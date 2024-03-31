@@ -95,7 +95,7 @@ def build_vars(lines: list[str], total_port_banks: int):
     for line in lines:
         if line.startswith("VAR"):
             var_name = line.split(" ")[1]
-            addresses[var_name] = total_port_banks + len(addresses)
+            addresses[var_name] = total_port_banks + 2 * len(addresses)
 
     new_lines = remove_vars(lines)
     for line, content in enumerate(new_lines):

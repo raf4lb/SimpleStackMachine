@@ -20,9 +20,8 @@ void push(CPU *cpu)
     }
     else
     {
-        uint8_t h = memory_get_address(cpu->memory, address) << 8;
-        uint8_t l = memory_get_address(cpu->memory, address + 1);
-        value = h | l;
+        address = address + cpu->user_memory - cpu->port_bank->size;
+        value = memory_get_address_16b(cpu->memory, address);
     }
     stack_push(cpu->stack, value);
 }
@@ -48,8 +47,8 @@ void pop_address(CPU *cpu)
     }
     else
     {
-        address = address + cpu->user_memory - cpu->port_bank->size;
-        memory_set_address(cpu->memory, address, value);
+        address = cpu->user_memory + address - cpu->port_bank->size;
+        memory_set_address_16b(cpu->memory, address, value);
     }
 }
 

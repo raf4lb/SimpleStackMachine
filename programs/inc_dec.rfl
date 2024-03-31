@@ -1,0 +1,29 @@
+; Count from 0 to 10 and from 10 to 0
+
+VAR MIN
+VAR MAX
+
+.main
+  PSHL 0
+  POP $MIN
+  PSHL 10
+  POP $MAX
+  PSHL 0
+  TOP
+  JMP .incr
+
+.incr
+  PSHL 1
+  ADD
+  TOP
+  JGE $MAX
+  JMP .incr
+  JMP .decr
+
+.decr
+  PSHL 1
+  SUB
+  TOP
+  JLE $MIN
+  JMP .decr
+  HLT

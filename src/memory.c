@@ -60,7 +60,7 @@ uint8_t memory_get_address(Memory *memory, uint16_t address)
     {
         return memory->data[address];
     }
-    memory_error_print("memory_get_address: Memory address %d out of the range\n");
+    memory_error_print("memory_get_address: Memory address out of the range\n");
     exit(EXIT_FAILURE);
 }
 
@@ -75,4 +75,20 @@ void memory_set_address(Memory *memory, uint16_t address, uint8_t value)
         memory_error_print("memory_get_address: Memory address out of the range\n");
         exit(EXIT_FAILURE);
     }
+}
+
+uint16_t memory_get_address_16b(Memory *memory, uint16_t address)
+{
+    uint8_t h = memory_get_address(memory, address) << 8;
+    uint8_t l = memory_get_address(memory, address + 1);
+    uint16_t value = h | l;
+    return value;
+}
+
+void memory_set_address_16b(Memory *memory, uint16_t address, uint16_t value)
+{
+    uint8_t h = value >> 8;
+    memory_set_address(memory, address, h);
+    uint8_t l = value & 255;
+    memory_set_address(memory, address + 1, l);
 }

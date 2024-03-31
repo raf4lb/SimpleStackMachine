@@ -20,4 +20,8 @@ uint8_t memory_get_address(Memory *memory, uint16_t address);
 
 void memory_set_address(Memory *memory, uint16_t address, uint8_t value);
 
+uint16_t memory_get_address_16b(Memory *memory, uint16_t address);
+
+void memory_set_address_16b(Memory *memory, uint16_t address, uint16_t value);
+
 #endif

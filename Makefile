@@ -35,7 +35,8 @@ arduino:
 		$(SOURCE_DIR)/instructions.c \
 		$(SOURCE_DIR)/serial.c \
 		$(SOURCE_DIR)/main.c \
-		-DPROGRAM=\""$(PROGRAM)"\" -DPROGRAM_SIZE=$(PROGRAM_SIZE) \
+		-DPROGRAM_SIZE=$(PROGRAM_SIZE) \
+		-DPROGRAM=\""$(PROGRAM)"\" \
 		-o build/$@.bin
 	avr-objcopy -O ihex -R .eeprom build/$@.bin build/$@.hex
 
