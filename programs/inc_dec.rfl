@@ -1,29 +1,41 @@
 ; Count from 0 to 10 and from 10 to 0
 
+VAR i
 VAR MIN
 VAR MAX
 
 .main
-  PSHL 0
-  POP $MIN
-  PSHL 10
-  POP $MAX
-  PSHL 0
-  TOP
-  JMP .incr
-
+    PSHL 0
+    POPA $MIN
+    PSHL 10
+    POPA $MAX
+    PSHL 0
+    TOP
+    POPA $i
+    
 .incr
-  PSHL 1
-  ADD
-  TOP
-  JGE $MAX
-  JMP .incr
-  JMP .decr
+    PSH $i
+    PSHL 1
+    ADD
+    TOP
+    POPA $i
+    PSH $i
+    PSH $MAX
+    CPL
+    PJIF .decr
+    JMP .incr
 
 .decr
-  PSHL 1
-  SUB
-  TOP
-  JLE $MIN
-  JMP .decr
-  HLT
+    PSH $i
+    PSHL 1
+    SUB
+    TOP
+    POPA $i
+    PSH $i
+    PSH $MIN
+    CPG
+    PJIF .end 
+    JMP .decr
+
+.end
+    HLT
