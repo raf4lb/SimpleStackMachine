@@ -1,4 +1,6 @@
 #include "stack.h"
+#include "io.h"
+#include <stdint.h>
 
 typedef struct CPU CPU;
 
@@ -8,9 +10,11 @@ struct CPU
     Stack *stack;
     int ip;
     void (**instructions)(CPU *cpu);
+    PortBank *port_bank;
+    uint16_t user_memory;
 };
 
-CPU *cpu_create(int memory_size, int stack_size, void (**instructions)(CPU *cpu));
+CPU *cpu_create(int memory_size, int stack_size, void (**instructions)(CPU *cpu), uint8_t port_banks);
 
 void cpu_free(CPU *cpu);
 

@@ -1,22 +1,24 @@
 #ifndef CPU_H
 #define CPU_H
 
-#include "cpu.h"
 #include <stdlib.h>
+#include "cpu.h"
+#include "stack.h"
+#include "serial.h"
 
-CPU *cpu_create(int memory_size, int stack_size, void (**instructions)(CPU *cpu))
+CPU *cpu_create(int memory_size, int stack_size, void (**instructions)(CPU *cpu), uint8_t port_bank)
 {
     CPU *cpu = (CPU *)malloc(sizeof(CPU));
     if (cpu == NULL)
     {
-        printf("Memory allocation to CPU failed");
+        serial_printf("Memory allocation to CPU failed");
         exit(EXIT_FAILURE);
     }
-    Memory *memory = memory_create(memory_size);
-    cpu->memory = memory;
-    Stack *stack = stack_create(stack_size);
-    cpu->stack = stack;
+    cpu->memory = memory_create(memory_size);
+    cpu->stack = stack_create(stack_size);
     cpu->instructions = instructions;
+    cpu->port_bank = port_bank_create(port_bank);
+    cpu->user_memory = 0;
     return cpu;
 }
 
@@ -24,6 +26,7 @@ void cpu_free(CPU *cpu)
 {
     stack_free(cpu->stack);
     memory_free(cpu->memory);
+    port_bank_free(cpu->port_bank);
     free(cpu->instructions);
     free(cpu);
 }
@@ -47,7 +50,10 @@ void cpu_load_program(CPU *cpu, uint8_t *program, int program_size)
 {
     int i;
     for (i = 0; i < program_size; i++)
+    {
         memory_set_address(cpu->memory, i, program[i]);
+    }
+    cpu->user_memory = program_size;
 }
 
 void cpu_run(CPU *cpu)

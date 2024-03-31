@@ -1,9 +1,10 @@
 #include "stack.h"
 #include <stdlib.h>
+#include "serial.h"
 
 void stack_error_print(char *message)
 {
-    printf("StackError: %s\n", message);
+    serial_printf("StackError: %s\n", message);
 }
 
 Stack *stack_create(int size)
@@ -44,7 +45,8 @@ uint16_t stack_pop(Stack *stack)
         stack_error_print("stackunderflow");
         exit(EXIT_FAILURE);
     }
-    return stack->data[stack->sp--];
+    stack->sp--;
+    return stack->data[stack->sp];
 }
 
 void stack_push(Stack *stack, uint16_t value)
@@ -59,19 +61,19 @@ void stack_push(Stack *stack, uint16_t value)
 
 void stack_print(Stack *stack)
 {
-    printf("[");
+    serial_printf("[");
     int i;
     for (i = 0; i < stack->size; i++)
     {
         if (i > 0)
         {
-            printf(", ");
+            serial_printf(", ");
         }
         if (i == stack->sp)
         {
-            printf("->");
+            serial_printf("->");
         }
-        printf("%u", stack->data[i]);
+        serial_printf("%u", stack->data[i]);
     }
-    printf("]\n");
+    serial_printf("]\n");
 }

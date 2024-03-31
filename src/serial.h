@@ -1,6 +1,8 @@
 #ifndef SERIAL_H
 #define SERIAL_H
 
+#include <stdint.h>
+
 #ifndef F_CPU
 #define F_CPU 16000000UL
 #endif
@@ -11,6 +13,10 @@
 void serial_setup(void);
 
 void serial_send(char *sendString);
+
+uint8_t USART_receive();
+
+void USART_transmit(uint8_t data);
 
 void serial_printf(const char *format, ...);
 

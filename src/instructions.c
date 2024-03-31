@@ -1,25 +1,34 @@
-#include "instructions.h"
 #include <stdlib.h>
+#include "instructions.h"
+#include "serial.h"
+#include "delay.h"
 
 void halt(CPU *cpu)
 {
-    printf("Exit\n");
+    serial_printf("Exit\n");
+    cpu_free(cpu);
     exit(0);
 }
 
 void push(CPU *cpu)
 {
-    // push a 16 bit value from a 16bit address to stack
     uint16_t address = cpu_fetch_16b(cpu);
-    uint8_t h = memory_get_address(cpu->memory, address) << 8;
-    uint8_t l = memory_get_address(cpu->memory, address + 1);
-    uint16_t value = h | l;
+    uint16_t value;
+    if (address < cpu->port_bank->size)
+    {
+        value = port_bank_get_address(cpu->port_bank, address);
+    }
+    else
+    {
+        uint8_t h = memory_get_address(cpu->memory, address) << 8;
+        uint8_t l = memory_get_address(cpu->memory, address + 1);
+        value = h | l;
+    }
     stack_push(cpu->stack, value);
 }
 
 void push_literal(CPU *cpu)
 {
-    // push a 16 bit value to stack
     uint16_t value = cpu_fetch_16b(cpu);
     stack_push(cpu->stack, value);
 }
@@ -29,9 +38,148 @@ void pop(CPU *cpu)
     stack_pop(cpu->stack);
 }
 
+void pop_address(CPU *cpu)
+{
+    uint16_t address = cpu_fetch_16b(cpu);
+    uint16_t value = stack_pop(cpu->stack);
+    if (address < cpu->port_bank->size)
+    {
+        port_bank_set_address(cpu->port_bank, (uint8_t)address, (uint8_t)value);
+    }
+    else
+    {
+        address = address + cpu->user_memory - cpu->port_bank->size;
+        memory_set_address(cpu->memory, address, value);
+    }
+}
+
 void top(CPU *cpu)
 {
-    printf("%d\n", cpu->stack->data[cpu->stack->sp - 1]);
+    serial_printf("%d\n", cpu->stack->data[cpu->stack->sp - 1]);
+}
+
+void delay(CPU *cpu)
+{
+    uint16_t milliseconds = cpu_fetch_16b(cpu);
+    delay_ms(milliseconds);
+}
+
+void jump(CPU *cpu)
+{
+    uint16_t address = cpu_fetch_16b(cpu);
+    cpu->ip = address;
+}
+
+void pop_jump_if_false(CPU *cpu)
+{
+    uint16_t address = cpu_fetch_16b(cpu);
+    uint16_t result = stack_pop(cpu->stack);
+    if (!result)
+        cpu->ip = address;
+}
+
+void compare_equal(CPU *cpu)
+{
+    uint16_t b = stack_pop(cpu->stack);
+    uint16_t a = stack_pop(cpu->stack);
+    stack_push(cpu->stack, a == b);
+}
+
+void compare_less(CPU *cpu)
+{
+    uint16_t b = stack_pop(cpu->stack);
+    uint16_t a = stack_pop(cpu->stack);
+    stack_push(cpu->stack, a < b);
+}
+
+void compare_greater(CPU *cpu)
+{
+    uint16_t b = stack_pop(cpu->stack);
+    uint16_t a = stack_pop(cpu->stack);
+    stack_push(cpu->stack, a > b);
+}
+
+void compare_less_equal(CPU *cpu)
+{
+    uint16_t b = stack_pop(cpu->stack);
+    uint16_t a = stack_pop(cpu->stack);
+    stack_push(cpu->stack, a <= b);
+}
+
+void compare_greater_equal(CPU *cpu)
+{
+    uint16_t b = stack_pop(cpu->stack);
+    uint16_t a = stack_pop(cpu->stack);
+    stack_push(cpu->stack, a >= b);
+}
+
+void add(CPU *cpu)
+{
+    uint16_t b = stack_pop(cpu->stack);
+    uint16_t a = stack_pop(cpu->stack);
+    stack_push(cpu->stack, a + b);
+}
+
+void subtract(CPU *cpu)
+{
+    uint16_t b = stack_pop(cpu->stack);
+    uint16_t a = stack_pop(cpu->stack);
+    stack_push(cpu->stack, a - b);
+}
+
+void multiply(CPU *cpu)
+{
+    uint16_t b = stack_pop(cpu->stack);
+    uint16_t a = stack_pop(cpu->stack);
+    stack_push(cpu->stack, a * b);
+}
+
+void divide(CPU *cpu)
+{
+    uint16_t b = stack_pop(cpu->stack);
+    uint16_t a = stack_pop(cpu->stack);
+    stack_push(cpu->stack, a / b);
+}
+
+void bitwise_and(CPU *cpu)
+{
+    uint16_t b = stack_pop(cpu->stack);
+    uint16_t a = stack_pop(cpu->stack);
+    stack_push(cpu->stack, a & b);
+}
+
+void bitwise_or(CPU *cpu)
+{
+    uint16_t b = stack_pop(cpu->stack);
+    uint16_t a = stack_pop(cpu->stack);
+    stack_push(cpu->stack, a | b);
+}
+
+void bitwise_xor(CPU *cpu)
+{
+    uint16_t b = stack_pop(cpu->stack);
+    uint16_t a = stack_pop(cpu->stack);
+    stack_push(cpu->stack, a ^ b);
+}
+
+void bitwise_not(CPU *cpu)
+{
+    uint16_t a = stack_pop(cpu->stack);
+    stack_push(cpu->stack, ~a);
+}
+
+void bitwise_left_shift(CPU *cpu)
+{
+    uint16_t b = stack_pop(cpu->stack);
+    uint16_t a = stack_pop(cpu->stack);
+    stack_push(cpu->stack, a << b);
+}
+
+void bitwise_right_shift(CPU *cpu)
+{
+    uint16_t b = stack_pop(cpu->stack);
+    uint16_t a = stack_pop(cpu->stack);
+    stack_push(cpu->stack, a >> b);
 }
 
 void (**instructions_create())()
@@ -46,6 +194,26 @@ void (**instructions_create())()
     instructions[1] = push_literal;
     instructions[2] = push;
     instructions[3] = pop;
-    instructions[4] = top;
+    instructions[4] = pop_address;
+    instructions[5] = top;
+    instructions[6] = delay;
+    instructions[7] = jump;
+    instructions[8] = pop_jump_if_false;
+    instructions[9] = compare_equal;
+    instructions[10] = compare_less;
+    instructions[11] = compare_greater;
+    instructions[12] = compare_less_equal;
+    instructions[13] = compare_greater_equal;
+    instructions[14] = add;
+    instructions[15] = subtract;
+    instructions[16] = multiply;
+    instructions[17] = divide;
+    instructions[18] = bitwise_and;
+    instructions[19] = bitwise_or;
+    instructions[20] = bitwise_xor;
+    instructions[21] = bitwise_not;
+    instructions[22] = bitwise_left_shift;
+    instructions[23] = bitwise_right_shift;
+
     return instructions;
 }

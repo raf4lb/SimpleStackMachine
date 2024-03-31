@@ -1,10 +1,11 @@
 #include "memory.h"
 #include <stdlib.h>
 #include <stdint.h>
+#include "serial.h"
 
 void memory_error_print(char *message)
 {
-    printf("MemoryError: %s", message);
+    serial_printf("MemoryError: %s", message);
 }
 
 Memory *memory_create(int size)
@@ -40,17 +41,17 @@ void memory_free(Memory *memory)
 
 void memory_print(Memory *memory)
 {
-    printf("[");
+    serial_printf("[");
     int i;
     for (i = 0; i < memory->size; i++)
     {
         if (i > 0)
         {
-            printf(", ");
+            serial_printf(", ");
         }
-        printf("%u", memory->data[i]);
+        serial_printf("%u", memory->data[i]);
     }
-    printf("]\n");
+    serial_printf("]\n");
 }
 
 uint8_t memory_get_address(Memory *memory, uint16_t address)

@@ -1,9 +1,9 @@
-#include "serial.h"
 #include <string.h>
 #include <stdio.h>
 #include <avr/io.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include "serial.h"
 
 void serial_setup()
 {
@@ -16,15 +16,32 @@ void serial_setup()
     UCSR0C = (1 << UCSZ01) | (1 << UCSZ00); // 8 bit data format
 }
 
+uint8_t USART_receive()
+{
+    // Wait for data to be received
+    while (!(UCSR0A & (1 << RXC0)))
+        ;
+
+    // Get and return received data from buffer
+    return UDR0;
+}
+
+void USART_transmit(uint8_t data)
+{
+    // Wait for empty transmit buffer
+    while (!(UCSR0A & (1 << UDRE0)))
+        ;
+
+    // Put data into buffer, sends the data
+    UDR0 = data;
+}
+
 void serial_send(char *sendString)
 {
     int i = 0;
     for (i = 0; i < strlen(sendString); i++)
     {
-        while ((UCSR0A & (1 << UDRE0)) == 0)
-        {
-        };
-        UDR0 = sendString[i];
+        USART_transmit(sendString[i]);
     }
 }
 
