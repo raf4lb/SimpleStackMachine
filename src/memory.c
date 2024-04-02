@@ -8,7 +8,7 @@ void memory_error_print(char *message)
     serial_printf("MemoryError: %s", message);
 }
 
-Memory *memory_create(int size)
+Memory *memory_create(uint16_t size)
 {
     Memory *memory = (Memory *)malloc(sizeof(Memory));
     if (memory == NULL)

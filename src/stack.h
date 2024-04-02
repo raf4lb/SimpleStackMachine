@@ -6,11 +6,11 @@
 typedef struct
 {
     uint16_t *data;
-    int size;
-    int sp;
+    uint16_t size;
+    uint16_t sp;
 } Stack;
 
-Stack *stack_create(int size);
+Stack *stack_create(uint16_t size);
 
 void stack_free(Stack *stack);
 

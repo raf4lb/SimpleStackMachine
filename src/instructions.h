@@ -51,7 +51,11 @@ void bitwise_left_shift(CPU *cpu);
 
 void bitwise_right_shift(CPU *cpu);
 
-#define INSTRUCTIONS 24
+void call(CPU *cpu);
+
+void ret(CPU *cpu);
+
+#define INSTRUCTIONS 26
 
 void (**instructions_create())();
 

@@ -181,6 +181,19 @@ void bitwise_right_shift(CPU *cpu)
     stack_push(cpu->stack, a >> b);
 }
 
+void call(CPU *cpu)
+{
+    uint16_t address = cpu_fetch_16b(cpu);
+    stack_push(cpu->callstack, cpu->ip);
+    cpu->ip = address;
+}
+
+void ret(CPU *cpu)
+{
+    uint16_t address = stack_pop(cpu->callstack);
+    cpu->ip = address;
+}
+
 void (**instructions_create())()
 {
     void (**instructions)() = malloc(INSTRUCTIONS * sizeof(void (*)()));
@@ -213,6 +226,8 @@ void (**instructions_create())()
     instructions[21] = bitwise_not;
     instructions[22] = bitwise_left_shift;
     instructions[23] = bitwise_right_shift;
+    instructions[24] = call;
+    instructions[25] = ret;
 
     return instructions;
 }

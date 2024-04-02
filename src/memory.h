@@ -7,10 +7,10 @@
 typedef struct
 {
     uint8_t *data; // array of 8 bits
-    int size;
+    uint16_t size; // maximum size is 65536
 } Memory;
 
-Memory *memory_create(int size);
+Memory *memory_create(uint16_t size);
 
 void memory_free(Memory *memory);
 

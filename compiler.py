@@ -25,6 +25,8 @@ INSTRUCTIONS = {
     "NOT": 21,
     "LSH": 22,
     "RSH": 23,
+    "CALL": 24,
+    "RET": 25,
 }
 
 LONG_INSTRUCTIONS = {
@@ -34,6 +36,7 @@ LONG_INSTRUCTIONS = {
     "DLY",
     "JMP",
     "PJIF",
+    "CALL",
 }
 
 PORTS = {

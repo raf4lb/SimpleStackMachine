@@ -6,7 +6,7 @@
 #include "stack.h"
 #include "serial.h"
 
-CPU *cpu_create(int memory_size, int stack_size, void (**instructions)(CPU *cpu), uint8_t port_bank)
+CPU *cpu_create(uint16_t memory_size, uint16_t stack_size, uint16_t callstack_size, void (**instructions)(CPU *cpu), uint8_t port_bank)
 {
     CPU *cpu = (CPU *)malloc(sizeof(CPU));
     if (cpu == NULL)
@@ -16,6 +16,7 @@ CPU *cpu_create(int memory_size, int stack_size, void (**instructions)(CPU *cpu)
     }
     cpu->memory = memory_create(memory_size);
     cpu->stack = stack_create(stack_size);
+    cpu->callstack = stack_create(callstack_size);
     cpu->instructions = instructions;
     cpu->port_bank = port_bank_create(port_bank);
     cpu->user_memory = 0;
@@ -46,7 +47,7 @@ void cpu_execute(CPU *cpu, uint8_t opcode)
     cpu->instructions[opcode](cpu);
 }
 
-void cpu_load_program(CPU *cpu, uint8_t *program, int program_size)
+void cpu_load_program(CPU *cpu, uint8_t *program, uint16_t program_size)
 {
     int i;
     for (i = 0; i < program_size; i++)

@@ -7,7 +7,7 @@ void stack_error_print(char *message)
     serial_printf("StackError: %s\n", message);
 }
 
-Stack *stack_create(int size)
+Stack *stack_create(uint16_t size)
 {
     Stack *stack = (Stack *)malloc(sizeof(Stack));
     if (stack == NULL)

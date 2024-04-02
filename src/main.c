@@ -11,7 +11,7 @@
 #define PROGRAM_SIZE 0
 #endif
 
-uint8_t *convert_str_to_long_int(char str[], int size)
+uint8_t *convert_str_to_long_int(char str[], uint16_t size)
 {
     uint8_t *array = malloc(size * sizeof(uint8_t)); // Dynamically allocate memory for the array
 
@@ -24,7 +24,7 @@ uint8_t *convert_str_to_long_int(char str[], int size)
 
     // Remove curly braces and split the string into individual elements
     char *token = strtok(str, "{,}");
-    int i = 0;
+    uint16_t i = 0;
 
     // Convert each element to long integer
     while (token != NULL)
@@ -39,14 +39,15 @@ uint8_t *convert_str_to_long_int(char str[], int size)
 int main(void)
 {
     char program_string[] = PROGRAM;
-    int program_size = PROGRAM_SIZE;
+    uint16_t program_size = PROGRAM_SIZE;
     uint8_t *program = convert_str_to_long_int(program_string, program_size);
 
     void (**instructions)() = instructions_create();
-    int memory_size = 128;
-    int stack_size = 16;
+    uint16_t memory_size = 128;
+    uint16_t stack_size = 16;
+    uint16_t callstack_size = 16;
     uint8_t port_banks = 3;
-    CPU *cpu = cpu_create(memory_size, stack_size, instructions, port_banks);
+    CPU *cpu = cpu_create(memory_size, stack_size, callstack_size, instructions, port_banks);
 
     cpu_load_program(cpu, program, program_size);
     serial_setup();
