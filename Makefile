@@ -34,6 +34,7 @@ arduino:
 		$(SOURCE_DIR)/cpu.c \
 		$(SOURCE_DIR)/instructions.c \
 		$(SOURCE_DIR)/serial.c \
+		$(SOURCE_DIR)/hashmap.c \
 		$(SOURCE_DIR)/main.c \
 		-DPROGRAM_SIZE=$(PROGRAM_SIZE) \
 		-DPROGRAM=\""$(PROGRAM)"\" \
