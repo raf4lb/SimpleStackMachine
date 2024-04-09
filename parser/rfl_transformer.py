@@ -196,8 +196,27 @@ class RFLTransformer(Transformer):
         self.if_count += 1
         return code
 
-    # def condition(self, items):
-    #     print(items)
+    def loop_statement(self, items):
+        loop_control = items[0].children
+        variable = loop_control[0]
+        start = loop_control[1]
+        increment = loop_control[2]
+        end = loop_control[3]
+        code_block = items[1]
+        code = f"""
+        .for
+            {code_block}
+            PSH ${variable}
+            PSHL {increment}
+            ADD
+            POPA ${variable}
+            PSH ${variable}
+            PSHL {end}
+            CPGE
+            PJIF .for
+        """
+        # print(code)
+        return code
 
     def start(self, items):
         code = "CALL .main\nHLT\n"

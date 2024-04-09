@@ -7,7 +7,8 @@ rfl_grammar = """
     
     code_block: statement+
     
-    statement: if_statement 
+    statement: if_statement
+        | loop_statement
         | function_call 
         | variable_declaration 
         | variable_assignment 
@@ -54,6 +55,10 @@ rfl_grammar = """
 
     if_statement: "?" "(" condition ")" "{" code_block "}" else_block?
     else_block: "!" "{" code_block "}"
+
+    loop_statement: "loop" "(" loop_control ")" "{" code_block "}"
+
+    loop_control: identifier "=" expression ":" expression ":" expression
 
     condition: expression
 

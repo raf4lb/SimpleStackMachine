@@ -1,0 +1,8 @@
+main(){
+    i <int>
+    sum <int>
+    sum = 0
+    loop (i=0:2:10){
+        sum = sum + i
+    }
+} void
