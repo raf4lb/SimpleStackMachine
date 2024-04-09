@@ -1,0 +1,30 @@
+sum(x<int>, y<int>){
+    ret x + y
+} int
+
+main(){
+    condition <int>
+    condition = 1
+    result <int>
+    result = 5
+    ? (0){
+        result = sum(result, 1)
+    }
+    ! {
+        result = sum(result, 2)
+    }
+
+    ? (condition+1){
+        result = sum(result, 3)
+    }
+    ! {
+        result = sum(result, 4)
+    }
+
+    ? (condition+1){
+        result = sum(result, 5)
+    }
+    ! {
+        result = sum(result, 6)
+    }
+} void

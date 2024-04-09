@@ -6,6 +6,8 @@
 void halt(CPU *cpu)
 {
     serial_printf("Exit\n");
+    // stack_print(cpu->stack);
+    // memory_print(cpu->memory);
     cpu_free(cpu);
     exit(0);
 }
@@ -194,6 +196,12 @@ void ret(CPU *cpu)
     cpu->ip = address;
 }
 
+void neg(CPU *cpu)
+{
+    uint16_t top = cpu->stack->data[cpu->stack->sp - 1];
+    cpu->stack->data[cpu->stack->sp - 1] = -top;
+}
+
 void (**instructions_create())()
 {
     void (**instructions)() = malloc(INSTRUCTIONS * sizeof(void (*)()));
@@ -228,6 +236,7 @@ void (**instructions_create())()
     instructions[23] = bitwise_right_shift;
     instructions[24] = call;
     instructions[25] = ret;
+    instructions[26] = neg;
 
     return instructions;
 }

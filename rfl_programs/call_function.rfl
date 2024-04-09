@@ -1,0 +1,10 @@
+sum(x <int>, y <int>, z <int>){
+    w <int>
+    w = 10
+    ret x + y + w * z
+} int
+
+main(){
+    res <int>
+    res = sum(10,5,2)
+} void

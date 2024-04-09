@@ -55,7 +55,9 @@ void call(CPU *cpu);
 
 void ret(CPU *cpu);
 
-#define INSTRUCTIONS 26
+void neg(CPU *cpu);
+
+#define INSTRUCTIONS 27
 
 void (**instructions_create())();
 

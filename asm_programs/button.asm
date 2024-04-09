@@ -5,34 +5,34 @@
 ; PORTB address is 0b1
 
 PSHL 2          ; push 0b10 to stack
-POPA ddrb       ; set DDRB 0 input 1 output
+POPA $ddrb       ; set DDRB 0 input 1 output
 
 .loop
     ; check if PINB0 is ON (PINB & 1)
-    PSH pinb    ; push PINB to stack
+    PSH $pinb    ; push PINB to stack
     PSHL 1      ; push 1 to stack
     AND         ; bitwise AND operation
     PSHL 1
     CPE
     PJIF .off
     ; PORTB = PORTB | (1 << PINB1)
-    PSH portb   ; push PORTB to stack
+    PSH $portb   ; push PORTB to stack
     PSHL 1      ; push 1 to stack
     PSHL 1      ; push 1 to stack
     LSH         ; bitwise LEFT SHIFT operation
     OR          ; bitwise OR operation
-    POPA portb  ; pop result to PORTB
+    POPA $portb  ; pop result to PORTB
     JMP .loop
     
 
 .off
     ; PORTB = PORTB & ~(1 << PINB1) 
-    PSH portb   ; push PORTB to stack
+    PSH $portb   ; push PORTB to stack
     PSHL 1      ; push 1 to stack
     PSHL 1      ; push 1 to stack
     LSH         ; bitwise LEFT SHIFT operation
     NOT         ; bitwise NOT operation
     AND         ; bitwise AND operation
-    POPA portb  ; pop result to address 0x1 (PORTB)
+    POPA $portb  ; pop result to address 0x1 (PORTB)
     JMP .loop
     

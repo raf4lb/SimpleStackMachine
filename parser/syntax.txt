@@ -1,0 +1,97 @@
+
+Comments start with ";" symbol.
+For example:
+; this is a comment
+
+Variables start with variable name followed by variable type inside "<>"
+For example:
+a <int>
+
+functions start with function name followed by parenteses "()" followed by "{}". 
+Function parameters are passed inside "()" with the list of parameters in the format "name<type>".
+The function code is defined inside "{}" and the return of the function is defined after {}.
+The special keyword "ret" is for the return of the function.
+For example:
+my_function(a<int>){
+    ret a
+} int
+
+
+classes are created using the "class" keyword followed by the class name followed by {}
+
+example:
+class Person {}
+
+
+
+
+class Person {
+    ; this is a comment
+    ; class attribute starts with the symbol "." followed by attribute name followed by symbol ":" followed by type 
+    .name <str>
+    .age <int>
+
+    ; class constructor starts with the symbol "." followed by name "constructor" followed by symbol "(" followed by type 
+    .constructor(name<str>, age<int>){
+        .name = name
+        .age = age
+    }
+    
+    .get_age(){
+        ret .age
+    } int
+
+    .get_name(){
+        ret .name
+    } str
+
+    .check_age(){
+        age <int> = .get_age()
+        ? (age > 10){
+            ret 1
+        }
+        !? (age < 15){
+            ret 2
+        }
+        ! {
+            ret 20
+        }
+    } int
+
+    .loop(){
+        i <int>
+        loop (i=1:1:10){
+            print(i)
+        }
+    } void
+
+}
+
+Person p("Rafael", 29)
+
+p.get_age()
+p.get_name()
+
+
+# variable declaration
+a <int>
+b <int>
+c <int>
+
+# variable assignment
+a = 2
+b = 3
+c = a + b
+
+# function declaration
+my_function(x <int>, y <int>){
+    # function body
+    z <int> # variable declaration
+    z = 3 # variable assignment
+    ret x + y + z # return expression
+} int # function type return
+
+sum <int>
+sum = my_function(2, 3) # assinging sum variable to return of the function
+
+

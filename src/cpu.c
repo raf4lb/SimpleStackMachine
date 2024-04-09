@@ -20,6 +20,7 @@ CPU *cpu_create(uint16_t memory_size, uint16_t stack_size, uint16_t callstack_si
     cpu->instructions = instructions;
     cpu->port_bank = port_bank_create(port_bank);
     cpu->user_memory = 0;
+    cpu->ip = 0;
     return cpu;
 }
 

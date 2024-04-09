@@ -43,7 +43,7 @@ int main(void)
     uint8_t *program = convert_str_to_long_int(program_string, program_size);
 
     void (**instructions)() = instructions_create();
-    uint16_t memory_size = 128;
+    uint16_t memory_size = 256;
     uint16_t stack_size = 16;
     uint16_t callstack_size = 16;
     uint8_t port_banks = 3;
@@ -55,6 +55,7 @@ int main(void)
 
     cpu_run(cpu);
     cpu_free(cpu);
+    free(program);
 
     return 0;
 }

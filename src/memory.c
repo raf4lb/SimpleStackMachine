@@ -72,7 +72,7 @@ void memory_set_address(Memory *memory, uint16_t address, uint8_t value)
     }
     else
     {
-        memory_error_print("memory_get_address: Memory address out of the range\n");
+        memory_error_print("memory_set_address: Memory address out of the range\n");
         exit(EXIT_FAILURE);
     }
 }
