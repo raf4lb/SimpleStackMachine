@@ -1,6 +1,3 @@
-#ifndef CPU_H
-#define CPU_H
-
 #include <stdlib.h>
 #include "cpu.h"
 #include "stack.h"
@@ -67,4 +64,17 @@ void cpu_run(CPU *cpu)
     }
 }
 
-#endif
+void cpu_print_user_memory(CPU *cpu)
+{
+    serial_printf("[");
+    uint16_t i;
+    for (i = cpu->user_memory; i < cpu->memory->size; i++)
+    {
+        if (i > cpu->user_memory)
+        {
+            serial_printf(", ");
+        }
+        serial_printf("%u", cpu->memory->data[i]);
+    }
+    serial_printf("]\n");
+}

@@ -1,3 +1,6 @@
+#ifndef IO_H
+#define IO_H
+
 #define _DDRB 0
 #define _PORTB 1
 #include <stdint.h>
@@ -19,3 +22,5 @@ void port_bank_free(PortBank *port_bank);
 void port_bank_set_address(PortBank *port_bank, uint8_t address, uint8_t value);
 
 uint8_t port_bank_get_address(PortBank *port_bank, uint8_t address);
+
+#endif
