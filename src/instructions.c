@@ -6,6 +6,7 @@
 void halt(CPU *cpu)
 {
     serial_printf("Exit\n");
+    cpu_print_user_memory(cpu);
     cpu_free(cpu);
     exit(0);
 }

@@ -1,3 +1,6 @@
+#ifndef CPU_H
+#define CPU_H
+
 #include "stack.h"
 #include "io.h"
 #include <stdint.h>
@@ -28,3 +31,7 @@ void cpu_execute(CPU *cpu, uint8_t opcode);
 void cpu_load_program(CPU *cpu, uint8_t *program, uint16_t program_size);
 
 void cpu_run(CPU *cpu);
+
+void cpu_print_user_memory(CPU *cpu);
+
+#endif
