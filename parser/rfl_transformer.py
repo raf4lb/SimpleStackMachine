@@ -1,4 +1,4 @@
-from lark import Transformer, Tree, Token, v_args
+from lark import Transformer, Token
 
 
 class RFLTransformer(Transformer):
@@ -6,6 +6,13 @@ class RFLTransformer(Transformer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.if_count = 0
+        self.loop_count = 0
+        self.augmented_assignment = {
+            "augmented_operator_add": "ADD",
+            "augmented_operator_sub": "SUB",
+            "augmented_operator_mul": "MUL",
+            "augmented_operator_div": "DIV",
+        }
 
     def number(self, n):
         (n,) = n
@@ -171,28 +178,26 @@ class RFLTransformer(Transformer):
         block_true = items[1]
         if len(items) > 2:  # there is else block
             block_false = items[2].children[0]
-            code = f"""{block_condition}
+            code = f"""
+                {block_condition}
                 PSHL 0
                 CPG
                 PJIF .condition_false_{self.if_count}
-                JMP .condition_true_{self.if_count}
-            .condition_true_{self.if_count}
-                {block_true}
-                JMP .out_{self.if_count}
-            .condition_false_{self.if_count}
-                {block_false}
-            .out_{self.if_count}
-            """
+                    {block_true}
+                    JMP .out_{self.if_count}
+                .condition_false_{self.if_count}
+                    {block_false}
+                .out_{self.if_count}
+                """
         else:
-            code = f"""{block_condition}
+            code = f"""
+                {block_condition}
                 PSHL 0
                 CPG
                 PJIF .out_{self.if_count}
-                JMP .condition_true_{self.if_count}
-            .condition_true_{self.if_count}
-                {block_true}
-            .out_{self.if_count}
-            """
+                    {block_true}
+                .out_{self.if_count}
+                """
         self.if_count += 1
         return code
 
@@ -200,21 +205,47 @@ class RFLTransformer(Transformer):
         loop_control = items[0].children
         variable = loop_control[0]
         start = loop_control[1]
-        increment = loop_control[2]
+        increment = self._get_expression_code(loop_control[2])
         end = loop_control[3]
         code_block = items[1]
         code = f"""
-        .for
-            {code_block}
-            PSH ${variable}
-            PSHL {increment}
-            ADD
+            PSHL {start}
             POPA ${variable}
-            PSH ${variable}
-            PSHL {end}
-            CPGE
-            PJIF .for
-        """
+            .loop_{self.loop_count}
+                {code_block}
+                PSH ${variable}
+                {increment}
+                ADD
+                POPA ${variable}
+                PSH ${variable}
+                PSHL {end}
+                CPG
+                PJIF .loop_{self.loop_count}
+            """
+        # print(code)
+        return code
+
+    @staticmethod
+    def _get_expression_code(expression):
+        if isinstance(expression, str):
+            if expression.isdigit():
+                code = f"PSHL {expression}\n"
+            elif expression.isalnum():
+                code = f"PSH ${expression}\n"
+            else:
+                code = expression
+        else:
+            raise Exception(f"Invalid expression {expression}")
+        return code
+
+    def augmented_assignment_statement(self, items):
+        variable = items[0]
+        augmented_operator = items[1].data
+        augmented_instruction = self.augmented_assignment.get(augmented_operator)
+        if augmented_instruction is None:
+            raise Exception(f"Unknown augmented instruction {augmented_instruction}")
+        expression = self._get_expression_code(items[2])
+        code = f"{expression}PSH ${variable}\n{augmented_instruction}\nPOPA ${variable}"
         # print(code)
         return code
 

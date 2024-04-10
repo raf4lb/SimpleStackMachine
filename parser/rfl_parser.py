@@ -16,6 +16,7 @@ rfl_grammar = """
         | function_declaration 
         | class_declaration 
         | class_instantiation
+        | augmented_assignment_statement
     
     class_declaration: "class" identifier "{" class_body "}"    
     class_body: (method_declaration 
@@ -31,12 +32,7 @@ rfl_grammar = """
     attribute_declaration:  attribute_identifier "<" type ">"
     attribute_assignment: attribute_identifier "=" expression
     method_declaration: "." identifier "(" parameters? ")" "{" method_body "}" return_type
-    method_body: (function_call 
-        | variable_declaration_with_assignment 
-        | variable_declaration 
-        | variable_assignment 
-        | attribute_assignment 
-        | return_statement)*
+    method_body: (code_block | return_statement?)*
 
     class_instantiation: class_name identifier "(" arguments ")"
     class_name: identifier
@@ -61,6 +57,12 @@ rfl_grammar = """
     loop_control: identifier "=" expression ":" expression ":" expression
 
     condition: expression
+
+    augmented_assignment_statement: identifier augmented_operator expression
+    augmented_operator: "+=" -> augmented_operator_add
+        | "-=" -> augmented_operator_sub
+        | "*=" -> augmented_operator_mul
+        | "/=" -> augmented_operator_div
 
     ?expression: expression "+" multiply -> add
         | expression "-" multiply -> sub

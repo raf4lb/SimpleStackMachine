@@ -18,7 +18,7 @@ generic:
 arduino:
 	$(eval PYTHON_SCRIPT := compiler.py)
 	@echo "Compiling rfl file..."
-	$(eval OUTPUT := $(shell python3 $(PYTHON_SCRIPT) $(PROGRAM_FILE) $(PORTS_SIZE)))
+	$(eval OUTPUT := $(shell python3 $(PYTHON_SCRIPT) $(PROGRAM_FILE)))
 	@echo "OK"
 	$(eval PROGRAM := $(word 1, $(OUTPUT)))
 	$(eval PROGRAM_SIZE := $(word 2, $(OUTPUT)))

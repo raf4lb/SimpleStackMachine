@@ -1,8 +1,15 @@
 main(){
-    i <int>
     sum <int>
     sum = 0
-    loop (i=0:2:10){
-        sum = sum + i
+    condition <int>
+    condition = 1
+    i <int>
+    loop (i=1:1:10){
+        ? (condition){
+            sum += i
+        }
+        ! {
+            sum += 1
+        }
     }
 } void
