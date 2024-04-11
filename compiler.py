@@ -121,7 +121,8 @@ def pprint(lines):
         print(f"{line}\t", content)
 
 
-def compile_rfl(filename: str, total_port_banks=0, debug=False) -> list[int]:
+def compile_rfl(filename: str, debug=False) -> list[int]:
+    total_port_banks = len(PORTS)
     program = []
     with open(filename) as p:
         lines = p.read().splitlines()
@@ -180,8 +181,7 @@ def disassembly(code):
 
 
 if __name__ == "__main__":
-    total_port_banks = int(sys.argv[2])
-    program = compile_rfl(sys.argv[1], total_port_banks, False)
+    program = compile_rfl(sys.argv[1], False)
     # print(disassembly(program))
     program_len = len(program)
     output = "{" + ",".join([str(inst) for inst in program]) + "}"
