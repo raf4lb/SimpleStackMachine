@@ -78,3 +78,21 @@ void stack_print(Stack *stack)
     }
     vmprintf("]\n");
 }
+
+void stack_push_bytes(Stack *stack, uint8_t *source, uint16_t data_size)
+{
+    int i;
+    for (i = 0; i < data_size; i++)
+    {
+        stack_push(stack, source[i]);
+    }
+}
+
+void stack_pop_bytes(Stack *stack, uint8_t *destination, uint16_t data_size)
+{
+    int i;
+    for (i = data_size - 1; i >= 0; i--)
+    {
+        destination[i] = stack_pop(stack);
+    }
+}
