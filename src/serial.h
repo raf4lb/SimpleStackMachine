@@ -1,3 +1,4 @@
+#ifdef ARDUINO
 #ifndef SERIAL_H
 #define SERIAL_H
 
@@ -18,6 +19,7 @@ uint8_t USART_receive();
 
 void USART_transmit(uint8_t data);
 
-void serial_printf(const char *format, ...);
+int serial_printf(const char *format, ...);
 
+#endif
 #endif

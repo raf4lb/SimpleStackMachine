@@ -1,8 +1,5 @@
-#include "avr/io.h"
-#include <stdio.h>
 #include <stdlib.h>
 #include "io.h"
-#include "serial.h"
 
 void map_ports(PortBank *port_bank)
 {
@@ -16,14 +13,14 @@ PortBank *port_bank_create(uint8_t size)
     PortBank *port_bank = (PortBank *)malloc(sizeof(PortBank));
     if (port_bank == NULL)
     {
-        serial_printf("Memory allocation failed for port bank\n");
+        vmprintf("Memory allocation failed for port bank\n");
         exit(1);
     }
     port_bank->size = size;
     port_bank->ports = (volatile uint8_t **)malloc(size * sizeof(volatile uint8_t *));
     if (port_bank->ports == NULL)
     {
-        serial_printf("Memory allocation failed for ports of the bank\n");
+        vmprintf("Memory allocation failed for ports of the bank\n");
         exit(1);
     }
     map_ports(port_bank);
@@ -32,14 +29,14 @@ PortBank *port_bank_create(uint8_t size)
 
 void port_bank_print(PortBank *port_bank)
 {
-    serial_printf("[");
+    vmprintf("[");
     for (int i = 0; i < port_bank->size; i++)
     {
         if (i > 0)
-            serial_printf(", ");
-        serial_printf("%hhu", *(port_bank->ports[i]));
+            vmprintf(", ");
+        vmprintf("%hhu", *(port_bank->ports[i]));
     }
-    serial_printf("]\n");
+    vmprintf("]\n");
 }
 
 void port_bank_free(PortBank *port_bank)
@@ -57,3 +54,10 @@ uint8_t port_bank_get_address(PortBank *port_bank, uint8_t address)
 {
     return *(port_bank->ports[address]);
 }
+
+#ifdef ARDUINO
+int (*vmprintf)(const char *, ...) = serial_printf;
+#endif
+#ifdef MACOSX
+int (*vmprintf)(const char *, ...) = printf;
+#endif

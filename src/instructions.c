@@ -1,12 +1,10 @@
 #include <stdlib.h>
 #include "instructions.h"
-#include "serial.h"
 #include "delay.h"
 
 void halt(CPU *cpu)
 {
-    serial_printf("Exit\n");
-    cpu_print_user_memory(cpu);
+    vmprintf("Exit\n");
     cpu_free(cpu);
     exit(0);
 }
@@ -14,7 +12,7 @@ void halt(CPU *cpu)
 void push(CPU *cpu)
 {
     uint16_t address = cpu_fetch_16b(cpu);
-    uint16_t value;
+    uint8_t value;
     if (address < cpu->port_bank->size)
     {
         value = port_bank_get_address(cpu->port_bank, address);
@@ -24,27 +22,31 @@ void push(CPU *cpu)
         address = address + cpu->user_memory - cpu->port_bank->size;
         value = memory_get_address_16b(cpu->memory, address);
     }
+    // TODO: Pop value according the size of type stored
     stack_push(cpu->stack, value);
 }
 
 void push_literal(CPU *cpu)
 {
     uint16_t value = cpu_fetch_16b(cpu);
+    // TODO: Push value according the size of type stored
     stack_push(cpu->stack, value);
 }
 
 void pop(CPU *cpu)
 {
+    // TODO: Pop value according the size of type stored
     stack_pop(cpu->stack);
 }
 
 void pop_address(CPU *cpu)
 {
     uint16_t address = cpu_fetch_16b(cpu);
-    uint16_t value = stack_pop(cpu->stack);
+    // TODO: Pop value according the size of type stored
+    uint8_t value = stack_pop(cpu->stack);
     if (address < cpu->port_bank->size)
     {
-        port_bank_set_address(cpu->port_bank, (uint8_t)address, (uint8_t)value);
+        port_bank_set_address(cpu->port_bank, address, value);
     }
     else
     {
@@ -55,7 +57,7 @@ void pop_address(CPU *cpu)
 
 void top(CPU *cpu)
 {
-    serial_printf("%d\n", cpu->stack->data[cpu->stack->sp - 1]);
+    vmprintf("%d\n", cpu->stack->data[cpu->stack->sp - 1]);
 }
 
 void delay(CPU *cpu)
@@ -73,124 +75,143 @@ void jump(CPU *cpu)
 void pop_jump_if_false(CPU *cpu)
 {
     uint16_t address = cpu_fetch_16b(cpu);
-    uint16_t result = stack_pop(cpu->stack);
+    // TODO: Pop value according the size of type stored
+    // Here result is a bool so it should be okay
+    uint8_t result = stack_pop(cpu->stack);
     if (!result)
         cpu->ip = address;
 }
 
 void compare_equal(CPU *cpu)
 {
-    uint16_t b = stack_pop(cpu->stack);
-    uint16_t a = stack_pop(cpu->stack);
+    // TODO: Pop value according the size of type stored (int, float, etc)
+    uint8_t b = stack_pop(cpu->stack);
+    uint8_t a = stack_pop(cpu->stack);
     stack_push(cpu->stack, a == b);
 }
 
 void compare_less(CPU *cpu)
 {
-    uint16_t b = stack_pop(cpu->stack);
-    uint16_t a = stack_pop(cpu->stack);
+    // TODO: Pop value according the size of type stored (int, float, etc)
+    uint8_t b = stack_pop(cpu->stack);
+    uint8_t a = stack_pop(cpu->stack);
     stack_push(cpu->stack, a < b);
 }
 
 void compare_greater(CPU *cpu)
 {
-    uint16_t b = stack_pop(cpu->stack);
-    uint16_t a = stack_pop(cpu->stack);
+    // TODO: Pop value according the size of type stored (int, float, etc)
+    uint8_t b = stack_pop(cpu->stack);
+    uint8_t a = stack_pop(cpu->stack);
     stack_push(cpu->stack, a > b);
 }
 
 void compare_less_equal(CPU *cpu)
 {
-    uint16_t b = stack_pop(cpu->stack);
-    uint16_t a = stack_pop(cpu->stack);
+    // TODO: Pop value according the size of type stored (int, float, etc)
+    uint8_t b = stack_pop(cpu->stack);
+    uint8_t a = stack_pop(cpu->stack);
     stack_push(cpu->stack, a <= b);
 }
 
 void compare_greater_equal(CPU *cpu)
 {
-    uint16_t b = stack_pop(cpu->stack);
-    uint16_t a = stack_pop(cpu->stack);
+    // TODO: Pop value according the size of type stored (int, float, etc)
+    uint8_t b = stack_pop(cpu->stack);
+    uint8_t a = stack_pop(cpu->stack);
     stack_push(cpu->stack, a >= b);
 }
 
 void add(CPU *cpu)
 {
-    uint16_t b = stack_pop(cpu->stack);
-    uint16_t a = stack_pop(cpu->stack);
+    // TODO: Pop value according the size of type stored (int, float, etc)
+    uint8_t b = stack_pop(cpu->stack);
+    uint8_t a = stack_pop(cpu->stack);
     stack_push(cpu->stack, a + b);
 }
 
 void subtract(CPU *cpu)
 {
-    uint16_t b = stack_pop(cpu->stack);
-    uint16_t a = stack_pop(cpu->stack);
+    // TODO: Pop value according the size of type stored (int, float, etc)
+    uint8_t b = stack_pop(cpu->stack);
+    uint8_t a = stack_pop(cpu->stack);
     stack_push(cpu->stack, a - b);
 }
 
 void multiply(CPU *cpu)
 {
-    uint16_t b = stack_pop(cpu->stack);
-    uint16_t a = stack_pop(cpu->stack);
+    // TODO: Pop value according the size of type stored (int, float, etc)
+    uint8_t b = stack_pop(cpu->stack);
+    uint8_t a = stack_pop(cpu->stack);
     stack_push(cpu->stack, a * b);
 }
 
 void divide(CPU *cpu)
 {
-    uint16_t b = stack_pop(cpu->stack);
-    uint16_t a = stack_pop(cpu->stack);
+    // TODO: Pop value according the size of type stored (int, float, etc)
+    uint8_t b = stack_pop(cpu->stack);
+    uint8_t a = stack_pop(cpu->stack);
     stack_push(cpu->stack, a / b);
 }
 
 void bitwise_and(CPU *cpu)
 {
-    uint16_t b = stack_pop(cpu->stack);
-    uint16_t a = stack_pop(cpu->stack);
+    // TODO: Pop value according the integer size
+    uint8_t b = stack_pop(cpu->stack);
+    uint8_t a = stack_pop(cpu->stack);
     stack_push(cpu->stack, a & b);
 }
 
 void bitwise_or(CPU *cpu)
 {
-    uint16_t b = stack_pop(cpu->stack);
-    uint16_t a = stack_pop(cpu->stack);
+    // TODO: Pop value according the integer size
+    uint8_t b = stack_pop(cpu->stack);
+    uint8_t a = stack_pop(cpu->stack);
     stack_push(cpu->stack, a | b);
 }
 
 void bitwise_xor(CPU *cpu)
 {
-    uint16_t b = stack_pop(cpu->stack);
-    uint16_t a = stack_pop(cpu->stack);
+    // TODO: Pop value according the integer size
+    uint8_t b = stack_pop(cpu->stack);
+    uint8_t a = stack_pop(cpu->stack);
     stack_push(cpu->stack, a ^ b);
 }
 
 void bitwise_not(CPU *cpu)
 {
-    uint16_t a = stack_pop(cpu->stack);
+    // TODO: Pop value according the integer size
+    uint8_t a = stack_pop(cpu->stack);
     stack_push(cpu->stack, ~a);
 }
 
 void bitwise_left_shift(CPU *cpu)
 {
-    uint16_t b = stack_pop(cpu->stack);
-    uint16_t a = stack_pop(cpu->stack);
+    // TODO: Pop value according the integer size
+    uint8_t b = stack_pop(cpu->stack);
+    uint8_t a = stack_pop(cpu->stack);
     stack_push(cpu->stack, a << b);
 }
 
 void bitwise_right_shift(CPU *cpu)
 {
-    uint16_t b = stack_pop(cpu->stack);
-    uint16_t a = stack_pop(cpu->stack);
+    // TODO: Pop value according the integer size
+    uint8_t b = stack_pop(cpu->stack);
+    uint8_t a = stack_pop(cpu->stack);
     stack_push(cpu->stack, a >> b);
 }
 
 void call(CPU *cpu)
 {
     uint16_t address = cpu_fetch_16b(cpu);
+    // TODO: Push 16bit size (address size)
     stack_push(cpu->callstack, cpu->ip);
     cpu->ip = address;
 }
 
 void ret(CPU *cpu)
 {
+    // TODO: Pop 16bit size (address size)
     uint16_t address = stack_pop(cpu->callstack);
     cpu->ip = address;
 }
@@ -200,7 +221,7 @@ void (**instructions_create())()
     void (**instructions)() = malloc(INSTRUCTIONS * sizeof(void (*)()));
     if (instructions == NULL)
     {
-        printf("Memory allocation failed for instructions");
+        vmprintf("Memory allocation failed for instructions");
         return NULL;
     }
     instructions[0] = halt;

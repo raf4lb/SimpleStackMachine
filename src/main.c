@@ -1,7 +1,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include "instructions.h"
-#include "serial.h"
 
 #ifndef PROGRAM
 #define PROGRAM "{}"
@@ -18,7 +17,7 @@ uint8_t *convert_str_to_long_int(char str[], uint16_t size)
     // Check if memory allocation is successful
     if (array == NULL)
     {
-        serial_printf("Memory allocation failed.\n");
+        vmprintf("Memory allocation failed.\n");
         exit(1);
     }
 
@@ -50,9 +49,10 @@ int main(void)
     CPU *cpu = cpu_create(memory_size, stack_size, callstack_size, instructions, port_banks);
 
     cpu_load_program(cpu, program, program_size);
+#ifdef ARDUINO
     serial_setup();
-    serial_printf("Running program\n");
-
+#endif
+    vmprintf("Running program\n");
     cpu_run(cpu);
     cpu_free(cpu);
 
@@ -76,7 +76,7 @@ int main(void)
 //         }
 //         for (i = 0; i < size; i++)
 //         {
-//             serial_printf("%c\n", receivedData[i]);
+//             vmprintf("%c\n", receivedData[i]);
 //         }
 //     }
 // }

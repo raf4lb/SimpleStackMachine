@@ -1,14 +1,14 @@
 #include <stdlib.h>
 #include "cpu.h"
 #include "stack.h"
-#include "serial.h"
+#include "io.h"
 
 CPU *cpu_create(uint16_t memory_size, uint16_t stack_size, uint16_t callstack_size, void (**instructions)(CPU *cpu), uint8_t port_bank)
 {
     CPU *cpu = (CPU *)malloc(sizeof(CPU));
     if (cpu == NULL)
     {
-        serial_printf("Memory allocation to CPU failed");
+        vmprintf("Memory allocation to CPU failed");
         exit(EXIT_FAILURE);
     }
     cpu->memory = memory_create(memory_size);
@@ -65,15 +65,15 @@ void cpu_run(CPU *cpu)
 
 void cpu_print_user_memory(CPU *cpu)
 {
-    serial_printf("[");
+    vmprintf("[");
     uint16_t i;
     for (i = cpu->user_memory; i < cpu->memory->size; i++)
     {
         if (i > cpu->user_memory)
         {
-            serial_printf(", ");
+            vmprintf(", ");
         }
-        serial_printf("%u", cpu->memory->data[i]);
+        vmprintf("%u", cpu->memory->data[i]);
     }
-    serial_printf("]\n");
+    vmprintf("]\n");
 }

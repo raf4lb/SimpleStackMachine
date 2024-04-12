@@ -1,10 +1,10 @@
 #include "stack.h"
 #include <stdlib.h>
-#include "serial.h"
+#include "io.h"
 
 void stack_error_print(char *message)
 {
-    serial_printf("StackError: %s\n", message);
+    vmprintf("StackError: %s\n", message);
 }
 
 Stack *stack_create(uint16_t size)
@@ -16,7 +16,7 @@ Stack *stack_create(uint16_t size)
         exit(EXIT_FAILURE);
     }
     stack->size = size;
-    uint16_t *data = (uint16_t *)malloc(size * sizeof(uint16_t));
+    uint8_t *data = (uint8_t *)malloc(size * sizeof(uint8_t));
     if (data == NULL)
     {
         stack_error_print("Memory allocation failed for Stack->data\n");
@@ -29,6 +29,7 @@ Stack *stack_create(uint16_t size)
         data[i] = 0;
     }
     stack->data = data;
+    stack->sp = 0;
     return stack;
 }
 
@@ -38,7 +39,7 @@ void stack_free(Stack *stack)
     free(stack);
 }
 
-uint16_t stack_pop(Stack *stack)
+uint8_t stack_pop(Stack *stack)
 {
     if (stack->sp == 0)
     {
@@ -49,7 +50,7 @@ uint16_t stack_pop(Stack *stack)
     return stack->data[stack->sp];
 }
 
-void stack_push(Stack *stack, uint16_t value)
+void stack_push(Stack *stack, uint8_t value)
 {
     if (stack->sp == stack->size)
     {
@@ -61,19 +62,37 @@ void stack_push(Stack *stack, uint16_t value)
 
 void stack_print(Stack *stack)
 {
-    serial_printf("[");
+    vmprintf("[");
     int i;
     for (i = 0; i < stack->size; i++)
     {
         if (i > 0)
         {
-            serial_printf(", ");
+            vmprintf(", ");
         }
         if (i == stack->sp)
         {
-            serial_printf("->");
+            vmprintf("->");
         }
-        serial_printf("%u", stack->data[i]);
+        vmprintf("%u", stack->data[i]);
     }
-    serial_printf("]\n");
+    vmprintf("]\n");
+}
+
+void stack_push_bytes(Stack *stack, uint8_t *source, uint16_t data_size)
+{
+    int i;
+    for (i = 0; i < data_size; i++)
+    {
+        stack_push(stack, source[i]);
+    }
+}
+
+void stack_pop_bytes(Stack *stack, uint8_t *destination, uint16_t data_size)
+{
+    int i;
+    for (i = data_size - 1; i >= 0; i--)
+    {
+        destination[i] = stack_pop(stack);
+    }
 }

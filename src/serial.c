@@ -1,3 +1,4 @@
+#ifdef ARDUINO
 #include <string.h>
 #include <stdio.h>
 #include <avr/io.h>
@@ -45,7 +46,7 @@ void serial_send(char *sendString)
     }
 }
 
-void serial_printf(const char *format, ...)
+int serial_printf(const char *format, ...)
 {
     va_list args;
     va_start(args, format);
@@ -68,4 +69,6 @@ void serial_printf(const char *format, ...)
     // Now you can use the buffer as needed, for example, printing it
     serial_send(buffer);
     free(buffer);
+    return 0;
 }
+#endif
