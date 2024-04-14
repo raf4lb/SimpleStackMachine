@@ -1,7 +1,6 @@
-.start
-    PSHL 2
-    PSHL 4
-    MUL
-    TOP
-    HLT
+DATA hello STRING "HELLO WORLD!\n"
+
+PSHL $hello
+SYSCALL 0
+HLT    
     

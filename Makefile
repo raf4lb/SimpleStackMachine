@@ -1,40 +1,24 @@
 all: main
 
-CC = clang
-override CFLAGS += -g -Wno-everything -pthread -lm
-
 BUILD_DIR = build
 SOURCE_DIR = src
 TEST_DIR = tests
 TEST_BUILD_DIR = $(TEST_DIR)/build
 
-generic:
-	mkdir -p $(BUILD_DIR)
-	mkdir -p $(BUILD_DIR)
-	$(eval PYTHON_SCRIPT := compiler.py)
-	@echo "Compiling rfl file..."
-	$(eval OUTPUT := $(shell python3 $(PYTHON_SCRIPT) $(PROGRAM_FILE)))
-	@echo "OK"
-	$(eval PROGRAM := $(word 1, $(OUTPUT)))
-	$(eval PROGRAM_SIZE := $(word 2, $(OUTPUT)))
-	@echo "Program: $(PROGRAM)"
-	@echo "Size: $(PROGRAM_SIZE)"
-	@echo "Sending code to RFLVM"
-	$(CC) \
-		$(SOURCE_DIR)/memory.c \
+PARAMS = $(SOURCE_DIR)/memory.c \
 		$(SOURCE_DIR)/io.c \
 		$(SOURCE_DIR)/delay.c \
 		$(SOURCE_DIR)/stack.c \
 		$(SOURCE_DIR)/cpu.c \
 		$(SOURCE_DIR)/instructions.c \
 		$(SOURCE_DIR)/serial.c \
+		$(SOURCE_DIR)/builtin.c \
 		$(SOURCE_DIR)/main.c \
-		-DMACOSX \
 		-DPROGRAM_SIZE=$(PROGRAM_SIZE) \
 		-DPROGRAM=\""$(PROGRAM)"\" \
-		-o build/$@
+		-DDATA_ADDRESS=$(DATA_ADDRESS) \
 
-arduino:
+compile:
 	mkdir -p $(BUILD_DIR)
 	$(eval PYTHON_SCRIPT := compiler.py)
 	@echo "Compiling rfl file..."
@@ -42,23 +26,21 @@ arduino:
 	@echo "OK"
 	$(eval PROGRAM := $(word 1, $(OUTPUT)))
 	$(eval PROGRAM_SIZE := $(word 2, $(OUTPUT)))
+	$(eval DATA_ADDRESS := $(word 3, $(OUTPUT)))
 	@echo "Program: $(PROGRAM)"
 	@echo "Size: $(PROGRAM_SIZE)"
-	@echo "Sending code to RFLVM"
-	avr-gcc -Os -mmcu=atmega328p \
-		$(SOURCE_DIR)/memory.c \
-		$(SOURCE_DIR)/io.c \
-		$(SOURCE_DIR)/delay.c \
-		$(SOURCE_DIR)/stack.c \
-		$(SOURCE_DIR)/cpu.c \
-		$(SOURCE_DIR)/instructions.c \
-		$(SOURCE_DIR)/serial.c \
-		$(SOURCE_DIR)/main.c \
-		-DARDUINO \
-		-DPROGRAM_SIZE=$(PROGRAM_SIZE) \
-		-DPROGRAM=\""$(PROGRAM)"\" \
-		-o build/$@.bin
+	@echo "Data: $(DATA_ADDRESS)"
+		
+generic: compile
+	@echo "Compiling code to MACOSX version"
+	clang $(PARAMS) -DMACOSX -o build/$@
+	@echo "MACOSX version created"
+
+arduino: compile
+	@echo "Compiling code to ARDUINO version"
+	avr-gcc $(PARAMS) -Os -mmcu=atmega328p -DARDUINO -o build/$@.bin
 	avr-objcopy -O ihex -R .eeprom build/$@.bin build/$@.hex
+	@echo "ARDUINO version created"
 
 clean:
 	rm -r $(BUILD_DIR)
@@ -73,6 +55,7 @@ test:
 		$(SOURCE_DIR)/cpu.c \
 		$(SOURCE_DIR)/instructions.c \
 		$(SOURCE_DIR)/serial.c \
+		$(SOURCE_DIR)/builtin.c \
 		$(TEST_DIR)/test_*.c \
 		-DMACOSX \
 		-o $(TEST_BUILD_DIR)/$@

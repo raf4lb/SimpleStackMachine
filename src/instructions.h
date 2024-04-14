@@ -55,7 +55,9 @@ void call(CPU *cpu);
 
 void ret(CPU *cpu);
 
-#define INSTRUCTIONS 26
+void syscall(CPU *cpu);
+
+#define INSTRUCTIONS 27
 
 void (**instructions_create())();
 

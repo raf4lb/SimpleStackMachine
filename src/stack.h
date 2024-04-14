@@ -24,4 +24,8 @@ void stack_push_bytes(Stack *stack, uint8_t *source, uint16_t data_size);
 
 void stack_pop_bytes(Stack *stack, uint8_t *destination, uint16_t data_size);
 
+void stack_push_uint16_t(Stack *stack, uint16_t value);
+
+uint16_t stack_pop_uint16_t(Stack *stack);
+
 #endif

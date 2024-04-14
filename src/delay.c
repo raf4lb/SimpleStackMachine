@@ -1,8 +1,7 @@
 #include "delay.h"
 #ifdef ARDUINO
 #include <util/delay.h> // Delay functions
-#endif
-#ifdef MACOSX
+#elif MACOSX
 #include <unistd.h>
 #endif
 void delay_ms(uint16_t milliseconds)

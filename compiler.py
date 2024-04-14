@@ -27,6 +27,7 @@ INSTRUCTIONS = {
     "RSH": 23,
     "CALL": 24,
     "RET": 25,
+    "SYSCALL": 26,
 }
 
 LONG_INSTRUCTIONS = {
@@ -37,6 +38,7 @@ LONG_INSTRUCTIONS = {
     "JMP",
     "PJIF",
     "CALL",
+    "SYSCALL",
 }
 
 PORTS = {
@@ -93,19 +95,56 @@ def remove_vars(lines: list[str]) -> list[str]:
     return [line for line in lines if not line.startswith("VAR")]
 
 
-def build_vars(lines: list[str], total_port_banks: int):
-    addresses = {}
+def to_utf8(string):
+    utf8_bytes = string.encode("utf-8")
+    utf8_array = [byte for byte in utf8_bytes]
+    return ",".join(str(c) for c in utf8_array) + ",0"
+
+
+def build_utf8_strings(lines: list[str]):
+    for i, content in enumerate(lines):
+        content = content.replace("\\n", "\n")
+        if '"' in content:
+            string = str()
+            found = False
+            for c in content:
+                if c == '"':
+                    if found:
+                        found = False
+                        break
+                    else:
+                        found = True
+                        continue
+                if found:
+                    string += c
+            ascii_list = to_utf8(string)
+            lines[i] = content.replace(f'"{string}"', ascii_list)
+
+
+def build_vars(lines: list[str]):
+    addresses = PORTS.copy()
+    data = []
+
+    def allocate_str(value):
+        data.extend(int(c) for c in value.split(","))  # store ascii value
+
     for line in lines:
         if line.startswith("VAR"):
             var_name = line.split(" ")[1]
-            addresses[var_name] = total_port_banks + 2 * len(addresses)
+            addresses[var_name] = 2 * len(addresses)
+
+        elif line.startswith("DATA"):
+            var_name, var_type, var_value = line.split(" ")[1:]
+            addresses[var_name] = len(data)  # free index
+            if var_type == "STRING":
+                allocate_str(var_value)
 
     new_lines = remove_vars(lines)
     for line, content in enumerate(new_lines):
         if "$" in content:
             instruction, var_name = content.split(" ")
             new_lines[line] = f"{instruction} {addresses[var_name[1:]]}"
-    return new_lines
+    return new_lines, data
 
 
 def map_ports(lines: list[str]) -> None:
@@ -122,14 +161,14 @@ def pprint(lines):
 
 
 def compile_rfl(filename: str, debug=False) -> list[int]:
-    total_port_banks = len(PORTS)
     program = []
-    with open(filename) as p:
-        lines = p.read().splitlines()
+    with open(filename, "r") as p:
+        lines = p.readlines()
         lines = remove_comments(lines)
         strip(lines)
         lines = remove_blank_lines(lines)
-        lines = build_vars(lines, total_port_banks)
+        build_utf8_strings(lines)
+        lines, data = build_vars(lines)
         lines = build_jumps(lines)
         map_ports(lines)
         # print(lines)
@@ -152,7 +191,9 @@ def compile_rfl(filename: str, debug=False) -> list[int]:
                 l_operand = operand[8:]
                 program.append(int(h_operand, 2))
                 program.append(int(l_operand, 2))
-    return program
+    data_address = len(program)
+    program.extend(data)
+    return program, len(program), data_address
 
 
 def get_instruction(code):
@@ -181,8 +222,7 @@ def disassembly(code):
 
 
 if __name__ == "__main__":
-    program = compile_rfl(sys.argv[1], False)
+    program, program_size, data_address = compile_rfl(sys.argv[1], False)
     # print(disassembly(program))
-    program_len = len(program)
     output = "{" + ",".join([str(inst) for inst in program]) + "}"
-    print(output, program_len)
+    print(output, program_size, data_address)
