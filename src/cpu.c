@@ -16,7 +16,9 @@ CPU *cpu_create(uint16_t memory_size, uint16_t stack_size, uint16_t callstack_si
     cpu->callstack = stack_create(callstack_size);
     cpu->instructions = instructions;
     cpu->port_bank = port_bank_create(port_bank);
+    cpu->ip = 0;
     cpu->user_memory = 0;
+    cpu->data_memory = 0;
     return cpu;
 }
 
@@ -44,14 +46,16 @@ void cpu_execute(CPU *cpu, uint8_t opcode)
     cpu->instructions[opcode](cpu);
 }
 
-void cpu_load_program(CPU *cpu, uint8_t *program, uint16_t program_size)
+void cpu_load_program(CPU *cpu, uint8_t *program, uint16_t program_size, uint16_t data_address)
 {
     int i;
     for (i = 0; i < program_size; i++)
     {
         memory_set_address(cpu->memory, i, program[i]);
     }
+    cpu->ip = 0;
     cpu->user_memory = program_size;
+    cpu->data_memory = data_address;
 }
 
 void cpu_run(CPU *cpu)

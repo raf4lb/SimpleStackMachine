@@ -10,6 +10,10 @@
 #define PROGRAM_SIZE 0
 #endif
 
+#ifndef DATA_ADDRESS
+#define DATA_ADDRESS 0
+#endif
+
 uint8_t *convert_str_to_long_int(char str[], uint16_t size)
 {
     uint8_t *array = malloc(size * sizeof(uint8_t)); // Dynamically allocate memory for the array
@@ -39,6 +43,7 @@ int main(void)
 {
     char program_string[] = PROGRAM;
     uint16_t program_size = PROGRAM_SIZE;
+    uint16_t data_address = DATA_ADDRESS;
     uint8_t *program = convert_str_to_long_int(program_string, program_size);
 
     void (**instructions)() = instructions_create();
@@ -48,7 +53,7 @@ int main(void)
     uint8_t port_banks = 3;
     CPU *cpu = cpu_create(memory_size, stack_size, callstack_size, instructions, port_banks);
 
-    cpu_load_program(cpu, program, program_size);
+    cpu_load_program(cpu, program, program_size, data_address);
 #ifdef ARDUINO
     serial_setup();
 #endif

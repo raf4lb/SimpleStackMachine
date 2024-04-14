@@ -1,0 +1,19 @@
+VAR message_on STRING "HELLO WORLD!\n"
+VAR message_off STRING "OLÁ MUNDO!\n"
+
+.loop
+    CALL .on
+    DLY 1000
+    CALL .off
+    DLY 1000
+    JMP .loop
+
+.on
+    PSHL $message_on
+    SYSCALL 0
+    RET
+
+.off
+    PSHL $message_off
+    SYSCALL 0
+    RET

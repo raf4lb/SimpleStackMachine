@@ -16,6 +16,7 @@ struct CPU
     void (**instructions)(CPU *cpu);
     PortBank *port_bank;
     uint16_t user_memory;
+    uint16_t data_memory;
 };
 
 CPU *cpu_create(uint16_t memory_size, uint16_t stack_size, uint16_t callstack_size, void (**instructions)(CPU *cpu), uint8_t port_banks);
@@ -28,7 +29,7 @@ uint16_t cpu_fetch_16b(CPU *cpu);
 
 void cpu_execute(CPU *cpu, uint8_t opcode);
 
-void cpu_load_program(CPU *cpu, uint8_t *program, uint16_t program_size);
+void cpu_load_program(CPU *cpu, uint8_t *program, uint16_t program_size, uint16_t data_address);
 
 void cpu_run(CPU *cpu);
 

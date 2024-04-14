@@ -65,6 +65,7 @@ int test_stack_push()
     }
 
     print_result("test_stack_push", failed);
+    stack_free(stack);
     return failed;
 }
 
@@ -88,6 +89,7 @@ int test_stack_pop()
     }
 
     print_result("test_stack_pop", failed);
+    stack_free(stack);
     return failed;
 }
 
@@ -108,6 +110,7 @@ int test_stack_push_bytes()
         failed = 1;
     }
     print_result("test_stack_push_bytes", failed);
+    stack_free(stack);
     return failed;
 }
 
@@ -135,6 +138,7 @@ int test_stack_pop_bytes()
         failed = 1;
     }
     print_result("test_stack_pop_bytes", failed);
+    stack_free(stack);
     return failed;
 }
 

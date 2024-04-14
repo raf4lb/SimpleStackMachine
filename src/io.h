@@ -5,8 +5,7 @@
 #ifdef ARDUINO
 #include "avr/io.h"
 #include "serial.h"
-#endif
-#ifdef MACOSX
+#elif MACOSX
 #include <stdio.h>
 volatile uint8_t DDRB;
 volatile uint8_t PORTB;
