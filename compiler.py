@@ -92,7 +92,11 @@ def build_jumps(lines: list[str]) -> list[str]:
 
 
 def remove_vars(lines: list[str]) -> list[str]:
-    return [line for line in lines if not line.startswith("VAR")]
+    return [
+        line
+        for line in lines
+        if not line.startswith("VAR") and not line.startswith("DATA")
+    ]
 
 
 def to_utf8(string):

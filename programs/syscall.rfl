@@ -1,5 +1,5 @@
-VAR message_on STRING "HELLO WORLD!\n"
-VAR message_off STRING "OLÁ MUNDO!\n"
+DATA message_on STRING "HELLO WORLD!\n"
+DATA message_off STRING "OLÁ MUNDO!\n"
 
 .loop
     CALL .on
