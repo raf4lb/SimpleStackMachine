@@ -1,5 +1,5 @@
 #include "stack.h"
-#include <stdlib.h>
+#include "sys.h"
 #include "io.h"
 
 void stack_error_print(char *message)
@@ -9,22 +9,21 @@ void stack_error_print(char *message)
 
 Stack *stack_create(uint16_t size)
 {
-    Stack *stack = (Stack *)malloc(sizeof(Stack));
+    Stack *stack = (Stack *)vmmalloc(sizeof(Stack));
     if (stack == NULL)
     {
         stack_error_print("Memory allocation failed for Stack\n");
         exit(EXIT_FAILURE);
     }
     stack->size = size;
-    uint8_t *data = (uint8_t *)malloc(size * sizeof(uint8_t));
+    uint8_t *data = (uint8_t *)vmmalloc(size * sizeof(uint8_t));
     if (data == NULL)
     {
         stack_error_print("Memory allocation failed for Stack->data\n");
         exit(EXIT_FAILURE);
     }
     // Initialize stack
-    int i;
-    for (i = 0; i < size; i++)
+    for (int i = 0; i < size; i++)
     {
         data[i] = 0;
     }
@@ -35,8 +34,8 @@ Stack *stack_create(uint16_t size)
 
 void stack_free(Stack *stack)
 {
-    free(stack->data);
-    free(stack);
+    vmfree(stack->data);
+    vmfree(stack);
 }
 
 uint8_t stack_pop(Stack *stack)
@@ -63,8 +62,7 @@ void stack_push(Stack *stack, uint8_t value)
 void stack_print(Stack *stack)
 {
     vmprintf("[");
-    int i;
-    for (i = 0; i < stack->size; i++)
+    for (int i = 0; i < stack->size; i++)
     {
         if (i > 0)
         {
@@ -81,8 +79,7 @@ void stack_print(Stack *stack)
 
 void stack_push_bytes(Stack *stack, uint8_t *source, uint16_t data_size)
 {
-    int i;
-    for (i = 0; i < data_size; i++)
+    for (int i = 0; i < data_size; i++)
     {
         stack_push(stack, source[i]);
     }
@@ -90,8 +87,7 @@ void stack_push_bytes(Stack *stack, uint8_t *source, uint16_t data_size)
 
 void stack_pop_bytes(Stack *stack, uint8_t *destination, uint16_t data_size)
 {
-    int i;
-    for (i = 0; i < data_size; i++)
+    for (int i = 0; i < data_size; i++)
     {
         destination[i] = stack_pop(stack);
     }

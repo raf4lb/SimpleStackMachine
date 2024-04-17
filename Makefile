@@ -13,9 +13,10 @@ PARAMS = $(SOURCE_DIR)/memory.c \
 		$(SOURCE_DIR)/instructions.c \
 		$(SOURCE_DIR)/serial.c \
 		$(SOURCE_DIR)/builtin.c \
+		$(SOURCE_DIR)/sys.c \
 		$(SOURCE_DIR)/main.c \
 		-DPROGRAM_SIZE=$(PROGRAM_SIZE) \
-		-DPROGRAM=\""$(PROGRAM)"\" \
+		-DPROGRAM="$(PROGRAM)" \
 		-DDATA_ADDRESS=$(DATA_ADDRESS) \
 
 compile:
@@ -38,8 +39,9 @@ generic: compile
 
 arduino: compile
 	@echo "Compiling code to ARDUINO version"
-	avr-gcc $(PARAMS) -Os -mmcu=atmega328p -DARDUINO -o build/$@.bin
-	avr-objcopy -O ihex -R .eeprom build/$@.bin build/$@.hex
+	avr-gcc $(PARAMS) -Os -mmcu=atmega328p -DARDUINO -o build/$@.elf
+	avr-objcopy -O ihex -R .eeprom build/$@.elf build/$@.hex
+	avr-size -C --mcu=atmega328p build/$@.elf 
 	@echo "ARDUINO version created"
 
 clean:

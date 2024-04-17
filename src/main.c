@@ -1,6 +1,6 @@
 #include <string.h>
-#include <stdlib.h>
 #include "instructions.h"
+#include "sys.h"
 
 #ifndef PROGRAM
 #define PROGRAM "{}"
@@ -14,43 +14,17 @@
 #define DATA_ADDRESS 0
 #endif
 
-uint8_t *convert_str_to_long_int(char str[], uint16_t size)
-{
-    uint8_t *array = malloc(size * sizeof(uint8_t)); // Dynamically allocate memory for the array
-
-    // Check if memory allocation is successful
-    if (array == NULL)
-    {
-        vmprintf("Memory allocation failed.\n");
-        exit(1);
-    }
-
-    // Remove curly braces and split the string into individual elements
-    char *token = strtok(str, "{,}");
-    uint16_t i = 0;
-
-    // Convert each element to long integer
-    while (token != NULL)
-    {
-        array[i++] = (uint8_t)strtoul(token, NULL, 10);
-        token = strtok(NULL, "{,}");
-    }
-
-    return array;
-}
+uint8_t program[] = PROGRAM;
+uint16_t program_size = PROGRAM_SIZE;
+uint16_t data_address = DATA_ADDRESS;
+uint16_t memory_size = 1024;
+uint16_t stack_size = 16;
+uint16_t callstack_size = 16;
+uint8_t port_banks = 3;
 
 int main(void)
 {
-    char program_string[] = PROGRAM;
-    uint16_t program_size = PROGRAM_SIZE;
-    uint16_t data_address = DATA_ADDRESS;
-    uint8_t *program = convert_str_to_long_int(program_string, program_size);
-
     void (**instructions)() = instructions_create();
-    uint16_t memory_size = 128;
-    uint16_t stack_size = 16;
-    uint16_t callstack_size = 16;
-    uint8_t port_banks = 3;
     CPU *cpu = cpu_create(memory_size, stack_size, callstack_size, instructions, port_banks);
 
     cpu_load_program(cpu, program, program_size, data_address);
@@ -58,9 +32,10 @@ int main(void)
     serial_setup();
 #endif
     vmprintf("Running program\n");
+    vmprintf("Memory usage: %d bytes\n", get_memory_usage());
+    vmprintf("Free memory: %d bytes\n", free_memory());
     cpu_run(cpu);
     cpu_free(cpu);
-
     return 0;
 }
 

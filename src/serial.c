@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <avr/io.h>
 #include <stdarg.h>
-#include <stdlib.h>
+#include "sys.h"
 #include "serial.h"
 
 void serial_setup()
@@ -39,8 +39,7 @@ void USART_transmit(uint8_t data)
 
 void serial_send(char *sendString)
 {
-    int i = 0;
-    for (i = 0; i < strlen(sendString); i++)
+    for (int i = 0; i < strlen(sendString); i++)
     {
         USART_transmit(sendString[i]);
     }
@@ -55,7 +54,7 @@ int serial_printf(const char *format, ...)
     int size = vsnprintf(NULL, 0, format, args);
 
     // Allocate memory for the buffer
-    char *buffer = (char *)malloc(sizeof(char) + 1); // +1 for null terminator
+    char *buffer = (char *)vmmalloc(sizeof(char) + 1); // +1 for null terminator
 
     // Reset va_list for actual usage
     va_end(args);
@@ -68,7 +67,7 @@ int serial_printf(const char *format, ...)
 
     // Now you can use the buffer as needed, for example, printing it
     serial_send(buffer);
-    free(buffer);
+    vmfree(buffer);
     return 0;
 }
 #endif

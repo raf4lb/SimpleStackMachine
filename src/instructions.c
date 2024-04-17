@@ -1,4 +1,4 @@
-#include <stdlib.h>
+#include "sys.h"
 #include "instructions.h"
 #include "delay.h"
 #include "builtin.h"
@@ -7,6 +7,7 @@ void halt(CPU *cpu)
 {
     vmprintf("Exit\n");
     cpu_free(cpu);
+    vmprintf("Free memory: %d bytes\n", free_memory());
     exit(0);
 }
 
@@ -236,7 +237,7 @@ void syscall(CPU *cpu)
 
 void (**instructions_create())()
 {
-    void (**instructions)() = malloc(INSTRUCTIONS * sizeof(void (*)()));
+    void (**instructions)() = vmmalloc(INSTRUCTIONS * sizeof(void (*)()));
     if (instructions == NULL)
     {
         vmprintf("Memory allocation failed for instructions");

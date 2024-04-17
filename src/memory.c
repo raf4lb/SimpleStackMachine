@@ -1,6 +1,5 @@
 #include "memory.h"
-#include <stdlib.h>
-#include <stdint.h>
+#include "sys.h"
 #include "io.h"
 
 void memory_error_print(char *message)
@@ -10,22 +9,21 @@ void memory_error_print(char *message)
 
 Memory *memory_create(uint16_t size)
 {
-    Memory *memory = (Memory *)malloc(sizeof(Memory));
+    Memory *memory = (Memory *)vmmalloc(sizeof(Memory));
     if (memory == NULL)
     {
         memory_error_print("Memory allocation failed for Memory\n");
         exit(EXIT_FAILURE);
     }
     memory->size = size;
-    uint8_t *data = (uint8_t *)malloc(size * sizeof(uint8_t));
+    uint8_t *data = (uint8_t *)vmmalloc(size * sizeof(uint8_t));
     if (data == NULL)
     {
         memory_error_print("Memory allocation failed for Memory->data\n");
         exit(EXIT_FAILURE);
     }
     // Initialize memory
-    int i;
-    for (i = 0; i < size; i++)
+    for (int i = 0; i < size; i++)
     {
         data[i] = 0;
     }
@@ -35,15 +33,14 @@ Memory *memory_create(uint16_t size)
 
 void memory_free(Memory *memory)
 {
-    free(memory->data);
-    free(memory);
+    vmfree(memory->data);
+    vmfree(memory);
 }
 
 void memory_print(Memory *memory)
 {
     vmprintf("[");
-    int i;
-    for (i = 0; i < memory->size; i++)
+    for (int i = 0; i < memory->size; i++)
     {
         if (i > 0)
         {
