@@ -3,7 +3,7 @@
 #include "io.h"
 #include "sys.h"
 
-CPU *cpu_create(uint16_t memory_size, uint16_t stack_size, uint16_t callstack_size, void (**instructions)(CPU *cpu), uint8_t port_bank)
+CPU *cpu_create(uint16_t memory_size, uint16_t stack_size, uint16_t callstack_size, InstructionPtr *instructions, uint8_t port_bank)
 {
     CPU *cpu = (CPU *)vmmalloc(sizeof(CPU));
     if (cpu == NULL)
@@ -11,11 +11,14 @@ CPU *cpu_create(uint16_t memory_size, uint16_t stack_size, uint16_t callstack_si
         vmprintf("Memory allocation to CPU failed");
         exit(1);
     }
-    cpu->memory = memory_create(memory_size);
+    if (memory_size > 0)
+    {
+        cpu->memory = memory_create(memory_size);
+    }
     cpu->stack = stack_create(stack_size);
     cpu->callstack = stack_create(callstack_size);
-    cpu->instructions = instructions;
     cpu->port_bank = port_bank_create(port_bank);
+    cpu->instructions = instructions;
     cpu->ip = 0;
     cpu->user_memory = 0;
     cpu->data_memory = 0;
@@ -27,13 +30,18 @@ void cpu_free(CPU *cpu)
     stack_free(cpu->stack);
     memory_free(cpu->memory);
     port_bank_free(cpu->port_bank);
-    vmfree(cpu->instructions);
     vmfree(cpu);
 }
 
 uint8_t cpu_fetch_8b(CPU *cpu)
 {
-    return memory_get_address(cpu->memory, cpu->ip++);
+
+    if (0 <= cpu->ip && cpu->ip < cpu->program_size)
+    {
+        return cpu->program[cpu->ip++];
+    }
+    vmprintf("cpu_fetch_8b: out of program memory\n");
+    exit(EXIT_FAILURE);
 }
 
 uint16_t cpu_fetch_16b(CPU *cpu)
@@ -48,12 +56,10 @@ void cpu_execute(CPU *cpu, uint8_t opcode)
 
 void cpu_load_program(CPU *cpu, uint8_t *program, uint16_t program_size, uint16_t data_address)
 {
-    for (int i = 0; i < program_size; i++)
-    {
-        memory_set_address(cpu->memory, i, program[i]);
-    }
+    cpu->program = program;
+    cpu->program_size = program_size;
     cpu->ip = 0;
-    cpu->user_memory = program_size;
+    cpu->user_memory = 0;
     cpu->data_memory = data_address;
 }
 
