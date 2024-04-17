@@ -2,6 +2,7 @@
 #include "instructions.h"
 #include "delay.h"
 #include "builtin.h"
+#include "io.h"
 
 void halt(CPU *cpu)
 {
@@ -16,52 +17,63 @@ void push(CPU *cpu)
     uint16_t value;
     if (address < cpu->port_bank->size)
     {
-        value = port_bank_get_address(cpu->port_bank, address);
+        value = (uint16_t)port_bank_get_address(cpu->port_bank, address);
     }
     else
     {
         address = address + cpu->user_memory - cpu->port_bank->size;
-        value = memory_get_address_16b(cpu->memory, address);
+        value = (uint16_t)memory_get_address_16b(cpu->memory, address);
     }
     // TODO: Pop value according the size of type stored
-    stack_push_uint16_t(cpu->stack, value);
+    Object *object = Object_create(OBJECT_TYPE_I16, value);
+    ObjectStack_push(cpu->stack, object);
 }
 
 void push_literal(CPU *cpu)
 {
     uint16_t value = cpu_fetch_16b(cpu);
     // TODO: Push value according the size of type stored
-    stack_push_uint16_t(cpu->stack, value);
+    Object *object = Object_create(OBJECT_TYPE_I16, value);
+    ObjectStack_push(cpu->stack, object);
 }
 
 void pop(CPU *cpu)
 {
     // TODO: Pop value according the size of type stored
-    stack_pop_uint16_t(cpu->stack);
+    Object *object = ObjectStack_pop(cpu->stack);
+    Object_free(object);
 }
 
 void pop_address(CPU *cpu)
 {
     uint16_t address = cpu_fetch_16b(cpu);
-    // TODO: Pop value according the size of type stored
-    uint16_t value = stack_pop_uint16_t(cpu->stack);
+    Object *object = ObjectStack_pop(cpu->stack);
+    uint16_t value = object->value.from.i16;
     if (address < cpu->port_bank->size)
     {
-        port_bank_set_address(cpu->port_bank, address, value);
+        port_bank_set_address(cpu->port_bank, address, (uint8_t)value);
     }
     else
     {
         address = cpu->user_memory + address - cpu->port_bank->size;
         memory_set_address_16b(cpu->memory, address, value);
     }
+    Object_free(object);
 }
 
 void top(CPU *cpu)
 {
-    uint8_t h = cpu->stack->data[cpu->stack->sp - 2];
-    uint8_t l = cpu->stack->data[cpu->stack->sp - 1];
-    uint16_t top = h << 8 | l;
-    vmprintf("%d\n", top);
+    Object *object = cpu->stack->data[cpu->stack->sp - 1];
+    switch (object->type)
+    {
+    case OBJECT_TYPE_I16:
+        vmprintf("%d\n", object->value.from.i16);
+        break;
+
+    default:
+        vmprintf("TopInstructionError: Unknown object type\n");
+        break;
+    }
 }
 
 void delay(CPU *cpu)
@@ -79,9 +91,10 @@ void jump(CPU *cpu)
 void pop_jump_if_false(CPU *cpu)
 {
     uint16_t address = cpu_fetch_16b(cpu);
-    // TODO: Pop value according the size of type stored
     // Here result is a bool so it should be okay
-    uint16_t result = stack_pop_uint16_t(cpu->stack);
+    Object *object = ObjectStack_pop(cpu->stack);
+    uint8_t result = (uint8_t)object->value.from.i16;
+    Object_free(object);
     if (!result)
         cpu->ip = address;
 }
@@ -89,120 +102,112 @@ void pop_jump_if_false(CPU *cpu)
 void compare_equal(CPU *cpu)
 {
     // TODO: Pop value according the size of type stored (int, float, etc)
-    uint16_t b = stack_pop_uint16_t(cpu->stack);
-    uint16_t a = stack_pop_uint16_t(cpu->stack);
-    stack_push_uint16_t(cpu->stack, a == b);
+    Object *b = ObjectStack_pop(cpu->stack);
+    Object *a = ObjectStack_pop(cpu->stack);
+    ObjectStack_push(cpu->stack, Object_equal(a, b));
 }
 
 void compare_less(CPU *cpu)
 {
     // TODO: Pop value according the size of type stored (int, float, etc)
-    uint16_t b = stack_pop_uint16_t(cpu->stack);
-    uint16_t a = stack_pop_uint16_t(cpu->stack);
-    stack_push_uint16_t(cpu->stack, a < b);
+    Object *b = ObjectStack_pop(cpu->stack);
+    Object *a = ObjectStack_pop(cpu->stack);
+    ObjectStack_push(cpu->stack, Object_less(a, b));
 }
 
 void compare_greater(CPU *cpu)
 {
     // TODO: Pop value according the size of type stored (int, float, etc)
-    uint16_t b = stack_pop_uint16_t(cpu->stack);
-    uint16_t a = stack_pop_uint16_t(cpu->stack);
-    stack_push_uint16_t(cpu->stack, a > b);
+    Object *b = ObjectStack_pop(cpu->stack);
+    Object *a = ObjectStack_pop(cpu->stack);
+    ObjectStack_push(cpu->stack, Object_greater(a, b));
 }
 
 void compare_less_equal(CPU *cpu)
 {
     // TODO: Pop value according the size of type stored (int, float, etc)
-    uint16_t b = stack_pop_uint16_t(cpu->stack);
-    uint16_t a = stack_pop_uint16_t(cpu->stack);
-    stack_push_uint16_t(cpu->stack, a <= b);
+    Object *b = ObjectStack_pop(cpu->stack);
+    Object *a = ObjectStack_pop(cpu->stack);
+    ObjectStack_push(cpu->stack, Object_less_equal(a, b));
 }
 
 void compare_greater_equal(CPU *cpu)
 {
     // TODO: Pop value according the size of type stored (int, float, etc)
-    uint16_t b = stack_pop_uint16_t(cpu->stack);
-    uint16_t a = stack_pop_uint16_t(cpu->stack);
-    stack_push_uint16_t(cpu->stack, a >= b);
+    Object *b = ObjectStack_pop(cpu->stack);
+    Object *a = ObjectStack_pop(cpu->stack);
+    ObjectStack_push(cpu->stack, Object_greater_equal(a, b));
 }
 
 void add(CPU *cpu)
 {
     // TODO: Pop value according the size of type stored (int, float, etc)
-    uint16_t b = stack_pop_uint16_t(cpu->stack);
-    uint16_t a = stack_pop_uint16_t(cpu->stack);
-    stack_push_uint16_t(cpu->stack, a + b);
+    Object *b = ObjectStack_pop(cpu->stack);
+    Object *a = ObjectStack_pop(cpu->stack);
+    Object *c = Object_add(a, b);
+    ObjectStack_push(cpu->stack, c);
 }
 
 void subtract(CPU *cpu)
 {
-    // TODO: Pop value according the size of type stored (int, float, etc)
-    uint16_t b = stack_pop_uint16_t(cpu->stack);
-    uint16_t a = stack_pop_uint16_t(cpu->stack);
-    stack_push_uint16_t(cpu->stack, a - b);
+    Object *b = ObjectStack_pop(cpu->stack);
+    Object *a = ObjectStack_pop(cpu->stack);
+    ObjectStack_push(cpu->stack, Object_sub(a, b));
 }
 
 void multiply(CPU *cpu)
 {
-    // TODO: Pop value according the size of type stored (int, float, etc)
-    uint16_t b = stack_pop_uint16_t(cpu->stack);
-    uint16_t a = stack_pop_uint16_t(cpu->stack);
-    stack_push_uint16_t(cpu->stack, a * b);
+    Object *b = ObjectStack_pop(cpu->stack);
+    Object *a = ObjectStack_pop(cpu->stack);
+    ObjectStack_push(cpu->stack, Object_mul(a, b));
 }
 
 void divide(CPU *cpu)
 {
-    // TODO: Pop value according the size of type stored (int, float, etc)
-    uint16_t b = stack_pop_uint16_t(cpu->stack);
-    uint16_t a = stack_pop_uint16_t(cpu->stack);
-    stack_push_uint16_t(cpu->stack, a / b);
+    Object *b = ObjectStack_pop(cpu->stack);
+    Object *a = ObjectStack_pop(cpu->stack);
+    ObjectStack_push(cpu->stack, Object_div(a, b));
 }
 
 void bitwise_and(CPU *cpu)
 {
-    // TODO: Pop value according the integer size
-    uint16_t b = stack_pop_uint16_t(cpu->stack);
-    uint16_t a = stack_pop_uint16_t(cpu->stack);
-    stack_push_uint16_t(cpu->stack, a & b);
+    Object *b = ObjectStack_pop(cpu->stack);
+    Object *a = ObjectStack_pop(cpu->stack);
+    ObjectStack_push(cpu->stack, Object_bitwise_and(a, b));
 }
 
 void bitwise_or(CPU *cpu)
 {
-    // TODO: Pop value according the integer size
-    uint16_t b = stack_pop_uint16_t(cpu->stack);
-    uint16_t a = stack_pop_uint16_t(cpu->stack);
-    stack_push_uint16_t(cpu->stack, a | b);
+    Object *b = ObjectStack_pop(cpu->stack);
+    Object *a = ObjectStack_pop(cpu->stack);
+    ObjectStack_push(cpu->stack, Object_bitwise_or(a, b));
 }
 
 void bitwise_xor(CPU *cpu)
 {
-    // TODO: Pop value according the integer size
-    uint16_t b = stack_pop_uint16_t(cpu->stack);
-    uint16_t a = stack_pop_uint16_t(cpu->stack);
-    stack_push_uint16_t(cpu->stack, a ^ b);
+    Object *b = ObjectStack_pop(cpu->stack);
+    Object *a = ObjectStack_pop(cpu->stack);
+    ObjectStack_push(cpu->stack, Object_bitwise_xor(a, b));
 }
 
 void bitwise_not(CPU *cpu)
 {
-    // TODO: Pop value according the integer size
-    uint16_t a = stack_pop_uint16_t(cpu->stack);
-    stack_push_uint16_t(cpu->stack, ~a);
+    Object *a = ObjectStack_pop(cpu->stack);
+    ObjectStack_push(cpu->stack, Object_bitwise_not(a));
 }
 
 void bitwise_left_shift(CPU *cpu)
 {
-    // TODO: Pop value according the integer size
-    uint16_t b = stack_pop_uint16_t(cpu->stack);
-    uint16_t a = stack_pop_uint16_t(cpu->stack);
-    stack_push_uint16_t(cpu->stack, a << b);
+    Object *b = ObjectStack_pop(cpu->stack);
+    Object *a = ObjectStack_pop(cpu->stack);
+    ObjectStack_push(cpu->stack, Object_bitwise_left_shift(a, b));
 }
 
 void bitwise_right_shift(CPU *cpu)
 {
-    // TODO: Pop value according the integer size
-    uint16_t b = stack_pop_uint16_t(cpu->stack);
-    uint16_t a = stack_pop_uint16_t(cpu->stack);
-    stack_push_uint16_t(cpu->stack, a >> b);
+    Object *b = ObjectStack_pop(cpu->stack);
+    Object *a = ObjectStack_pop(cpu->stack);
+    ObjectStack_push(cpu->stack, Object_bitwise_right_shift(a, b));
 }
 
 void call(CPU *cpu)

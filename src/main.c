@@ -41,6 +41,9 @@ uint8_t *convert_str_to_long_int(char str[], uint16_t size)
 
 int main(void)
 {
+#ifdef ARDUINO
+    serial_setup();
+#endif
     char program_string[] = PROGRAM;
     uint16_t program_size = PROGRAM_SIZE;
     uint16_t data_address = DATA_ADDRESS;
@@ -54,9 +57,6 @@ int main(void)
     CPU *cpu = cpu_create(memory_size, stack_size, callstack_size, instructions, port_banks);
 
     cpu_load_program(cpu, program, program_size, data_address);
-#ifdef ARDUINO
-    serial_setup();
-#endif
     vmprintf("Running program\n");
     cpu_run(cpu);
     cpu_free(cpu);

@@ -13,6 +13,8 @@ PARAMS = $(SOURCE_DIR)/memory.c \
 		$(SOURCE_DIR)/instructions.c \
 		$(SOURCE_DIR)/serial.c \
 		$(SOURCE_DIR)/builtin.c \
+		$(SOURCE_DIR)/object.c \
+		$(SOURCE_DIR)/objectstack.c \
 		$(SOURCE_DIR)/main.c \
 		-DPROGRAM_SIZE=$(PROGRAM_SIZE) \
 		-DPROGRAM=\""$(PROGRAM)"\" \
@@ -32,15 +34,22 @@ compile:
 	@echo "Data: $(DATA_ADDRESS)"
 		
 generic: compile
-	@echo "Compiling code to MACOSX version"
+	@echo "Compiling code for MACOSX version"
 	clang $(PARAMS) -DMACOSX -o build/$@
 	@echo "MACOSX version created"
 
-arduino: compile
-	@echo "Compiling code to ARDUINO version"
+arduino-uno: compile
+	@echo "Compiling code for ARDUINO version"
 	avr-gcc $(PARAMS) -Os -mmcu=atmega328p -DARDUINO -o build/$@.bin
 	avr-objcopy -O ihex -R .eeprom build/$@.bin build/$@.hex
 	@echo "ARDUINO version created"
+
+arduino-mega: compile
+	@echo "Compiling code for ARDUINO version"
+	avr-gcc $(PARAMS) -Os -mmcu=atmega2560 -DARDUINO -o build/$@.bin
+	avr-objcopy -O ihex -R .eeprom build/$@.bin build/$@.hex
+	@echo "ARDUINO version created"
+
 
 clean:
 	rm -r $(BUILD_DIR)
@@ -56,7 +65,9 @@ test:
 		$(SOURCE_DIR)/instructions.c \
 		$(SOURCE_DIR)/serial.c \
 		$(SOURCE_DIR)/builtin.c \
-		$(TEST_DIR)/test_*.c \
+		$(SOURCE_DIR)/object.c \
+		$(SOURCE_DIR)/objectstack.c \
+		$(TEST_DIR)/$(TEST_FILE) \
 		-DMACOSX \
 		-o $(TEST_BUILD_DIR)/$@
 

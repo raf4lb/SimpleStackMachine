@@ -1,9 +1,12 @@
 #include "builtin.h"
 #include <stdint.h>
+#include "io.h"
 
 void print(CPU *cpu)
 {
-    uint16_t buffer_address = stack_pop_uint16_t(cpu->stack); // pop 2 bytes
+    Object *object = ObjectStack_pop(cpu->stack);
+    uint16_t buffer_address = object->value.from.i16;
+    Object_free(object);
     // vmprintf("address %d = %d\n", buffer_address, cpu->memory->data[cpu->data_memory + buffer_address]);
     const char *buffer = (const char *)&cpu->memory->data[cpu->data_memory + buffer_address];
 

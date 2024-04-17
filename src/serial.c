@@ -56,7 +56,12 @@ int serial_printf(const char *format, ...)
 
     // Allocate memory for the buffer
     char *buffer = (char *)malloc(sizeof(char) + 1); // +1 for null terminator
-
+    if (buffer == NULL)
+    {
+        // Failed to allocate memory, handle error
+        va_end(args);
+        return -1;
+    }
     // Reset va_list for actual usage
     va_end(args);
     va_start(args, format);

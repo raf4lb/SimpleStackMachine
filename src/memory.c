@@ -92,3 +92,31 @@ void memory_set_address_16b(Memory *memory, uint16_t address, uint16_t value)
     uint8_t l = value & 255;
     memory_set_address(memory, address + 1, l);
 }
+
+#ifdef ARDUINO
+#include "Arduino.h"
+// Function to get the free memory on Arduino
+unsigned int getFreeMemory()
+{
+    // Start of the heap (as defined by the linker)
+    extern unsigned int __heap_start;
+
+    // Current position of the heap
+    unsigned int current_sp = (unsigned int)&current_sp;
+
+    // Free memory calculation
+    unsigned int free_memory;
+    if (__heap_start == 0)
+    {
+        // If the heap start address is not defined, return 0
+        free_memory = 0;
+    }
+    else
+    {
+        // Calculate free memory
+        free_memory = current_sp - (unsigned int)&__heap_start;
+    }
+    return free_memory;
+}
+
+#endif

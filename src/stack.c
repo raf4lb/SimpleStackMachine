@@ -91,7 +91,7 @@ void stack_push_bytes(Stack *stack, uint8_t *source, uint16_t data_size)
 void stack_pop_bytes(Stack *stack, uint8_t *destination, uint16_t data_size)
 {
     int i;
-    for (i = 0; i < data_size; i++)
+    for (i = data_size - 1; i >= 0; i--)
     {
         destination[i] = stack_pop(stack);
     }
@@ -107,6 +107,6 @@ uint16_t stack_pop_uint16_t(Stack *stack)
 {
     uint8_t buffer[2];
     stack_pop_bytes(stack, buffer, 2); // pop 2 bytes
-    uint16_t data = buffer[1] << 8 | buffer[0];
+    uint16_t data = buffer[0] << 8 | buffer[1];
     return data;
 }

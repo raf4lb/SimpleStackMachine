@@ -2,15 +2,16 @@
 #define CPU_H
 
 #include "stack.h"
-#include "io.h"
+#include "objectstack.h"
 #include <stdint.h>
+#include "io.h"
 
 typedef struct CPU CPU;
 
 struct CPU
 {
     Memory *memory;
-    Stack *stack;
+    ObjectStack *stack;
     Stack *callstack;
     uint16_t ip;
     void (**instructions)(CPU *cpu);

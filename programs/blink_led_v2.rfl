@@ -5,15 +5,15 @@ PSHL 2          ; push 0b10 to stack
 POPA $ddrb       ; set DDRB 0 input 1 output
 
 .loop
-
     ; PORTB = PORTB | (1 << PINB1)
     PSH $portb   ; push PORTB to stack
     PSHL 1       ; push 1 to stack
     PSHL 1       ; push 1 to stack
     LSH          ; bitwise LEFT SHIFT operation
     OR           ; bitwise OR operation
+    TOP
     POPA $portb  ; pop result to address 0x1 (PORTB)
-    DLY 1000
+    DLY 500
 
     ; PORTB = PORTB & ~(1 << PINB1)
     PSH $portb   ; push PORTB to stack
@@ -22,7 +22,8 @@ POPA $ddrb       ; set DDRB 0 input 1 output
     LSH          ; bitwise LEFT SHIFT operation
     NOT          ; bitwise NOT operation
     AND          ; bitwise AND operation
+    TOP
     POPA $portb  ; pop result to address 0x1 (PORTB)
-    DLY 1000
+    DLY 500
     
     JMP .loop   ; jump to .loop
