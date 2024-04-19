@@ -1,0 +1,58 @@
+VAR a
+PSHL 0
+POPA $a
+VAR b
+PSHL 1
+POPA $b
+VAR c
+VAR i
+
+VAR n
+PSHL 30  ; n here
+POPA $n
+
+PSH $n
+PSHL 1
+CPGE
+PJIF .false_1
+PSH $a
+TOP
+.false_1
+PSH $n
+PSHL 2
+CPGE
+PJIF .false_2
+PSH $b
+TOP
+.false_2
+PSHL 3
+POPA $i
+VAR inc
+PSHL 1
+POPA $inc
+.for
+    CALL .for_content
+    PSH $i
+    PSH $inc
+    ADD
+    POPA $i
+    PSH $i
+    PSH $n
+    CPG
+    PJIF .for
+    HLT
+
+.for_content
+    PSH $a
+    PSH $b
+    ADD
+    TOP
+    POPA $c
+    PSH $b
+    POPA $a
+    PSH $c
+    POPA $b
+    RET
+
+
+
