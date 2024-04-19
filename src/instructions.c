@@ -1,4 +1,4 @@
-#include <stdlib.h>
+#include "sys.h"
 #include "instructions.h"
 #include "delay.h"
 #include "builtin.h"
@@ -232,43 +232,4 @@ void syscall(CPU *cpu)
     default:
         break;
     }
-}
-
-void (**instructions_create())()
-{
-    void (**instructions)() = malloc(INSTRUCTIONS * sizeof(void (*)()));
-    if (instructions == NULL)
-    {
-        vmprintf("Memory allocation failed for instructions");
-        return NULL;
-    }
-    instructions[0] = halt;
-    instructions[1] = push_literal;
-    instructions[2] = push;
-    instructions[3] = pop;
-    instructions[4] = pop_address;
-    instructions[5] = top;
-    instructions[6] = delay;
-    instructions[7] = jump;
-    instructions[8] = pop_jump_if_false;
-    instructions[9] = compare_equal;
-    instructions[10] = compare_less;
-    instructions[11] = compare_greater;
-    instructions[12] = compare_less_equal;
-    instructions[13] = compare_greater_equal;
-    instructions[14] = add;
-    instructions[15] = subtract;
-    instructions[16] = multiply;
-    instructions[17] = divide;
-    instructions[18] = bitwise_and;
-    instructions[19] = bitwise_or;
-    instructions[20] = bitwise_xor;
-    instructions[21] = bitwise_not;
-    instructions[22] = bitwise_left_shift;
-    instructions[23] = bitwise_right_shift;
-    instructions[24] = call;
-    instructions[25] = ret;
-    instructions[26] = syscall;
-
-    return instructions;
 }

@@ -32,8 +32,7 @@ int test_stack_create(void)
         failed = 1;
     }
 
-    uint16_t i;
-    for (i = 0; i < stack_size; i++)
+    for (int i = 0; i < stack_size; i++)
     {
         if (stack->data[i] != 0)
         {

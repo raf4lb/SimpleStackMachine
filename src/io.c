@@ -1,4 +1,4 @@
-#include <stdlib.h>
+#include "sys.h"
 #include "io.h"
 
 void map_ports(PortBank *port_bank)
@@ -10,14 +10,14 @@ void map_ports(PortBank *port_bank)
 
 PortBank *port_bank_create(uint8_t size)
 {
-    PortBank *port_bank = (PortBank *)malloc(sizeof(PortBank));
+    PortBank *port_bank = (PortBank *)vmmalloc(sizeof(PortBank));
     if (port_bank == NULL)
     {
         vmprintf("Memory allocation failed for port bank\n");
         exit(1);
     }
     port_bank->size = size;
-    port_bank->ports = (volatile uint8_t **)malloc(size * sizeof(volatile uint8_t *));
+    port_bank->ports = (volatile uint8_t **)vmmalloc(size * sizeof(volatile uint8_t *));
     if (port_bank->ports == NULL)
     {
         vmprintf("Memory allocation failed for ports of the bank\n");
@@ -41,8 +41,8 @@ void port_bank_print(PortBank *port_bank)
 
 void port_bank_free(PortBank *port_bank)
 {
-    free(port_bank->ports);
-    free(port_bank);
+    vmfree(port_bank->ports);
+    vmfree(port_bank);
 }
 
 void port_bank_set_address(PortBank *port_bank, uint8_t address, uint8_t value)
