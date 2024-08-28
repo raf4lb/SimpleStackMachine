@@ -1,0 +1,31 @@
+; sum(x <i16>, y <i16>) {
+;   return x + y
+; } <i16>
+; 
+; main() {
+;   result <i16>
+;   result = sum(1, 2)
+;   return result
+; } <void>
+
+.main
+    ALLOC_I16 0
+    PUSHL_I16 -10
+    PUSHL_I16 123
+    CALL .sum
+    STORE_I16 0
+    LOAD_I16 0
+    TOP_I16
+    HALT
+
+.sum
+    ALLOC_I16 4
+    ALLOC_I16 6
+    STORE_I16 4
+    STORE_I16 6
+    LOAD_I16 4
+    LOAD_I16 6
+    ADD_I16
+    FREE_I16 4
+    FREE_I16 6
+    RETURN

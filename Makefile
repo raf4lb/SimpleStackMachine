@@ -14,6 +14,7 @@ PARAMS = $(SOURCE_DIR)/memory.c \
 		$(SOURCE_DIR)/serial.c \
 		$(SOURCE_DIR)/builtin.c \
 		$(SOURCE_DIR)/sys.c \
+		$(SOURCE_DIR)/datatypes.c \
 		$(SOURCE_DIR)/main.c \
 		-DPROGRAM_SIZE=$(PROGRAM_SIZE) \
 		-DPROGRAM="$(PROGRAM)" \
@@ -21,7 +22,7 @@ PARAMS = $(SOURCE_DIR)/memory.c \
 
 compile:
 	mkdir -p $(BUILD_DIR)
-	$(eval PYTHON_SCRIPT := compiler.py)
+	$(eval PYTHON_SCRIPT := new_compiler.py)
 	@echo "Compiling rfl file..."
 	$(eval OUTPUT := $(shell python3 $(PYTHON_SCRIPT) $(PROGRAM_FILE)))
 	@echo "OK"

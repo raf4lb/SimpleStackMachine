@@ -3,17 +3,17 @@ DATA message_off STRING "OLÁ MUNDO!\n"
 
 .loop
     CALL .on
-    DLY 1000
+    DELAY 1000
     CALL .off
-    DLY 1000
-    JMP .loop
+    DELAY 1000
+    JUMP .loop
 
 .on
-    PSHL $message_on
+    PUSHL_U16 $message_on
     SYSCALL 0
-    RET
+    RETURN
 
 .off
-    PSHL $message_off
+    PUSHL_U16 $message_off
     SYSCALL 0
-    RET
+    RETURN

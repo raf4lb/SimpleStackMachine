@@ -1,28 +1,27 @@
 ; Use a button to control a led
 ; https://wokwi.com/projects/392567753366512641
 
-PSHL 2          ; push 0b10 to stack
-POPA $ddrb       ; set DDRB 0 input 1 output
+PUSHL_U16 2          ; push 0b10 to stack
+POPA_U16 $ddrb       ; set DDRB 0 input 1 output
 
 .loop
-
     ; PORTB = PORTB | (1 << PINB1)
-    PSH $portb   ; push PORTB to stack
-    PSHL 1       ; push 1 to stack
-    PSHL 1       ; push 1 to stack
-    LSH          ; bitwise LEFT SHIFT operation
-    OR           ; bitwise OR operation
-    POPA $portb  ; pop result to address 0x1 (PORTB)
-    DLY 1000
+    PUSH_U16 $portb   ; push PORTB to stack
+    PUSHL_U16 1       ; push 1 to stack
+    PUSHL_U16 1       ; push 1 to stack
+    LSHIFT_U16        ; bitwise LEFT SHIFT operation
+    OR_U16            ; bitwise OR operation
+    POPA_U16 $portb   ; pop result to address 0x1 (PORTB)
+    DELAY 1000
 
     ; PORTB = PORTB & ~(1 << PINB1)
-    PSH $portb   ; push PORTB to stack
-    PSHL 1       ; push 1 to stack
-    PSHL 1       ; push 1 to stack
-    LSH          ; bitwise LEFT SHIFT operation
-    NOT          ; bitwise NOT operation
-    AND          ; bitwise AND operation
-    POPA $portb  ; pop result to address 0x1 (PORTB)
-    DLY 1000
+    PUSH_U16 $portb   ; push PORTB to stack
+    PUSHL_U16 1       ; push 1 to stack
+    PUSHL_U16 1       ; push 1 to stack
+    LSHIFT_U16        ; bitwise LEFT SHIFT operation
+    NOT_U16           ; bitwise NOT operation
+    AND_U16           ; bitwise AND operation
+    POPA_U16 $portb  ; pop result to address 0x1 (PORTB)
+    DELAY 1000
     
-    JMP .loop   ; jump to .loop
+    JUMP .loop   ; jump to .loop

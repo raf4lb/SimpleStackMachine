@@ -1,51 +1,251 @@
+from abc import ABC, abstractmethod
 import sys
+import struct
+
+
+class Instruction(ABC):
+    @property
+    @abstractmethod
+    def name(self): ...
+
+    @property
+    @abstractmethod
+    def opcode(self): ...
+
+    @property
+    @abstractmethod
+    def size(self): ...
+
+    @abstractmethod
+    def encode(self, operand): ...
+
+    def get_size(self):
+        return self.size
+
+
+def string_to_uint8_list(string_int, list_size):
+    int_val = int(string_int)
+    num_bytes = list_size * 8
+    # Masking to ensure only the required number of bits are retained
+    int_val &= (1 << num_bytes) - 1
+    # Generate the list of unsigned 8-bit integers
+    uint8_list = [(int_val >> (i * 8)) & 0xFF for i in range(list_size)]
+    # uint8_list.reverse()
+    return uint8_list
+
+
+def string_to_float_ieee754(float_str):
+    # Convert string to float
+    float_val = float(float_str)
+    # Pack the float value into a 4-byte string according to IEEE754 Single precision
+    ieee754_bytes = struct.pack("f", float_val)
+    # Convert the bytes to a hexadecimal string
+    ieee754_int = [int(byte) for byte in ieee754_bytes]
+    return ieee754_int
+
+
+class NoOperandInstruction(Instruction):
+    name = "NoOperandInstruction"
+    opcode = -1
+    size = 1
+
+    def encode(self, operand):
+        return [self.opcode]
+
+
+class HaltInstruction(NoOperandInstruction):
+    name = "HALT"
+    opcode = 0
+
+
+class OperandU16Instruction(Instruction):
+    name = "OperandU16Instruction"
+    opcode = -1
+    size = 3
+
+    def encode(self, operand):
+        encoded = [self.opcode]
+        encoded.extend(string_to_uint8_list(operand, 2))
+        return encoded
+
+
+class OperandF32Instruction(Instruction):
+    name = "OperandF32Instruction"
+    opcode = -1
+    size = 5
+
+    def encode(self, operand):
+        encoded = [self.opcode]
+        encoded.extend(string_to_float_ieee754(operand))
+        return encoded
+
+
+class PushLiteralU16Instruction(OperandU16Instruction):
+    name = "PUSHL_U16"
+    opcode = 28
+
+
+class PopU16Instruction(NoOperandInstruction):
+    name = "POP_U16"
+    opcode = 29
+
+
+class TopU16Instruction(NoOperandInstruction):
+    name = "TOP_U16"
+    opcode = 30
+
+
+class AddU16Instruction(NoOperandInstruction):
+    name = "ADD_U16"
+    opcode = 31
+
+
+class PushLiteralI16Instruction(OperandU16Instruction):
+    name = "PUSHL_I16"
+    opcode = 32
+
+
+class PopI16Instruction(NoOperandInstruction):
+    name = "POP_I16"
+    opcode = 33
+
+
+class TopI16Instruction(NoOperandInstruction):
+    name = "TOP_I16"
+    opcode = 34
+
+
+class AddI16Instruction(NoOperandInstruction):
+    name = "ADD_I16"
+    opcode = 35
+
+
+class SubtractI16Instruction(NoOperandInstruction):
+    name = "SUB_I16"
+    opcode = 36
+
+
+class MultiplyI16Instruction(NoOperandInstruction):
+    name = "MUL_I16"
+    opcode = 37
+
+
+class DivideI16Instruction(NoOperandInstruction):
+    name = "DIV_I16"
+    opcode = 38
+
+
+class ReadI16Instruction(OperandU16Instruction):
+    name = "READ_I16"
+    opcode = 46
+
+
+class WriteI16Instruction(OperandU16Instruction):
+    name = "WRITE_I16"
+    opcode = 47
+
+
+class Allocate16Instruction(OperandU16Instruction):
+    name = "ALLOC_I16"
+    opcode = 48
+
+
+class FreeI16Instruction(OperandU16Instruction):
+    name = "FREE_I16"
+    opcode = 49
+
+
+class PushLiteralF32Instruction(OperandF32Instruction):
+    name = "PUSHL_F32"
+    opcode = 39
+
+
+class PopF32Instruction(NoOperandInstruction):
+    name = "POP_F32"
+    opcode = 40
+
+
+class TopF32Instruction(NoOperandInstruction):
+    name = "TOP_F32"
+    opcode = 41
+
+
+class AddF32Instruction(NoOperandInstruction):
+    name = "ADD_F32"
+    opcode = 42
+
+
+class SubtractF32Instruction(NoOperandInstruction):
+    name = "SUB_F32"
+    opcode = 43
+
+
+class MultiplyF32Instruction(NoOperandInstruction):
+    name = "MUL_F32"
+    opcode = 44
+
+
+class DivideF32Instruction(NoOperandInstruction):
+    name = "DIV_F32"
+    opcode = 45
+
+
+class DelayInstruction(OperandU16Instruction):
+    name = "DELAY"
+    opcode = 6
+
+
+class JumpInstruction(OperandU16Instruction):
+    name = "JUMP"
+    opcode = 7
+
+
+class CallInstruction(OperandU16Instruction):
+    name = "CALL"
+    opcode = 24
+
+
+class ReturnInstruction(NoOperandInstruction):
+    name = "RETURN"
+    opcode = 25
+
+
+class SysCallInstruction(OperandU16Instruction):
+    name = "SYSCALL"
+    opcode = 26
+
 
 INSTRUCTIONS = {
-    "HLT": 0,
-    "PSHL": 1,
-    "PSH": 2,
-    "POP": 3,
-    "POPA": 4,
-    "TOP": 5,
-    "DLY": 6,
-    "JMP": 7,
-    "PJIF": 8,
-    "CPE": 9,
-    "CPL": 10,
-    "CPG": 11,
-    "CPLE": 12,
-    "CPGE": 13,
-    "ADD": 14,
-    "SUB": 15,
-    "MUL": 16,
-    "DIV": 17,
-    "AND": 18,
-    "OR": 19,
-    "XOR": 20,
-    "NOT": 21,
-    "LSH": 22,
-    "RSH": 23,
-    "CALL": 24,
-    "RET": 25,
-    "SYSCALL": 26,
-    "ADDF": 27,
-    "PUSHL_U16": 28,
-    "POP_U16": 29,
-    "TOP_U16": 30,
+    "HALT": HaltInstruction(),
+    "PUSHL_U16": PushLiteralU16Instruction(),
+    "POP_U16": PopU16Instruction(),
+    "TOP_U16": TopU16Instruction(),
+    "ADD_U16": AddU16Instruction(),
+    "PUSHL_I16": PushLiteralI16Instruction(),
+    "POP_I16": PopI16Instruction(),
+    "TOP_I16": TopI16Instruction(),
+    "ADD_I16": AddI16Instruction(),
+    "SUB_I16": SubtractI16Instruction(),
+    "MUL_I16": MultiplyI16Instruction(),
+    "DIV_I16": DivideI16Instruction(),
+    "LOAD_I16": ReadI16Instruction(),
+    "STORE_I16": WriteI16Instruction(),
+    "ALLOC_I16": Allocate16Instruction(),
+    "FREE_I16": FreeI16Instruction(),
+    "PUSHL_F32": PushLiteralF32Instruction(),
+    "POP_F32": PopF32Instruction(),
+    "TOP_F32": TopF32Instruction(),
+    "ADD_F32": AddF32Instruction(),
+    "SUB_F32": SubtractF32Instruction(),
+    "MUL_F32": MultiplyF32Instruction(),
+    "DIV_F32": DivideF32Instruction(),
+    "DELAY": DelayInstruction(),
+    "JUMP": JumpInstruction(),
+    "CALL": CallInstruction(),
+    "RETURN": ReturnInstruction(),
+    "SYSCALL": SysCallInstruction(),
 }
 
-LONG_INSTRUCTIONS = {
-    "PSHL",
-    "PSH",
-    "POPA",
-    "DLY",
-    "JMP",
-    "PJIF",
-    "CALL",
-    "TOP",
-    "POP",
-    "SYSCALL",
-}
 
 PORTS = {
     "ddrb": "0",
@@ -100,7 +300,7 @@ def build_jumps(lines: list[str]) -> list[str]:
 
     new_lines = remove_jumps(new_lines)
     for line, content in enumerate(new_lines):
-        if "." in content:
+        if " ." in content:
             instruction, label = content.split(" ")
             new_lines[line] = f"{instruction} {addresses[label[1:]]}"
     return new_lines
@@ -151,6 +351,7 @@ def build_vars(lines: list[str]):
         if line.startswith("VAR"):
             var_name = line.split(" ")[1]
             addresses[var_name] = 2 * len(addresses)
+            # pass
 
         elif line.startswith("DATA"):
             var_name, var_type, var_value = line.split(" ")[1:]
@@ -179,6 +380,17 @@ def pprint(lines):
         print(f"{line}\t", content)
 
 
+def encode_line(line: str) -> list[int]:
+    try:
+        inst_name, operand = line.split(" ")
+    except ValueError:
+        inst_name = line
+        operand = None
+    # print(f"decoding {inst_name}")
+    instruction = INSTRUCTIONS[inst_name]
+    return instruction.encode(operand)
+
+
 def compile_rfl(filename: str, debug: bool = True) -> list[int]:
     program = []
     with open(filename, "r") as p:
@@ -187,72 +399,21 @@ def compile_rfl(filename: str, debug: bool = True) -> list[int]:
         strip(lines)
         lines = remove_blank_lines(lines)
         build_utf8_strings(lines)
-        lines, data = build_vars(lines)
+        # lines, data = build_vars(lines)
         lines = build_jumps(lines)
         map_ports(lines)
         # print(lines)
-        if debug:
-            dline = 0
         for line in lines:
-            instruction = line.split(" ")
-            if debug:
-                print(f"{dline}\t", instruction)
-                if instruction[0] in ["TOP", "POP"]:
-                    dline += 2
-                elif len(instruction) == 2:
-                    dline += 3
-                elif len(instruction) == 3:
-                    dline += 4
-                else:
-                    dline += 1
-            opcode = INSTRUCTIONS[instruction[0]]
-            program.append(opcode)
-            if len(instruction) > 1:
-                if opcode == INSTRUCTIONS["PSHL"]:
-                    data_type = int(instruction[1])
-                    program.append(data_type)
-                    value = bin(int(instruction[2]))[2:]
-                    operand = []
-                    if data_type in [1, 5]:  # 16 bit size
-                        value = value.zfill(16)
-                        operand = [
-                            value[0:8],
-                            value[8:16],
-                        ]
-
-                    elif data_type in [2, 6, 8]:  # 32 bit size
-                        value = value.zfill(32)
-                        operand = [
-                            value[0:8],
-                            value[8:16],
-                            value[16:24],
-                            value[24:32],
-                        ]
-                    else:
-                        raise Exception(f"Unknown data type: {data_type}")
-
-                    for o in operand:
-                        program.append(int(o, 2))
-
-                elif opcode in [INSTRUCTIONS["TOP"], INSTRUCTIONS["POP"]]:
-                    data_type = instruction[1]
-                    program.append(int(data_type))
-                else:
-                    operand = bin(int(instruction[1]))[2:]
-                    operand = operand.zfill(16)
-                    h_operand = operand[:8]
-                    l_operand = operand[8:]
-                    program.append(int(h_operand, 2))
-                    program.append(int(l_operand, 2))
+            program.extend(encode_line(line))
     data_address = len(program)
-    program.extend(data)
+    # program.extend(data)
     return program, len(program), data_address
 
 
-def get_instruction(code):
+def get_instruction(opcode):
     for inst in INSTRUCTIONS:
-        if code == INSTRUCTIONS[inst]:
-            return inst
+        if opcode == inst.opcode:
+            return inst.name
 
 
 def disassembly(code):

@@ -1,6 +1,6 @@
 DATA hello STRING "HELLO WORLD!\n"
 
-PSHL $hello
+PUSHL_U16 $hello
 SYSCALL 0
-HLT    
+HALT
     
