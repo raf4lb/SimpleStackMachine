@@ -16,7 +16,7 @@
     RETURN
 
 .func_i16
-    PUSHL_I16 -320
+    PUSHL_I16 320
     PUSHL_I16 -340
     ADD_I16
     TOP_I16
@@ -24,9 +24,9 @@
     RETURN
 
 .func_f32
-    PUSHL_F32 2
-    PUSHL_F32 10
-    DIV_F32
+    PUSHL_F32 2.5
+    PUSHL_F32 10.5
+    MUL_F32
     TOP_F32
     POP_F32
     RETURN

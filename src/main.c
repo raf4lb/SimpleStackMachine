@@ -65,6 +65,9 @@ InstructionPtr instructions_set[] = {
     &store_I16,
     &var_I16,
     &del_I16,
+    &subtract_U16,
+    &multiply_U16,
+    &divide_U16,
 };
 
 uint8_t program[] = PROGRAM;

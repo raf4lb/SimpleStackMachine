@@ -51,6 +51,12 @@ void stack_read_bend_data(Stack *stack, uint16_t address, void *value, uint16_t 
 
 void stack_read_lend_data(Stack *stack, void *value, uint16_t size);
 
+uint16_t stack_read_U16(Stack *stack, uint16_t address);
+
+int16_t stack_read_I16(Stack *stack, uint16_t address);
+
+float stack_read_F32(Stack *stack, uint16_t address);
+
 void stack_write_bend_data(Stack *stack, uint16_t address, void *value, uint16_t size);
 
 #endif

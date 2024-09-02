@@ -223,14 +223,37 @@ void stack_read_bend_data(Stack *stack, uint16_t address, void *value, uint16_t 
         // Copia os bytes da stack para o buffer value, invertendo a ordem dos bytes
         for (int i = 0; i < size; i++)
         {
-            ((uint8_t *)value)[i] = stack->data[address - i + 1];
+            ((uint8_t *)value)[i] = stack->data[address + (size - i - 1)];
         }
-        // memcpy(value, stack->data + stack->sp - size, size);
     }
     else
     {
         vmprintf("stack_read_data: stack underflow\n");
     }
+}
+
+uint16_t stack_read_U16(Stack *stack, uint16_t address)
+{
+    uint16_t value;
+    uint8_t size = sizeof(value);
+    stack_read_bend_data(stack, address, &value, size);
+    return value;
+}
+
+int16_t stack_read_I16(Stack *stack, uint16_t address)
+{
+    int16_t value;
+    uint8_t size = sizeof(value);
+    stack_read_bend_data(stack, address, &value, size);
+    return value;
+}
+
+float stack_read_F32(Stack *stack, uint16_t address)
+{
+    float value;
+    uint8_t size = sizeof(value);
+    stack_read_bend_data(stack, address, &value, size);
+    return value;
 }
 
 void stack_read_lend_data(Stack *stack, void *value, uint16_t size)

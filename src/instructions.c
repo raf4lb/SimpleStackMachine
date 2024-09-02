@@ -69,12 +69,42 @@ void pop_U16(CPU *cpu)
     stack_pop_bend_data(cpu->stack, &value, sizeof(value));
 }
 
+void load_U16(CPU *cpu)
+{
+    uint16_t address;
+    cpu_fetch_data(cpu, &address, sizeof(address));
+    uint16_t value;
+    stack_read_bend_data(cpu->callstack, address, &value, sizeof(value));
+    stack_push_bend_data(cpu->stack, &value, sizeof(value));
+}
+
+void store_U16(CPU *cpu)
+{
+    uint16_t address;
+    cpu_fetch_data(cpu, &address, sizeof(address));
+    uint16_t value;
+    stack_pop_bend_data(cpu->stack, &value, sizeof(value));
+    stack_write_bend_data(cpu->callstack, address, &value, sizeof(value));
+}
+
+void var_U16(CPU *cpu)
+{
+    uint16_t address;
+    cpu_fetch_data(cpu, &address, sizeof(address));
+    cpu->callstack->sp += sizeof(uint16_t);
+}
+
+void del_U16(CPU *cpu)
+{
+    uint16_t address;
+    cpu_fetch_data(cpu, &address, sizeof(address));
+    cpu->callstack->sp -= sizeof(uint16_t);
+}
+
 void top_U16(CPU *cpu)
 {
-    uint16_t value;
-    uint8_t size = sizeof(value);
-    stack_read_bend_data(cpu->stack, cpu->stack->sp - size, &value, size);
-    vmprintf("%hu\n", value);
+    uint16_t top = stack_read_U16(cpu->stack, cpu->stack->sp - sizeof(uint16_t));
+    vmprintf("%hu\n", top);
 }
 
 void add_U16(CPU *cpu)
@@ -84,6 +114,36 @@ void add_U16(CPU *cpu)
     uint16_t a;
     stack_pop_bend_data(cpu->stack, &a, sizeof(a));
     uint16_t result = a + b;
+    stack_push_bend_data(cpu->stack, &result, sizeof(result));
+}
+
+void subtract_U16(CPU *cpu)
+{
+    uint16_t b;
+    stack_pop_bend_data(cpu->stack, &b, sizeof(b));
+    uint16_t a;
+    stack_pop_bend_data(cpu->stack, &a, sizeof(a));
+    uint16_t result = a - b;
+    stack_push_bend_data(cpu->stack, &result, sizeof(result));
+}
+
+void multiply_U16(CPU *cpu)
+{
+    uint16_t b;
+    stack_pop_bend_data(cpu->stack, &b, sizeof(b));
+    uint16_t a;
+    stack_pop_bend_data(cpu->stack, &a, sizeof(a));
+    uint16_t result = a * b;
+    stack_push_bend_data(cpu->stack, &result, sizeof(result));
+}
+
+void divide_U16(CPU *cpu)
+{
+    uint16_t b;
+    stack_pop_bend_data(cpu->stack, &b, sizeof(b));
+    uint16_t a;
+    stack_pop_bend_data(cpu->stack, &a, sizeof(a));
+    uint16_t result = a / b;
     stack_push_bend_data(cpu->stack, &result, sizeof(result));
 }
 
@@ -133,10 +193,8 @@ void del_I16(CPU *cpu)
 
 void top_I16(CPU *cpu)
 {
-    int16_t value;
-    uint8_t size = sizeof(value);
-    stack_read_bend_data(cpu->stack, cpu->stack->sp - size, &value, size);
-    vmprintf("%hi\n", value);
+    int16_t top = stack_read_I16(cpu->stack, cpu->stack->sp - sizeof(int16_t));
+    vmprintf("%hi\n", top);
 }
 
 void add_I16(CPU *cpu)
@@ -194,11 +252,9 @@ void pop_F32(CPU *cpu)
 
 void top_F32(CPU *cpu)
 {
-    float top;
-    uint8_t size = sizeof(top);
-    stack_read_bend_data(cpu->stack, cpu->stack->sp - size, &top, size);
+    float top = stack_read_F32(cpu->stack, cpu->stack->sp - sizeof(float));
     char floatString[30];
-    dtostrf(top, 5, 2, floatString);
+    dtostrf(top, 10, 6, floatString);
     vmprintf("%s\n", floatString);
 }
 

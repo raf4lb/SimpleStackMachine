@@ -63,9 +63,23 @@ void push_literal_U16(CPU *cpu);
 
 void pop_U16(CPU *cpu);
 
+void load_U16(CPU *cpu);
+
+void store_U16(CPU *cpu);
+
+void var_U16(CPU *cpu);
+
+void del_U16(CPU *cpu);
+
 void top_U16(CPU *cpu);
 
 void add_U16(CPU *cpu);
+
+void subtract_U16(CPU *cpu);
+
+void multiply_U16(CPU *cpu);
+
+void divide_U16(CPU *cpu);
 
 void push_literal_I16(CPU *cpu);
 
