@@ -34,6 +34,23 @@ def string_to_uint8_list(string_int, list_size):
     return uint8_list
 
 
+def string_to_int8_list(string_int, list_size):
+    int_val = int(string_int)
+    num_bytes = list_size * 8
+    # Masking to ensure only the required number of bits are retained
+    int_val &= (1 << num_bytes) - 1
+    # Create the list of signed 8-bit integers
+    int8_list = []
+    for i in range(list_size):
+        byte_val = (int_val >> (i * 8)) & 0xFF
+        # Convert to signed 8-bit integer if necessary
+        if byte_val & 0x80:  # If the most significant bit is set
+            byte_val -= 0x100
+        int8_list.append(byte_val)
+    # int8_list.reverse()
+    return int8_list
+
+
 def string_to_float_ieee754(float_str):
     # Convert string to float
     float_val = float(float_str)
@@ -41,6 +58,7 @@ def string_to_float_ieee754(float_str):
     ieee754_bytes = struct.pack("f", float_val)
     # Convert the bytes to a hexadecimal string
     ieee754_int = [int(byte) for byte in ieee754_bytes]
+    # ieee754_int.reverse()
     return ieee754_int
 
 
@@ -66,6 +84,17 @@ class OperandU16Instruction(Instruction):
     def encode(self, operand):
         encoded = [self.opcode]
         encoded.extend(string_to_uint8_list(operand, 2))
+        return encoded
+
+
+class OperandI16Instruction(Instruction):
+    name = "OperandI16Instruction"
+    opcode = -1
+    size = 3
+
+    def encode(self, operand):
+        encoded = [self.opcode]
+        encoded.extend(string_to_int8_list(operand, 2))
         return encoded
 
 
@@ -100,7 +129,7 @@ class AddU16Instruction(NoOperandInstruction):
     opcode = 31
 
 
-class PushLiteralI16Instruction(OperandU16Instruction):
+class PushLiteralI16Instruction(OperandI16Instruction):
     name = "PUSHL_I16"
     opcode = 32
 
@@ -135,12 +164,12 @@ class DivideI16Instruction(NoOperandInstruction):
     opcode = 38
 
 
-class ReadI16Instruction(OperandU16Instruction):
+class ReadI16Instruction(OperandI16Instruction):
     name = "READ_I16"
     opcode = 46
 
 
-class WriteI16Instruction(OperandU16Instruction):
+class WriteI16Instruction(OperandI16Instruction):
     name = "WRITE_I16"
     opcode = 47
 
@@ -150,7 +179,7 @@ class Allocate16Instruction(OperandU16Instruction):
     opcode = 48
 
 
-class FreeI16Instruction(OperandU16Instruction):
+class FreeI16Instruction(OperandI16Instruction):
     name = "FREE_I16"
     opcode = 49
 

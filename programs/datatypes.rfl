@@ -16,8 +16,8 @@
     RETURN
 
 .func_i16
-    PUSHL_I16 320
-    PUSHL_I16 -340
+    PUSHL_I16 -1320
+    PUSHL_I16 340
     ADD_I16
     TOP_I16
     POP_I16
