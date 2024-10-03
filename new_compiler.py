@@ -428,14 +428,14 @@ def compile_rfl(filename: str, debug: bool = True) -> list[int]:
         strip(lines)
         lines = remove_blank_lines(lines)
         build_utf8_strings(lines)
-        # lines, data = build_vars(lines)
+        lines, data = build_vars(lines)
         lines = build_jumps(lines)
         map_ports(lines)
         # print(lines)
         for line in lines:
             program.extend(encode_line(line))
     data_address = len(program)
-    # program.extend(data)
+    program.extend(data)
     return program, len(program), data_address
 
 
