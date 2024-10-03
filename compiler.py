@@ -28,6 +28,10 @@ INSTRUCTIONS = {
     "CALL": 24,
     "RET": 25,
     "SYSCALL": 26,
+    "ADDF": 27,
+    "PUSHL_U16": 28,
+    "POP_U16": 29,
+    "TOP_U16": 30,
 }
 
 LONG_INSTRUCTIONS = {
@@ -38,6 +42,8 @@ LONG_INSTRUCTIONS = {
     "JMP",
     "PJIF",
     "CALL",
+    "TOP",
+    "POP",
     "SYSCALL",
 }
 
@@ -78,7 +84,16 @@ def build_jumps(lines: list[str]) -> list[str]:
             addresses[content[1:]] = address - len(addresses)
         else:
             new_lines.append(content)
-        if len(content.split(" ")) == 2:
+        content_splitted = content.split(" ")
+        if content_splitted[0] in ["TOP", "POP"]:
+            address += 2
+        elif content_splitted[0] == "PSHL":
+            dtype = int(content_splitted[1])
+            if dtype in [1, 5]:  # 2 bytes
+                address += 4
+            elif dtype in [2, 6, 8]:  # 4 bytes
+                address += 6
+        elif len(content_splitted) == 2:
             address += 3
         else:
             address += 1
@@ -164,7 +179,7 @@ def pprint(lines):
         print(f"{line}\t", content)
 
 
-def compile_rfl(filename: str, debug=False) -> list[int]:
+def compile_rfl(filename: str, debug: bool = True) -> list[int]:
     program = []
     with open(filename, "r") as p:
         lines = p.readlines()
@@ -182,19 +197,53 @@ def compile_rfl(filename: str, debug=False) -> list[int]:
             instruction = line.split(" ")
             if debug:
                 print(f"{dline}\t", instruction)
-                if len(instruction) == 2:
+                if instruction[0] in ["TOP", "POP"]:
+                    dline += 2
+                elif len(instruction) == 2:
                     dline += 3
+                elif len(instruction) == 3:
+                    dline += 4
                 else:
                     dline += 1
-            opcode = bin(INSTRUCTIONS[instruction[0]])[2:]
-            program.append(int(opcode, 2))
-            operand = bin(int(instruction[1]))[2:] if len(instruction) == 2 else None
-            if operand:
-                operand = operand.zfill(16)
-                h_operand = operand[:8]
-                l_operand = operand[8:]
-                program.append(int(h_operand, 2))
-                program.append(int(l_operand, 2))
+            opcode = INSTRUCTIONS[instruction[0]]
+            program.append(opcode)
+            if len(instruction) > 1:
+                if opcode == INSTRUCTIONS["PSHL"]:
+                    data_type = int(instruction[1])
+                    program.append(data_type)
+                    value = bin(int(instruction[2]))[2:]
+                    operand = []
+                    if data_type in [1, 5]:  # 16 bit size
+                        value = value.zfill(16)
+                        operand = [
+                            value[0:8],
+                            value[8:16],
+                        ]
+
+                    elif data_type in [2, 6, 8]:  # 32 bit size
+                        value = value.zfill(32)
+                        operand = [
+                            value[0:8],
+                            value[8:16],
+                            value[16:24],
+                            value[24:32],
+                        ]
+                    else:
+                        raise Exception(f"Unknown data type: {data_type}")
+
+                    for o in operand:
+                        program.append(int(o, 2))
+
+                elif opcode in [INSTRUCTIONS["TOP"], INSTRUCTIONS["POP"]]:
+                    data_type = instruction[1]
+                    program.append(int(data_type))
+                else:
+                    operand = bin(int(instruction[1]))[2:]
+                    operand = operand.zfill(16)
+                    h_operand = operand[:8]
+                    l_operand = operand[8:]
+                    program.append(int(h_operand, 2))
+                    program.append(int(l_operand, 2))
     data_address = len(program)
     program.extend(data)
     return program, len(program), data_address
@@ -212,12 +261,31 @@ def disassembly(code):
     while i < len(code):
         inst = get_instruction(code[i])
         try:
-            if inst in LONG_INSTRUCTIONS:
+            if inst == "PSHL":
+                dtype = code[i + 1]
+                if dtype in [1, 5]:  # 2 bytes
+                    value = code[i + 2] << 8 | code[i + 3]
+                    disassembled.append(f"{i}\t {inst} {dtype} {value}")
+                    i += 4
+                elif dtype in [2, 6, 8]:  # 4 bytes
+                    value = (
+                        code[i + 2] << 24
+                        | code[i + 3] << 16
+                        | code[i + 4] << 8
+                        | code[i + 5]
+                    )
+                    disassembled.append(f"{i}\t {inst} {dtype} {value}")
+                    i += 6
+            elif inst in ["TOP", "POP"]:
+                dtype = code[i + 1]
+                disassembled.append(f"{i}\t {inst} {dtype}")
+                i += 2
+            elif inst in LONG_INSTRUCTIONS:
                 param = code[i + 1] << 8 | code[i + 2]
+                disassembled.append(f"{i}\t {inst} {param}")
                 i += 3
-                disassembled.append(f"{inst} {param}")
             else:
-                disassembled.append(inst)
+                disassembled.append(f"{i}\t {inst}")
                 i += 1
         except:
             print(f"Error in line {i}: {code[i]}({inst})")
@@ -227,6 +295,7 @@ def disassembly(code):
 
 if __name__ == "__main__":
     program, program_size, data_address = compile_rfl(sys.argv[1], False)
-    # print(disassembly(program))
+    # for line in disassembly(program):
+    #     print(line)
     output = "{" + ",".join([str(inst) for inst in program]) + "}"
     print(output, program_size, data_address)

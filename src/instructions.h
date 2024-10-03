@@ -57,4 +57,64 @@ void ret(CPU *cpu);
 
 void syscall(CPU *cpu);
 
+void addf(CPU *cpu);
+
+void push_literal_U16(CPU *cpu);
+
+void pop_U16(CPU *cpu);
+
+void load_U16(CPU *cpu);
+
+void store_U16(CPU *cpu);
+
+void var_U16(CPU *cpu);
+
+void del_U16(CPU *cpu);
+
+void top_U16(CPU *cpu);
+
+void add_U16(CPU *cpu);
+
+void subtract_U16(CPU *cpu);
+
+void multiply_U16(CPU *cpu);
+
+void divide_U16(CPU *cpu);
+
+void push_literal_I16(CPU *cpu);
+
+void pop_I16(CPU *cpu);
+
+void load_I16(CPU *cpu);
+
+void store_I16(CPU *cpu);
+
+void var_I16(CPU *cpu);
+
+void del_I16(CPU *cpu);
+
+void top_I16(CPU *cpu);
+
+void add_I16(CPU *cpu);
+
+void subtract_I16(CPU *cpu);
+
+void multiply_I16(CPU *cpu);
+
+void divide_I16(CPU *cpu);
+
+void push_literal_F32(CPU *cpu);
+
+void pop_F32(CPU *cpu);
+
+void top_F32(CPU *cpu);
+
+void add_F32(CPU *cpu);
+
+void subtract_F32(CPU *cpu);
+
+void multiply_F32(CPU *cpu);
+
+void divide_F32(CPU *cpu);
+
 #endif

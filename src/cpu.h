@@ -4,6 +4,7 @@
 #include "stack.h"
 #include "io.h"
 #include <stdint.h>
+#include <string.h>
 
 typedef struct CPU CPU;
 
@@ -31,6 +32,8 @@ uint8_t cpu_fetch_8b(CPU *cpu);
 
 uint16_t cpu_fetch_16b(CPU *cpu);
 
+void cpu_fetch_data(CPU *cpu, void *value, uint16_t size);
+
 void cpu_execute(CPU *cpu, uint8_t opcode);
 
 void cpu_load_program(CPU *cpu, uint8_t *program, uint16_t program_size, uint16_t data_address);
@@ -38,5 +41,7 @@ void cpu_load_program(CPU *cpu, uint8_t *program, uint16_t program_size, uint16_
 void cpu_run(CPU *cpu);
 
 void cpu_print_user_memory(CPU *cpu);
+
+void cpu_print(CPU *cpu);
 
 #endif

@@ -41,17 +41,37 @@ uint8_t cpu_fetch_8b(CPU *cpu)
         return cpu->program[cpu->ip++];
     }
     vmprintf("cpu_fetch_8b: out of program memory\n");
+    cpu_print(cpu);
     exit(EXIT_FAILURE);
 }
 
 uint16_t cpu_fetch_16b(CPU *cpu)
 {
-    return cpu_fetch_8b(cpu) << 8 | cpu_fetch_8b(cpu);
+    uint16_t data = cpu_fetch_8b(cpu);
+    return data << 8 | cpu_fetch_8b(cpu);
+}
+
+void cpu_fetch_data(CPU *cpu, void *value, uint16_t size)
+{
+    if (0 <= cpu->ip && cpu->ip < cpu->program_size)
+    {
+        memcpy(value, cpu->program + cpu->ip, size);
+        cpu->ip += size;
+    }
+    else
+    {
+        vmprintf("cpu_fetch_data: out of program memory\n");
+    }
 }
 
 void cpu_execute(CPU *cpu, uint8_t opcode)
 {
+    // vmprintf("\n");
     cpu->instructions[opcode](cpu);
+    // vmprintf("inst %d\n", opcode);
+    // stack_print(cpu->stack);
+    // stack_print(cpu->callstack);
+    // cpu_print(cpu);
 }
 
 void cpu_load_program(CPU *cpu, uint8_t *program, uint16_t program_size, uint16_t data_address)
@@ -84,4 +104,13 @@ void cpu_print_user_memory(CPU *cpu)
         vmprintf("%u", cpu->memory->data[i]);
     }
     vmprintf("]\n");
+}
+
+void cpu_print(CPU *cpu)
+{
+    vmprintf("Instruction Pointer: %d\n", cpu->ip);
+    vmprintf("Stack:\n");
+    stack_print(cpu->stack);
+    vmprintf("CallStack:\n");
+    stack_print(cpu->callstack);
 }
