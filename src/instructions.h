@@ -63,6 +63,10 @@ void push_literal_U16(CPU *cpu);
 
 void pop_U16(CPU *cpu);
 
+void push_U16(CPU *cpu);
+
+void pop_address_U16(CPU *cpu);
+
 void load_U16(CPU *cpu);
 
 void store_U16(CPU *cpu);

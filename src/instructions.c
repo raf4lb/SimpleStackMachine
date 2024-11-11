@@ -69,6 +69,40 @@ void pop_U16(CPU *cpu)
     stack_pop_bend_data(cpu->stack, &value, sizeof(value));
 }
 
+void push_U16(CPU *cpu)
+{
+    uint16_t address;
+    cpu_fetch_data(cpu, &address, sizeof(address));
+    uint16_t value;
+    if (address < cpu->port_bank->size)
+    {
+        value = port_bank_get_address(cpu->port_bank, address);
+    }
+    else
+    {
+        address = address + cpu->user_memory - cpu->port_bank->size;
+        value = memory_get_address_16b(cpu->memory, address);
+    }
+    stack_push_bend_data(cpu->stack, &value, sizeof(value));
+}
+
+void pop_address_U16(CPU *cpu)
+{
+    uint16_t address;
+    cpu_fetch_data(cpu, &address, sizeof(address));
+    uint16_t value;
+    stack_pop_bend_data(cpu->stack, &value, sizeof(value));
+    if (address < cpu->port_bank->size)
+    {
+        port_bank_set_address(cpu->port_bank, address, (uint8_t)value);
+    }
+    else
+    {
+        address = cpu->user_memory + address - cpu->port_bank->size;
+        memory_set_address_16b(cpu->memory, address, value);
+    }
+}
+
 void load_U16(CPU *cpu)
 {
     uint16_t address;

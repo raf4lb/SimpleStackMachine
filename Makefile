@@ -22,7 +22,7 @@ PARAMS = $(SOURCE_DIR)/memory.c \
 
 compile:
 	mkdir -p $(BUILD_DIR)
-	$(eval PYTHON_SCRIPT := new_compiler.py)
+	$(eval PYTHON_SCRIPT := compiler.py)
 	@echo "Compiling rfl file..."
 	$(eval OUTPUT := $(shell python3 $(PYTHON_SCRIPT) $(PROGRAM_FILE)))
 	@echo "OK"

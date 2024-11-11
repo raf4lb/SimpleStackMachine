@@ -69,6 +69,8 @@ InstructionPtr instructions_set[] = {
     &subtract_U16,
     &multiply_U16,
     &divide_U16,
+    &pop_address_U16,
+    &push_U16,
 };
 
 uint8_t program[] = PROGRAM;
