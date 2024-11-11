@@ -1,6 +1,7 @@
 #include <string.h>
 #include "instructions.h"
 #include "sys.h"
+#include "delay.h"
 
 #ifndef PROGRAM
 #define PROGRAM "{}"
@@ -80,13 +81,14 @@ uint8_t port_banks = 3;
 
 int main(void)
 {
-
-    CPU *cpu = cpu_create(memory_size, stack_size, callstack_size, instructions_set, port_banks);
-
-    cpu_load_program(cpu, program, program_size, data_address);
 #ifdef ARDUINO
-    serial_setup();
+    timer0_setup();
+#ifdef SERIAL_ENABLED
+    serial_setup(9600);
 #endif
+#endif
+    CPU *cpu = cpu_create(memory_size, stack_size, callstack_size, instructions_set, port_banks);
+    cpu_load_program(cpu, program, program_size, data_address);
     vmprintf("Memory consumption: %d bytes\n", get_memory_usage());
     vmprintf(" - VM consumption: %d bytes\n", get_memory_usage() - memory_size);
     vmprintf(" - User memory: %d bytes\n", memory_size);
@@ -95,25 +97,3 @@ int main(void)
     cpu_free(cpu);
     return 0;
 }
-
-// int main(void)
-// {
-//     int size = 5;
-//     uint8_t receivedData[size]; // Array to store received data
-//     int i;
-
-//     serial_setup();
-
-//     while (1)
-//     {
-//         i = 0;
-//         for (i = 0; i < size; i++)
-//         {
-//             receivedData[i] = USART_receive();
-//         }
-//         for (i = 0; i < size; i++)
-//         {
-//             vmprintf("%c\n", receivedData[i]);
-//         }
-//     }
-// }

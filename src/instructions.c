@@ -381,7 +381,7 @@ void top(CPU *cpu)
 void delay(CPU *cpu)
 {
     uint16_t milliseconds;
-    cpu_fetch_data(cpu, &milliseconds, 2);
+    cpu_fetch_data(cpu, &milliseconds, sizeof(milliseconds));
     delay_ms(milliseconds);
 }
 
@@ -546,11 +546,15 @@ void ret(CPU *cpu)
 
 void syscall(CPU *cpu)
 {
-    uint8_t func = cpu_fetch_16b(cpu);
-    switch (func)
+    uint16_t func_id;
+    cpu_fetch_data(cpu, &func_id, sizeof(func_id));
+    switch (func_id)
     {
-    case 0:
-        print(cpu);
+    case BUILTIN_PRINT:
+        builtin_print(cpu);
+        break;
+    case BUILTIN_TOGGLE_LED:
+        builtin_toggle_led(cpu, 500);
         break;
 
     default:
