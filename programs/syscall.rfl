@@ -11,9 +11,11 @@ CONST message_off STRING "OLÁ MUNDO!\n"
 .on
     PUSHL_U16 $message_on
     SYSCALL 0
+    POP_U16
     RETURN
 
 .off
     PUSHL_U16 $message_off
     SYSCALL 0
+    POP_U16
     RETURN
