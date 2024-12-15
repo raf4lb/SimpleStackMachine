@@ -1,17 +1,11 @@
 #include "builtin.h"
 #include "delay.h"
 #include <stdint.h>
-
-#ifdef ARDUINO
-
-#include "avr/io.h"
-#define LED_PIN PB5 // Define LED pin (Arduino digital pin 13 on ATmega328P)
-
-#endif
+#include "stack.h"
 
 void builtin_print(CPU *cpu)
 {
-    uint16_t buffer_address = stack_pop_16b(cpu->stack); // pop 2 bytes
+    uint16_t buffer_address = stack_read_U16(cpu->stack, cpu->stack->sp - sizeof(uint16_t)); // pop 2 bytes
     // vmprintf("address %d = %d\n", buffer_address, cpu->memory->data[cpu->data_memory + buffer_address]);
     const char *buffer = (const char *)&cpu->program[cpu->data_memory + buffer_address - cpu->port_bank->size];
 
@@ -31,9 +25,14 @@ void builtin_print(CPU *cpu)
 
 void builtin_toggle_led(CPU *cpu, uint16_t milliseconds)
 {
-    // Set LED pin as output
+#ifdef ARDUINO
+
+#include "avr/io.h"
+#define LED_PIN PB5 // Define LED pin (Arduino digital pin 13 on ATmega328P)
+                    // Set LED pin as output
     DDRB |= (1 << LED_PIN);
     // Toggle LED
     PORTB ^= (1 << LED_PIN);
     delay_ms(milliseconds);
+#endif
 }
