@@ -347,12 +347,8 @@ def build_jumps(lines: list[str]) -> list[str]:
     return new_lines
 
 
-def remove_vars(lines: list[str]) -> list[str]:
-    return [
-        line
-        for line in lines
-        if not line.startswith("VAR") and not line.startswith("DATA")
-    ]
+def remove_static_data_lines(lines: list[str]) -> list[str]:
+    return [line for line in lines if not line.startswith("CONST")]
 
 
 def to_utf8(string):
@@ -381,26 +377,26 @@ def build_utf8_strings(lines: list[str]):
             lines[i] = content.replace(f'"{string}"', ascii_list)
 
 
-def build_vars(lines: list[str]):
+def build_const_data(lines: list[str]):
     addresses = PORTS.copy()
     data = []
 
     def allocate_str(value):
         data.extend(int(c) for c in value.split(","))  # store ascii value
 
-    for line in lines:
-        if line.startswith("VAR"):
-            var_name = line.split(" ")[1]
-            addresses[var_name] = 2 * len(addresses)
-            # pass
+    def allocate_U16(value):
+        data.extend(string_to_uint8_list(value, 2))
 
-        elif line.startswith("DATA"):
+    for line in lines:
+        if line.startswith("CONST"):
             var_name, var_type, var_value = line.split(" ")[1:]
-            addresses[var_name] = len(data)  # free index
+            addresses[var_name] = len(data) + len(PORTS)  # free index
             if var_type == "STRING":
                 allocate_str(var_value)
+            elif var_type == "U16":
+                allocate_U16(var_value)
 
-    new_lines = remove_vars(lines)
+    new_lines = remove_static_data_lines(lines)
     for line, content in enumerate(new_lines):
         if "$" in content:
             instruction, var_name = content.split(" ")
@@ -440,10 +436,9 @@ def compile_rfl(filename: str, debug: bool = True) -> list[int]:
         strip(lines)
         lines = remove_blank_lines(lines)
         build_utf8_strings(lines)
-        lines, data = build_vars(lines)
+        lines, data = build_const_data(lines)
         lines = build_jumps(lines)
         map_ports(lines)
-        # print(lines)
         for line in lines:
             program.extend(encode_line(line))
     data_address = len(program)

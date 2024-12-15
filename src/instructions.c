@@ -71,6 +71,7 @@ void pop_U16(CPU *cpu)
 
 void push_U16(CPU *cpu)
 {
+    // TODO: optimize reading. We do not need to copy date to value variable, we can push it directly from the address.
     uint16_t address;
     cpu_fetch_data(cpu, &address, sizeof(address));
     uint16_t value;
@@ -80,8 +81,7 @@ void push_U16(CPU *cpu)
     }
     else
     {
-        address = address + cpu->user_memory - cpu->port_bank->size;
-        value = memory_get_address_16b(cpu->memory, address);
+        value = (uint16_t)cpu->program[cpu->data_memory + address - cpu->port_bank->size];
     }
     stack_push_bend_data(cpu->stack, &value, sizeof(value));
 }
