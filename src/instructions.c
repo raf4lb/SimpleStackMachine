@@ -81,7 +81,7 @@ void push_U16(CPU *cpu)
     }
     else
     {
-        value = (uint16_t)cpu->program[cpu->data_memory + address - cpu->port_bank->size];
+        value = (uint16_t)cpu->program[cpu->data_address + address - cpu->port_bank->size];
     }
     stack_push_bend_data(cpu->stack, &value, sizeof(value));
 }
@@ -428,10 +428,12 @@ void jump(CPU *cpu)
 
 void pop_jump_if_false(CPU *cpu)
 {
-    uint16_t address = cpu_fetch_16b(cpu);
+    uint16_t address;
+    cpu_fetch_data(cpu, &address, sizeof(uint16_t));
     // TODO: Pop value according the size of type stored
     // Here result is a bool so it should be okay
-    uint16_t result = stack_pop_16b(cpu->stack);
+    bool result;
+    stack_pop_bend_data(cpu->stack, &result, sizeof(bool));
     if (!result)
         cpu->ip = address;
 }
@@ -439,9 +441,12 @@ void pop_jump_if_false(CPU *cpu)
 void compare_equal(CPU *cpu)
 {
     // TODO: Pop value according the size of type stored (int, float, etc)
-    uint16_t b = stack_pop_16b(cpu->stack);
-    uint16_t a = stack_pop_16b(cpu->stack);
-    stack_push_16b(cpu->stack, a == b);
+    uint16_t b;
+    stack_pop_bend_data(cpu->stack, &b, sizeof(b));
+    uint16_t a;
+    stack_pop_bend_data(cpu->stack, &a, sizeof(a));
+    bool result = a == b;
+    stack_push_bend_data(cpu->stack, &result, sizeof(bool));
 }
 
 void compare_less(CPU *cpu)
@@ -455,9 +460,12 @@ void compare_less(CPU *cpu)
 void compare_greater(CPU *cpu)
 {
     // TODO: Pop value according the size of type stored (int, float, etc)
-    uint16_t b = stack_pop_16b(cpu->stack);
-    uint16_t a = stack_pop_16b(cpu->stack);
-    stack_push_16b(cpu->stack, a > b);
+    uint16_t b;
+    stack_pop_bend_data(cpu->stack, &b, sizeof(b));
+    uint16_t a;
+    stack_pop_bend_data(cpu->stack, &a, sizeof(a));
+    bool result = a > b;
+    stack_push_bend_data(cpu->stack, &result, sizeof(bool));
 }
 
 void compare_less_equal(CPU *cpu)
@@ -560,9 +568,6 @@ void bitwise_right_shift(CPU *cpu)
 
 void call(CPU *cpu)
 {
-    // TODO: Push 16bit size (address size)
-    // uint16_t address = cpu_fetch_16b(cpu);
-    // stack_push_16b(cpu->callstack, cpu->ip);
     uint16_t address;
     cpu_fetch_data(cpu, &address, sizeof(uint16_t));
     stack_push_bend_data(cpu->callstack, &cpu->ip, sizeof(uint16_t));
@@ -571,8 +576,21 @@ void call(CPU *cpu)
 
 void ret(CPU *cpu)
 {
-    // TODO: Pop 16bit size (address size)
-    // uint16_t address = stack_pop_16b(cpu->callstack);
+    uint16_t address;
+    stack_pop_bend_data(cpu->callstack, &address, sizeof(uint16_t));
+    cpu->ip = address;
+}
+
+void async_call(CPU *cpu)
+{
+    uint16_t address;
+    cpu_fetch_data(cpu, &address, sizeof(uint16_t));
+    Task *task = cpu_create_task(cpu, address);
+    cpu_set_current_task(cpu, task);
+}
+
+void async_ret(CPU *cpu)
+{
     uint16_t address;
     stack_pop_bend_data(cpu->callstack, &address, sizeof(uint16_t));
     cpu->ip = address;
@@ -580,20 +598,13 @@ void ret(CPU *cpu)
 
 void syscall(CPU *cpu)
 {
-    uint16_t func_id;
-    cpu_fetch_data(cpu, &func_id, sizeof(func_id));
-    switch (func_id)
-    {
-    case BUILTIN_PRINT:
-        builtin_print(cpu);
-        break;
-    case BUILTIN_TOGGLE_LED:
-        builtin_toggle_led(cpu, 500);
-        break;
+    builtin_syscall(cpu);
+}
 
-    default:
-        break;
-    }
+void push_millis(CPU *cpu)
+{
+    uint16_t time = millis();
+    stack_push_bend_data(cpu->stack, &time, sizeof(time));
 }
 
 void addf(CPU *cpu)

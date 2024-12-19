@@ -2,35 +2,56 @@
 #include "stack.h"
 #include "io.h"
 #include "sys.h"
+#include "task.h"
+#include "delay.h"
+#include "tasktree.h"
 
-CPU *cpu_create(uint16_t memory_size, uint16_t stack_size, uint16_t callstack_size, InstructionPtr *instructions, uint8_t port_bank)
+uint16_t MAX_TASKS = 1;
+uint16_t TASK_STACK_SIZE = 32;
+uint16_t TASK_CALLSTACK_SIZE = 32;
+uint16_t CONTEXT_MAX_CYCLES = 10;
+
+void cpu_init(uint16_t memory_size, uint16_t stack_size, uint16_t callstack_size, InstructionPtr *instructions, uint8_t port_bank)
 {
-    CPU *cpu = (CPU *)vmmalloc(sizeof(CPU));
-    if (cpu == NULL)
-    {
-        vmprintf("Memory allocation to CPU failed");
-        exit(1);
-    }
     if (memory_size > 0)
     {
-        cpu->memory = memory_create(memory_size);
+        cpu.memory = memory_create(memory_size);
     }
-    cpu->stack = stack_create(stack_size);
-    cpu->callstack = stack_create(callstack_size);
-    cpu->port_bank = port_bank_create(port_bank);
-    cpu->instructions = instructions;
-    cpu->ip = 0;
-    cpu->user_memory = 0;
-    cpu->data_memory = 0;
-    return cpu;
+    cpu.port_bank = port_bank_create(port_bank);
+    cpu.instructions = instructions;
+    cpu.ip = 0;
+    cpu.user_memory = 0;
+    cpu.data_address = 0;
+}
+
+Task *cpu_create_task(CPU *cpu, uint16_t address)
+{
+    uint8_t id = cpu_get_next_task_id(cpu);
+    Task *task = task_create(id, address, TASK_STACK_SIZE, TASK_CALLSTACK_SIZE);
+    return task;
+}
+
+void cpu_load_program(CPU *cpu, uint8_t *program, uint16_t program_size, uint16_t data_address)
+{
+    cpu->program = program;
+    cpu->program_size = program_size;
+    cpu->data_address = data_address;
+    Task *main_task = task_create(0, 0, 32, 32);
+    TaskTreeNode *root = task_tree_create_node(main_task);
+    cpu->task_tree = root;
+    Task *task = task_create(0, 0, 32, 32);
+    task_tree_add_child(root, task);
+    cpu_set_current_task(cpu, main_task);
 }
 
 void cpu_free(CPU *cpu)
 {
     stack_free(cpu->stack);
+    stack_free(cpu->callstack);
     memory_free(cpu->memory);
     port_bank_free(cpu->port_bank);
-    vmfree(cpu);
+    task_tree_free(cpu->task_tree);
+    free(cpu);
 }
 
 uint8_t cpu_fetch_8b(CPU *cpu)
@@ -74,21 +95,52 @@ void cpu_execute(CPU *cpu, uint8_t opcode)
     // cpu_print(cpu);
 }
 
-void cpu_load_program(CPU *cpu, uint8_t *program, uint16_t program_size, uint16_t data_address)
+uint8_t cpu_get_next_task_id(CPU *cpu)
 {
-    cpu->program = program;
-    cpu->program_size = program_size;
-    cpu->ip = 0;
-    cpu->user_memory = 0;
-    cpu->data_memory = data_address;
+    uint8_t next_task_id;
+    next_task_id = cpu->current_task->id + 1;
+    if (next_task_id == MAX_TASKS)
+    {
+        next_task_id = 0;
+    }
+    // vmprintf("next task %d\n", next_task_id);
+    return next_task_id;
+}
+
+void cpu_set_current_task(CPU *cpu, Task *task)
+{
+    task->active = true;
+    cpu->ip = task->ip;
+    cpu->stack = task->stack;
+    cpu->callstack = task->callstack;
+    cpu->current_task = task;
+}
+
+void cpu_context_switch(CPU *cpu, Task *task)
+{
+    cpu->current_task->active = false;
+    cpu->current_task->ip = cpu->ip;
+    cpu_set_current_task(cpu, task);
+}
+
+void cpu_run_cycle(TaskTreeNode *node)
+{
+    cpu_context_switch(&cpu, node->task);
+    uint8_t cycles = CONTEXT_MAX_CYCLES;
+    while (cycles > 0)
+    {
+        uint8_t opcode = cpu_fetch_8b(&cpu);
+        cpu_execute(&cpu, opcode);
+        cycles--;
+    }
 }
 
 void cpu_run(CPU *cpu)
 {
-    while (1)
+
+    while (true)
     {
-        uint8_t opcode = cpu_fetch_8b(cpu);
-        cpu_execute(cpu, opcode);
+        task_tree_traverse_dfs(cpu->task_tree, cpu_run_cycle);
     }
 }
 

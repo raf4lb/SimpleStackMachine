@@ -1,58 +1,58 @@
-VAR a
-PSHL 0
-POPA $a
-VAR b
-PSHL 1
-POPA $b
-VAR c
-VAR i
+ALLOC_U16 a ; a
+PUSHL_U16 0
+POPA_U16 $a
+ALLOC_U16 1 ; b
+PUSHL_U16 1
+POPA_U16 $b
+ALLOC_U16 2 ; c
+ALLOC_U16 3 ; i
 
-VAR n
-PSHL 30  ; n here
-POPA $n
+ALLOC_U16 4 ; n
+PUSHL_U16 30  ; n here
+POPA_U16 $n
 
-PSH $n
-PSHL 1
+PUSH_U16 $n
+PUSHL_U16 1
 CPGE
 PJIF .false_1
-PSH $a
-TOP
+PUSH_U16 $a
+TOP_U16
 .false_1
-PSH $n
-PSHL 2
+PUSH_U16 $n
+PUSHL_U16 2
 CPGE
 PJIF .false_2
-PSH $b
-TOP
+PUSH_U16 $b
+TOP_U16
 .false_2
-PSHL 3
-POPA $i
-VAR inc
-PSHL 1
-POPA $inc
+PUSHL_U16 3
+POPA_U16 $i
+ALLOC_U16 5 ; inc
+PUSHL_U16 1
+POPA_U16 $inc
 .for
     CALL .for_content
-    PSH $i
-    PSH $inc
-    ADD
-    POPA $i
-    PSH $i
-    PSH $n
+    PUSH_U16 $i
+    PUSH_U16 $inc
+    ADD_U16
+    POPA_U16 $i
+    PUSH_U16 $i
+    PUSH_U16 $n
     CPG
     PJIF .for
-    HLT
+    HALT
 
 .for_content
-    PSH $a
-    PSH $b
-    ADD
-    TOP
-    POPA $c
-    PSH $b
-    POPA $a
-    PSH $c
-    POPA $b
-    RET
+    PUSH_U16 $a
+    PUSH_U16 $b
+    ADD_U16
+    TOP_U16
+    POPA_U16 $c
+    PUSH_U16 $b
+    POPA_U16 $a
+    PUSH_U16 $c
+    POPA_U16 $b
+    RETURN
 
 
 

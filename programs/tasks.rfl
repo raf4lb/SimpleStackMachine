@@ -1,0 +1,16 @@
+CONST started STRING "task 1 started\n"
+CONST finished STRING "task 1 finished\n"
+
+.main
+    PUSHL_U16 $started
+    SYSCALL 0
+.loop
+    PUSH_MILLIS
+    PUSHL_U16 3000
+    COMPARE_GT
+    POP_JUMP_IF_FALSE .loop
+    PUSHL_U16 $finished
+    SYSCALL 0
+
+.exit
+    JUMP .exit

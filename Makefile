@@ -15,6 +15,8 @@ PARAMS = $(SOURCE_DIR)/memory.c \
 		$(SOURCE_DIR)/builtin.c \
 		$(SOURCE_DIR)/sys.c \
 		$(SOURCE_DIR)/datatypes.c \
+		$(SOURCE_DIR)/task.c \
+		$(SOURCE_DIR)/tasktree.c \
 		$(SOURCE_DIR)/main.c \
 		-DPROGRAM_SIZE=$(PROGRAM_SIZE) \
 		-DPROGRAM="$(PROGRAM)" \

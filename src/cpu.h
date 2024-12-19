@@ -5,6 +5,8 @@
 #include "io.h"
 #include <stdint.h>
 #include <string.h>
+#include "task.h"
+#include "tasktree.h"
 
 typedef struct CPU CPU;
 
@@ -13,6 +15,8 @@ typedef void (*InstructionPtr)(CPU *cpu);
 struct CPU
 {
     Memory *memory;
+    Task *current_task;
+    TaskTreeNode *task_tree;
     uint8_t *program;
     uint16_t program_size;
     Stack *stack;
@@ -21,10 +25,10 @@ struct CPU
     InstructionPtr *instructions;
     PortBank *port_bank;
     uint16_t user_memory;
-    uint16_t data_memory;
+    uint16_t data_address;
 };
 
-CPU *cpu_create(uint16_t memory_size, uint16_t stack_size, uint16_t callstack_size, InstructionPtr *instruction_set, uint8_t port_banks);
+void cpu_init(uint16_t memory_size, uint16_t stack_size, uint16_t callstack_size, InstructionPtr *instruction_set, uint8_t port_banks);
 
 void cpu_free(CPU *cpu);
 
@@ -43,5 +47,16 @@ void cpu_run(CPU *cpu);
 void cpu_print_user_memory(CPU *cpu);
 
 void cpu_print(CPU *cpu);
+
+volatile uint16_t context_switch_counter;
+
+CPU cpu;
+
+uint8_t cpu_get_next_task_id(CPU *cpu);
+
+void cpu_context_switch(CPU *cpu, Task *task);
+void cpu_set_current_task(CPU *cpu, Task *task);
+
+Task *cpu_create_task(CPU *cpu, uint16_t address);
 
 #endif

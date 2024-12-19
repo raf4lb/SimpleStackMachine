@@ -5,9 +5,10 @@
 
 void builtin_print(CPU *cpu)
 {
-    uint16_t buffer_address = stack_read_U16(cpu->stack, cpu->stack->sp - sizeof(uint16_t)); // pop 2 bytes
+    uint16_t buffer_address;
+    stack_pop_bend_data(cpu->stack, &buffer_address, sizeof(uint16_t)); // pop 2 bytes
     // vmprintf("address %d = %d\n", buffer_address, cpu->memory->data[cpu->data_memory + buffer_address]);
-    const char *buffer = (const char *)&cpu->program[cpu->data_memory + buffer_address - cpu->port_bank->size];
+    char *buffer = (char *)&cpu->program[cpu->data_address + buffer_address - cpu->port_bank->size];
 
     // stack_pop_bytes(cpu->stack, address, 2); // pop 2 bytes
     // int16_t integer = *(int16_t *)address;
@@ -23,6 +24,11 @@ void builtin_print(CPU *cpu)
     vmprintf(buffer);
 }
 
+void builtin_print_stack(CPU *cpu)
+{
+    stack_print(cpu->stack);
+}
+
 void builtin_toggle_led(CPU *cpu, uint16_t milliseconds)
 {
 #ifdef ARDUINO
@@ -35,4 +41,24 @@ void builtin_toggle_led(CPU *cpu, uint16_t milliseconds)
     PORTB ^= (1 << LED_PIN);
     delay_ms(milliseconds);
 #endif
+}
+
+void builtin_syscall(CPU *cpu)
+{
+    uint16_t func_id;
+    cpu_fetch_data(cpu, &func_id, sizeof(func_id));
+    switch (func_id)
+    {
+    case BUILTIN_PRINT:
+        builtin_print(cpu);
+        break;
+    case BUILTIN_TOGGLE_LED:
+        builtin_toggle_led(cpu, 500);
+        break;
+    case BUILTIN_PRINT_STACK:
+        builtin_print_stack(cpu);
+        break;
+    default:
+        break;
+    }
 }

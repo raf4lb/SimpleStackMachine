@@ -121,4 +121,6 @@ void multiply_F32(CPU *cpu);
 
 void divide_F32(CPU *cpu);
 
+void push_millis(CPU *cpu);
+
 #endif

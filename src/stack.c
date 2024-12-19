@@ -142,7 +142,7 @@ uint64_t stack_read_bytes(Stack *stack, uint16_t size)
 
 void stack_push_data(Stack *stack, void *value, uint16_t size)
 {
-    stack_push_lend_data(stack, value, size);
+    stack_push_bend_data(stack, value, size);
 }
 
 void stack_push_lend_data(Stack *stack, void *value, uint16_t size)
@@ -178,15 +178,7 @@ void stack_push_bend_data(Stack *stack, void *value, uint16_t size)
 
 void stack_pop_data(Stack *stack, void *value, uint16_t size)
 {
-    if (stack->sp >= size)
-    {
-        stack->sp -= size;
-        memcpy(value, stack->data + stack->sp, size);
-    }
-    else
-    {
-        vmprintf("stack_pop_data: stack underflow\n");
-    }
+    stack_pop_bend_data(stack, value, size);
 }
 
 void stack_pop_bend_data(Stack *stack, void *value, uint16_t size)

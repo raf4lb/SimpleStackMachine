@@ -254,9 +254,29 @@ class PushU16Instruction(OperandU16Instruction):
     opcode = 54
 
 
+class PushMillisInstruction(NoOperandInstruction):
+    name = "PUSH_MILLIS"
+    opcode = 55
+
+
+class PopJumpIfFalseInstruction(OperandU16Instruction):
+    name = "POP_JUMP_IF_FALSE"
+    opcode = 8
+
+
+class CompareEqualInstruction(NoOperandInstruction):
+    name = "COMPARE_EQ"
+    opcode = 9
+
+
+class CompareGreaterThanInstruction(NoOperandInstruction):
+    name = "COMPARE_GT"
+    opcode = 11
+
+
 INSTRUCTIONS = {
-    "HALT": HaltInstruction(),
-    "PUSHL_U16": PushLiteralU16Instruction(),
+    HaltInstruction.name: HaltInstruction(),
+    PushLiteralU16Instruction.name: PushLiteralU16Instruction(),
     "POP_U16": PopU16Instruction(),
     "PUSH_U16": PushU16Instruction(),
     "POPA_U16": PopAddressU16Instruction(),
@@ -285,6 +305,10 @@ INSTRUCTIONS = {
     "CALL": CallInstruction(),
     "RETURN": ReturnInstruction(),
     "SYSCALL": SysCallInstruction(),
+    "PUSH_MILLIS": PushMillisInstruction(),
+    PopJumpIfFalseInstruction.name: PopJumpIfFalseInstruction(),
+    CompareEqualInstruction.name: CompareEqualInstruction(),
+    CompareGreaterThanInstruction.name: CompareGreaterThanInstruction(),
 }
 
 
@@ -425,7 +449,10 @@ def encode_line(line: str) -> list[int]:
         operand = None
     # print(f"decoding {inst_name}")
     instruction = INSTRUCTIONS[inst_name]
-    return instruction.encode(operand)
+    try:
+        return instruction.encode(operand)
+    except:
+        print(instruction)
 
 
 def compile_rfl(filename: str, debug: bool = True) -> list[int]:

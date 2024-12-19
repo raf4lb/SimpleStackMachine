@@ -2,6 +2,8 @@
 #ifndef DELAY_H
 #define DELAY_H
 #include <stdint.h>
+#include <stdbool.h>
+#include "cpu.h"
 #ifdef ARDUINO
 #ifndef F_CPU
 #define F_CPU 16000000UL

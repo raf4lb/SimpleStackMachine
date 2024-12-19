@@ -2,6 +2,7 @@
 #include "instructions.h"
 #include "sys.h"
 #include "delay.h"
+#include "cpu.h"
 
 #ifndef PROGRAM
 #define PROGRAM "{}"
@@ -71,6 +72,7 @@ InstructionPtr instructions_set[] = {
     &divide_U16,
     &pop_address_U16,
     &push_U16,
+    &push_millis,
 };
 
 uint8_t program[] = PROGRAM;
@@ -89,13 +91,13 @@ int main(void)
     serial_setup(9600);
 #endif
 #endif
-    CPU *cpu = cpu_create(memory_size, stack_size, callstack_size, instructions_set, port_banks);
-    cpu_load_program(cpu, program, program_size, data_address);
+    cpu_init(memory_size, stack_size, callstack_size, instructions_set, port_banks);
+    cpu_load_program(&cpu, program, program_size, data_address);
     vmprintf("Memory consumption: %d bytes\n", get_memory_usage());
     vmprintf(" - VM consumption: %d bytes\n", get_memory_usage() - memory_size);
     vmprintf(" - User memory: %d bytes\n", memory_size);
     vmprintf("Running program\n");
-    cpu_run(cpu);
-    cpu_free(cpu);
+    cpu_run(&cpu);
+    cpu_free(&cpu);
     return 0;
 }

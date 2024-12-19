@@ -1,8 +1,10 @@
 #include "delay.h"
 #include <unistd.h>
+#include <stdbool.h>
 #ifdef ARDUINO
 
 volatile uint16_t millis_counter = 0; // Milliseconds counter
+volatile uint16_t context_switch_conter = 0;
 
 // Initialize Timer0 to generate an interrupt every 1 millisecond
 void timer0_setup()
@@ -27,6 +29,12 @@ void timer0_setup()
 ISR(TIMER0_COMPA_vect)
 {
     millis_counter++; // Increment every millisecond
+    context_switch_conter++;
+    // if (context_switch_conter > CONTEXT_SWITCH_MS)
+    // {
+    //     cpu_context_switch(&cpu);
+    //     context_switch_conter = 0;
+    // }
 }
 
 uint16_t millis()
@@ -42,10 +50,9 @@ uint16_t millis()
 void delay_ms(uint16_t milliseconds)
 {
     uint16_t started_at = millis();
-    uint16_t elapsed_time = 0;
 
     // Check if the interval has passed
-    while ((millis() - started_at) < milliseconds)
+    while (cpu.current_task->active && ((millis() - started_at) < milliseconds))
         ;
 }
 
