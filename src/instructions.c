@@ -287,9 +287,13 @@ void pop_F32(CPU *cpu)
 void top_F32(CPU *cpu)
 {
     float top = stack_read_F32(cpu->stack, cpu->stack->sp - sizeof(float));
+#ifdef ARDUINO
     char floatString[30];
-    dtostrf(top, 10, 6, floatString);
+    dtostrf(top, 10, 2, floatString);
     vmprintf("%s\n", floatString);
+#elif MACOSX
+    vmprintf("%.2f\n", top);
+#endif
 }
 
 void add_F32(CPU *cpu)
@@ -371,52 +375,13 @@ void top(CPU *cpu)
     uint8_t data_type;
     cpu_fetch_data(cpu, &data_type, sizeof(data_type));
     uint8_t size = get_data_type_size(data_type);
-    if (size == WORD) // 2 bytes
-    {
-        uint16_t top;
-        // stack_read_data(cpu->stack, &top, sizeof(top));
-        if (data_type == TYPE_U16)
-        {
-            vmprintf("%u\n", top);
-        }
-        else if (data_type == TYPE_I16)
-        {
-            vmprintf("%i\n", top);
-        }
-    }
-    else if (size == DWORD) // 4 bytes
-    {
-        if (data_type == TYPE_U32)
-        {
-            uint32_t top;
-            // stack_read_data(cpu->stack, &top, sizeof(top));
-            vmprintf("%lu\n", top);
-        }
-        else if (data_type == TYPE_I32)
-        {
-            uint32_t top;
-            // stack_read_data(cpu->stack, &top, sizeof(top));
-            vmprintf("%li\n", top);
-        }
-        else if (data_type == TYPE_F32)
-        {
-            float top;
-            // stack_read_data(cpu->stack, &top, sizeof(top));
-            char floatString[30];
-            dtostrf(top, 5, 2, floatString);
-            vmprintf("%s\n", floatString);
-        }
-    }
-    else
-    {
-        vmprintf("TopError: unknown datatype %d\n", data_type);
-    }
+    vmprintf("implement this");
 }
 void delay(CPU *cpu)
 {
     uint16_t milliseconds;
     cpu_fetch_data(cpu, &milliseconds, sizeof(milliseconds));
-    delay_ms(milliseconds);
+    delay_ms(cpu, milliseconds);
 }
 
 void jump(CPU *cpu)
@@ -583,17 +548,17 @@ void ret(CPU *cpu)
 
 void async_call(CPU *cpu)
 {
+    // Erro aqui;
     uint16_t address;
     cpu_fetch_data(cpu, &address, sizeof(uint16_t));
-    Task *task = cpu_create_task(cpu, address);
-    cpu_set_current_task(cpu, task);
+    cpu_create_task(cpu, address);
 }
 
 void async_ret(CPU *cpu)
 {
-    uint16_t address;
-    stack_pop_bend_data(cpu->callstack, &address, sizeof(uint16_t));
-    cpu->ip = address;
+    // Bug here
+    vmprintf("async return\n");
+    cpu_delete_task(cpu, cpu->task_tree_current_node);
 }
 
 void syscall(CPU *cpu)

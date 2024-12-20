@@ -259,6 +259,16 @@ class PushMillisInstruction(NoOperandInstruction):
     opcode = 55
 
 
+class AsyncCallInstruction(OperandU16Instruction):
+    name = "ASYNC_CALL"
+    opcode = 56
+
+
+class AsyncReturnInstruction(NoOperandInstruction):
+    name = "ASYNC_RETURN"
+    opcode = 57
+
+
 class PopJumpIfFalseInstruction(OperandU16Instruction):
     name = "POP_JUMP_IF_FALSE"
     opcode = 8
@@ -309,6 +319,8 @@ INSTRUCTIONS = {
     PopJumpIfFalseInstruction.name: PopJumpIfFalseInstruction(),
     CompareEqualInstruction.name: CompareEqualInstruction(),
     CompareGreaterThanInstruction.name: CompareGreaterThanInstruction(),
+    AsyncCallInstruction.name: AsyncCallInstruction(),
+    AsyncReturnInstruction.name: AsyncReturnInstruction(),
 }
 
 

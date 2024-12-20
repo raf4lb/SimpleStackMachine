@@ -10,4 +10,5 @@ uint8_t get_data_type_size(uint8_t data_type)
     {
         return DWORD;
     }
+    return 4;
 }

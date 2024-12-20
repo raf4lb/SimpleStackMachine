@@ -55,6 +55,10 @@ void call(CPU *cpu);
 
 void ret(CPU *cpu);
 
+void async_call(CPU *cpu);
+
+void async_ret(CPU *cpu);
+
 void syscall(CPU *cpu);
 
 void addf(CPU *cpu);

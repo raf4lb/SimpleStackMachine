@@ -47,12 +47,12 @@ uint16_t millis()
     return millis;
 }
 
-void delay_ms(uint16_t milliseconds)
+void delay_ms(CPU *cpu, uint16_t milliseconds)
 {
     uint16_t started_at = millis();
 
     // Check if the interval has passed
-    while (cpu.current_task->active && ((millis() - started_at) < milliseconds))
+    while (((millis() - started_at) < milliseconds))
         ;
 }
 
@@ -99,12 +99,20 @@ void delay_us(uint32_t microseconds)
 }
 
 #elif MACOSX
-
-void delay_ms(uint32_t milliseconds)
+#include <sys/time.h>
+#include <unistd.h>
+uint16_t millis()
 {
-    while (milliseconds--)
-    {
-        usleep(1000);
-    }
+    vmprintf("time");
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    uint64_t milliseconds = (uint64_t)(tv.tv_sec) * 1000 + (uint64_t)(tv.tv_usec) / 1000;
+    return (uint16_t)(milliseconds % 65536); // Wrap the time to fit into 16 bits
+    vmprintf("time");
+}
+
+void delay_ms(CPU *cpu, uint16_t milliseconds)
+{
+    usleep(milliseconds * 1000);
 }
 #endif

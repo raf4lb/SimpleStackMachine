@@ -39,7 +39,7 @@ void builtin_toggle_led(CPU *cpu, uint16_t milliseconds)
     DDRB |= (1 << LED_PIN);
     // Toggle LED
     PORTB ^= (1 << LED_PIN);
-    delay_ms(milliseconds);
+    delay_ms(cpu, milliseconds);
 #endif
 }
 

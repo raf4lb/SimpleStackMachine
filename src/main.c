@@ -73,6 +73,8 @@ InstructionPtr instructions_set[] = {
     &pop_address_U16,
     &push_U16,
     &push_millis,
+    &async_call,
+    &async_ret,
 };
 
 uint8_t program[] = PROGRAM;
@@ -85,13 +87,14 @@ uint8_t port_banks = 3;
 
 int main(void)
 {
+    CPU cpu;
 #ifdef ARDUINO
     timer0_setup();
 #ifdef SERIAL_ENABLED
     serial_setup(9600);
 #endif
 #endif
-    cpu_init(memory_size, stack_size, callstack_size, instructions_set, port_banks);
+    cpu_init(&cpu, memory_size, stack_size, callstack_size, instructions_set, port_banks);
     cpu_load_program(&cpu, program, program_size, data_address);
     vmprintf("Memory consumption: %d bytes\n", get_memory_usage());
     vmprintf(" - VM consumption: %d bytes\n", get_memory_usage() - memory_size);

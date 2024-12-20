@@ -13,14 +13,13 @@
 #include <avr/interrupt.h>
 
 void timer0_setup();
-uint16_t millis();
-
 void timer1_setup();
 uint32_t micros();
 
 #endif
 
-void delay_ms(uint16_t milliseconds);
+uint16_t millis();
+void delay_ms(CPU *cpu, uint16_t milliseconds);
 void delay_us(uint32_t microseconds);
 
 #endif

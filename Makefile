@@ -37,7 +37,12 @@ compile:
 		
 generic: compile
 	@echo "Compiling code to MACOSX version"
-	clang $(PARAMS) -DMACOSX -o build/$@
+	clang $(PARAMS) -DMACOSX -o build/generic
+	@echo "MACOSX version created"
+
+debug: compile
+	@echo "Compiling code to MACOSX version"
+	clang $(PARAMS) -DMACOSX -o build/a.out -g
 	@echo "MACOSX version created"
 
 arduino: compile
