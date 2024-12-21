@@ -5,15 +5,16 @@ SOURCE_DIR = src
 TEST_DIR = tests
 TEST_BUILD_DIR = $(TEST_DIR)/build
 
-PARAMS = $(SOURCE_DIR)/memory.c \
+PARAMS = \
+		$(SOURCE_DIR)/sys.c \
 		$(SOURCE_DIR)/io.c \
+		$(SOURCE_DIR)/memory.c \
 		$(SOURCE_DIR)/delay.c \
 		$(SOURCE_DIR)/stack.c \
 		$(SOURCE_DIR)/cpu.c \
 		$(SOURCE_DIR)/instructions.c \
 		$(SOURCE_DIR)/serial.c \
 		$(SOURCE_DIR)/builtin.c \
-		$(SOURCE_DIR)/sys.c \
 		$(SOURCE_DIR)/datatypes.c \
 		$(SOURCE_DIR)/task.c \
 		$(SOURCE_DIR)/tasktree.c \
@@ -23,7 +24,6 @@ PARAMS = $(SOURCE_DIR)/memory.c \
 		-DDATA_ADDRESS=$(DATA_ADDRESS) \
 
 compile:
-	mkdir -p $(BUILD_DIR)
 	$(eval PYTHON_SCRIPT := compiler.py)
 	@echo "Compiling rfl file..."
 	$(eval OUTPUT := $(shell python3 $(PYTHON_SCRIPT) $(PROGRAM_FILE)))
@@ -35,15 +35,25 @@ compile:
 	@echo "Size: $(PROGRAM_SIZE)"
 	@echo "Data: $(DATA_ADDRESS)"
 		
-generic: compile
+macosx: compile
 	@echo "Compiling code to MACOSX version"
-	clang $(PARAMS) -DMACOSX -o build/generic
+	clang $(PARAMS) -DMACOSX -o build/$@
 	@echo "MACOSX version created"
 
-debug: compile
+macosx-debug: compile
 	@echo "Compiling code to MACOSX version"
-	clang $(PARAMS) -DMACOSX -o build/a.out -g
+	clang $(PARAMS) -DMACOSX -o build/$@.out -g
 	@echo "MACOSX version created"
+
+windows: compile
+	@echo "Compiling code to WINDOWS version"
+	gcc $(PARAMS) -DWINDOWS -o build/$@.exe
+	@echo "WINDOWS version created"
+
+windows-debug: compile
+	@echo "Compiling code to WINDOWS version"
+	gcc $(PARAMS) -DWINDOWS -o build/$@.out -g
+	@echo "WINDOWS version created"
 
 arduino: compile
 	@echo "Compiling code to ARDUINO version"

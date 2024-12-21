@@ -3,13 +3,14 @@
 #include <stdint.h>
 
 #ifdef ARDUINO
+
 #include "avr/io.h"
 #include "serial.h"
-#elif MACOSX
+
+#elif defined(MACOSX) || defined(WINDOWS)
+
 #include <stdio.h>
-volatile uint8_t DDRB;
-volatile uint8_t PORTB;
-volatile uint8_t PINB;
+
 #endif
 
 typedef struct
@@ -30,6 +31,6 @@ void port_bank_set_address(PortBank *port_bank, uint8_t address, uint8_t value);
 
 uint8_t port_bank_get_address(PortBank *port_bank, uint8_t address);
 
-int (*vmprintf)(const char *, ...);
+extern int (*vmprintf)(const char *, ...);
 
 #endif

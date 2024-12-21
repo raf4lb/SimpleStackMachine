@@ -4,7 +4,6 @@
 #ifdef ARDUINO
 
 volatile uint16_t millis_counter = 0; // Milliseconds counter
-volatile uint16_t context_switch_conter = 0;
 
 // Initialize Timer0 to generate an interrupt every 1 millisecond
 void timer0_setup()
@@ -29,12 +28,6 @@ void timer0_setup()
 ISR(TIMER0_COMPA_vect)
 {
     millis_counter++; // Increment every millisecond
-    context_switch_conter++;
-    // if (context_switch_conter > CONTEXT_SWITCH_MS)
-    // {
-    //     cpu_context_switch(&cpu);
-    //     context_switch_conter = 0;
-    // }
 }
 
 uint16_t millis()
@@ -100,19 +93,38 @@ void delay_us(uint32_t microseconds)
 
 #elif MACOSX
 #include <sys/time.h>
-#include <unistd.h>
+
 uint16_t millis()
 {
-    vmprintf("time");
     struct timeval tv;
     gettimeofday(&tv, NULL);
     uint64_t milliseconds = (uint64_t)(tv.tv_sec) * 1000 + (uint64_t)(tv.tv_usec) / 1000;
     return (uint16_t)(milliseconds % 65536); // Wrap the time to fit into 16 bits
-    vmprintf("time");
 }
 
 void delay_ms(CPU *cpu, uint16_t milliseconds)
 {
     usleep(milliseconds * 1000);
 }
+
+#elif WINDOWS
+#include <windows.h>
+
+uint16_t millis() {
+    FILETIME ft;
+    ULARGE_INTEGER uli;
+
+    GetSystemTimeAsFileTime(&ft);
+    uli.LowPart = ft.dwLowDateTime;
+    uli.HighPart = ft.dwHighDateTime;
+
+    // Convert to milliseconds since epoch
+    uint64_t milliseconds = (uli.QuadPart / 10000ULL) % 65536; // FileTime is in 100-nanosecond intervals
+    return (uint16_t)milliseconds;
+}
+
+void delay_ms(CPU *cpu, uint16_t milliseconds) {
+    Sleep(milliseconds);
+}
 #endif
+

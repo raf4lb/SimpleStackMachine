@@ -49,8 +49,6 @@ void cpu_print_user_memory(CPU *cpu);
 
 void cpu_print(CPU *cpu);
 
-volatile uint16_t context_switch_counter;
-
 typedef struct TaskTreeNode TaskTreeNode;
 
 void cpu_context_switch(CPU *cpu, TaskTreeNode *node);

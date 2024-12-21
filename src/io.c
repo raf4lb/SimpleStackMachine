@@ -1,6 +1,22 @@
 #include "sys.h"
 #include "io.h"
 
+
+#ifdef ARDUINO
+
+int (*vmprintf)(const char *, ...) = serial_printf;
+
+#elif defined(MACOSX) || defined(WINDOWS)
+
+volatile uint8_t DDRB;
+volatile uint8_t PORTB;
+volatile uint8_t PINB;
+
+int (*vmprintf)(const char *, ...) = printf;
+
+#endif
+
+
 void map_ports(PortBank *port_bank)
 {
     port_bank->ports[0] = &DDRB;
@@ -54,10 +70,3 @@ uint8_t port_bank_get_address(PortBank *port_bank, uint8_t address)
 {
     return *(port_bank->ports[address]);
 }
-
-#ifdef ARDUINO
-int (*vmprintf)(const char *, ...) = serial_printf;
-#endif
-#ifdef MACOSX
-int (*vmprintf)(const char *, ...) = printf;
-#endif

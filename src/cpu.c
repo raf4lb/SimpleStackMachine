@@ -1,6 +1,5 @@
 #include "cpu.h"
 #include "stack.h"
-#include "io.h"
 #include "sys.h"
 #include "task.h"
 #include "delay.h"
@@ -13,10 +12,7 @@ uint16_t CONTEXT_MAX_CYCLES = 20;
 
 void cpu_init(CPU *cpu, uint16_t memory_size, uint16_t stack_size, uint16_t callstack_size, InstructionPtr *instructions, uint8_t port_bank)
 {
-    if (memory_size > 0)
-    {
-        cpu->memory = memory_create(memory_size);
-    }
+    cpu->memory = memory_create(memory_size);
     cpu->port_bank = port_bank_create(port_bank);
     cpu->instructions = instructions;
     cpu->ip = 0;
