@@ -2,7 +2,6 @@
 #include "instructions.h"
 #include "delay.h"
 #include "builtin.h"
-#include "datatypes.h"
 
 void halt(CPU *cpu)
 {
@@ -32,28 +31,9 @@ void push(CPU *cpu)
 
 void push_literal(CPU *cpu)
 {
-    uint8_t data_type;
-    cpu_fetch_data(cpu, &data_type, sizeof(data_type));
-    uint8_t size = get_data_type_size(data_type);
-    if (size == WORD)
-    {
-        uint16_t value;
-        cpu_fetch_data(cpu, &value, sizeof(value));
-        stack_push_lend_data(cpu->stack, &value, sizeof(value));
-    }
-    if (size == DWORD)
-    {
-        uint32_t value;
-        cpu_fetch_data(cpu, &value, sizeof(value));
-        if (data_type == TYPE_F32)
-        {
-            stack_push_bend_data(cpu->stack, &value, sizeof(value));
-        }
-        else
-        {
-            stack_push_lend_data(cpu->stack, &value, sizeof(value));
-        }
-    }
+    uint16_t value;
+    cpu_fetch_data(cpu, &value, sizeof(value));
+    stack_push_bend_data(cpu->stack, &value, sizeof(value));
 }
 
 void push_literal_U16(CPU *cpu)
@@ -338,44 +318,17 @@ void divide_F32(CPU *cpu)
 
 void pop(CPU *cpu)
 {
-    // TODO: Pop value according the size of type stored
-    uint8_t data_type;
-    cpu_fetch_data(cpu, &data_type, sizeof(data_type));
-    uint8_t size = get_data_type_size(data_type);
-    if (size == WORD) // 2 bytes
-    {
-        uint16_t value;
-        stack_pop_data(cpu->stack, &value, sizeof(value));
-    }
-    else if (size == DWORD) // 4 bytes
-    {
-        uint32_t value;
-        stack_pop_data(cpu->stack, &value, sizeof(value));
-    }
+    pop_U16(cpu);
 }
 
 void pop_address(CPU *cpu)
 {
-    uint16_t address = cpu_fetch_16b(cpu);
-    // TODO: Pop value according the size of type stored
-    uint16_t value = stack_pop_16b(cpu->stack);
-    if (address < cpu->port_bank->size)
-    {
-        port_bank_set_address(cpu->port_bank, address, (uint8_t)value);
-    }
-    else
-    {
-        address = cpu->user_memory + address - cpu->port_bank->size;
-        memory_set_address_16b(cpu->memory, address, value);
-    }
+    pop_address_U16(cpu);
 }
 
 void top(CPU *cpu)
 {
-    uint8_t data_type;
-    cpu_fetch_data(cpu, &data_type, sizeof(data_type));
-    uint8_t size = get_data_type_size(data_type);
-    vmprintf("implement this");
+    top_U16(cpu);
 }
 void delay(CPU *cpu)
 {
@@ -451,37 +404,22 @@ void compare_greater_equal(CPU *cpu)
 
 void add(CPU *cpu)
 {
-    uint16_t b;
-    stack_pop_data(cpu->stack, &b, sizeof(b));
-    uint16_t a;
-    stack_pop_data(cpu->stack, &a, sizeof(a));
-    uint16_t result = a + b;
-    stack_push_lend_data(cpu->stack, &result, sizeof(result));
-    stack_print(cpu->stack);
+    add_U16(cpu);
 }
 
 void subtract(CPU *cpu)
 {
-    // TODO: Pop value according the size of type stored (int, float, etc)
-    uint16_t b = stack_pop_16b(cpu->stack);
-    uint16_t a = stack_pop_16b(cpu->stack);
-    stack_push_16b(cpu->stack, a - b);
+    subtract_U16(cpu);
 }
 
 void multiply(CPU *cpu)
 {
-    // TODO: Pop value according the size of type stored (int, float, etc)
-    uint16_t b = stack_pop_16b(cpu->stack);
-    uint16_t a = stack_pop_16b(cpu->stack);
-    stack_push_16b(cpu->stack, a * b);
+    multiply_U16(cpu);
 }
 
 void divide(CPU *cpu)
 {
-    // TODO: Pop value according the size of type stored (int, float, etc)
-    uint16_t b = stack_pop_16b(cpu->stack);
-    uint16_t a = stack_pop_16b(cpu->stack);
-    stack_push_16b(cpu->stack, a / b);
+    divide_U16(cpu);
 }
 
 void bitwise_and(CPU *cpu)
@@ -556,8 +494,6 @@ void async_call(CPU *cpu)
 
 void async_ret(CPU *cpu)
 {
-    // Bug here
-    vmprintf("async return\n");
     cpu_delete_task(cpu, cpu->task_tree_current_node);
 }
 

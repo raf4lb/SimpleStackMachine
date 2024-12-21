@@ -15,7 +15,6 @@ typedef void (*InstructionPtr)(CPU *cpu);
 struct CPU
 {
     Memory *memory;
-    Task *current_task;
     TaskTreeNode *task_tree_root;
     TaskTreeNode *task_tree_current_node;
     uint8_t *program;
@@ -29,7 +28,7 @@ struct CPU
     uint16_t data_address;
 };
 
-void cpu_init(CPU *cpu, uint16_t memory_size, uint16_t stack_size, uint16_t callstack_size, InstructionPtr *instruction_set, uint8_t port_banks);
+void *cpu_create(uint16_t memory_size, uint16_t stack_size, uint16_t callstack_size, InstructionPtr *instruction_set, uint8_t port_banks);
 
 void cpu_free(CPU *cpu);
 
@@ -52,7 +51,7 @@ void cpu_print(CPU *cpu);
 typedef struct TaskTreeNode TaskTreeNode;
 
 void cpu_context_switch(CPU *cpu, TaskTreeNode *node);
-void cpu_set_new_context(CPU *cpu, TaskTreeNode *node);
+void cpu_set_task_node(CPU *cpu, TaskTreeNode *node);
 
 void cpu_create_task(CPU *cpu, uint16_t address);
 void cpu_delete_task(CPU *cpu, TaskTreeNode *node);

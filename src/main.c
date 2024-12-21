@@ -87,20 +87,18 @@ uint8_t port_banks = 3;
 
 int main(void)
 {
-    CPU cpu;
-#ifdef ARDUINO
-    timer0_setup();
+
+    timer_init();
 #ifdef SERIAL_ENABLED
     serial_setup(9600);
 #endif
-#endif
-    cpu_init(&cpu, memory_size, stack_size, callstack_size, instructions_set, port_banks);
-    cpu_load_program(&cpu, program, program_size, data_address);
+    CPU *cpu = cpu_create(memory_size, stack_size, callstack_size, instructions_set, port_banks);
+    cpu_load_program(cpu, program, program_size, data_address);
     vmprintf("Memory consumption: %d bytes\n", get_memory_usage());
     vmprintf(" - VM consumption: %d bytes\n", get_memory_usage() - memory_size);
     vmprintf(" - User memory: %d bytes\n", memory_size);
     vmprintf("Running program\n");
-    cpu_run(&cpu);
-    cpu_free(&cpu);
+    cpu_run(cpu);
+    cpu_free(cpu);
     return 0;
 }

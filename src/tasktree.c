@@ -24,7 +24,7 @@ TaskTreeNode *task_tree_create_node(Task *task)
     new_task->childCapacity = 0;
     new_task->parent = NULL; // Initialize parent pointer
     new_task->task = task;
-    vmprintf("Created task %d\n", new_task->id);
+    // vmprintf("Created task %d\n", new_task->id);
     return new_task;
 }
 
@@ -44,7 +44,6 @@ TaskTreeNode *task_tree_add_child(TaskTreeNode *parent, Task *task)
         }
     }
     parent->children[parent->childCount++] = child;
-    // vmprintf("Created task %d from task %d\n", child->id, child->parent->id);
     return child;
 }
 
@@ -63,11 +62,9 @@ void task_tree_remove_child(TaskTreeNode *node)
                 parent->children[j] = parent->children[j + 1];
             }
             parent->childCount--;
-            vmprintf("deleted\n");
             return;
         }
     }
-    vmprintf("Child with ID %d not found.\n", id);
 }
 
 // Function to print the tree recursively
@@ -115,29 +112,3 @@ void task_tree_free(TaskTreeNode *root)
         vmfree(root);
     }
 }
-
-// Main function for testing
-// int example()
-// {
-//     TaskTreeNode *root = task_tree_create_node();
-
-//     TaskTreeNode *child1 = task_tree_add_child(root);
-//     TaskTreeNode *child2 = task_tree_add_child(root);
-//     TaskTreeNode *child3 = task_tree_add_child(child1);
-
-//     printf("Tree structure:\n");
-//     task_tree_print(root, 0);
-
-//     if (child3->parent != NULL)
-//     {
-//         printf("\nParent of Task %d: ID = %d, Name = %s\n", child3->id, child3->parent->id, child3->parent->name);
-//     }
-
-//     task_tree_remove_child(root, child2->id);
-
-//     printf("\nTree structure after removing Child 2:\n");
-//     task_tree_print(root, 0);
-
-//     task_tree_free(root);
-//     return 0;
-// }

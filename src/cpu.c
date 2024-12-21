@@ -10,14 +10,16 @@ uint16_t TASK_STACK_SIZE = 32;
 uint16_t TASK_CALLSTACK_SIZE = 32;
 uint16_t CONTEXT_MAX_CYCLES = 20;
 
-void cpu_init(CPU *cpu, uint16_t memory_size, uint16_t stack_size, uint16_t callstack_size, InstructionPtr *instructions, uint8_t port_bank)
+void *cpu_create(uint16_t memory_size, uint16_t stack_size, uint16_t callstack_size, InstructionPtr *instructions, uint8_t port_bank)
 {
+    CPU *cpu = (CPU *)vmmalloc(sizeof(CPU));
     cpu->memory = memory_create(memory_size);
     cpu->port_bank = port_bank_create(port_bank);
     cpu->instructions = instructions;
     cpu->ip = 0;
     cpu->user_memory = 0;
     cpu->data_address = 0;
+    return cpu;
 }
 
 void cpu_create_task(CPU *cpu, uint16_t address)
@@ -29,7 +31,6 @@ void cpu_create_task(CPU *cpu, uint16_t address)
 
 void cpu_delete_task(CPU *cpu, TaskTreeNode *node)
 {
-    vmprintf("deleting task\n");
     task_tree_remove_child(node);
 }
 
@@ -39,14 +40,12 @@ void cpu_load_program(CPU *cpu, uint8_t *program, uint16_t program_size, uint16_
     cpu->program_size = program_size;
     cpu->data_address = data_address;
     Task *main_task = task_create(0, 0, TASK_STACK_SIZE, TASK_CALLSTACK_SIZE);
-    cpu->current_task = main_task;
     cpu->task_tree_root = task_tree_create_node(main_task);
+    cpu->task_tree_current_node = cpu->task_tree_root;
 }
 
 void cpu_free(CPU *cpu)
 {
-    stack_free(cpu->stack);
-    stack_free(cpu->callstack);
     memory_free(cpu->memory);
     port_bank_free(cpu->port_bank);
     task_tree_free(cpu->task_tree_root);
@@ -92,21 +91,23 @@ void cpu_execute(CPU *cpu, uint8_t opcode)
     // cpu_print(cpu);
 }
 
-void cpu_set_new_context(CPU *cpu, TaskTreeNode *node)
+void cpu_set_task_node(CPU *cpu, TaskTreeNode *node)
 {
     node->task->active = true;
     cpu->ip = node->task->ip;
     cpu->stack = node->task->stack;
     cpu->callstack = node->task->callstack;
-    cpu->current_task = node->task;
     cpu->task_tree_current_node = node;
 }
 
 void cpu_context_switch(CPU *cpu, TaskTreeNode *node)
 {
-    cpu->current_task->active = false;
-    cpu->current_task->ip = cpu->ip;
-    cpu_set_new_context(cpu, node);
+    if (cpu->task_tree_current_node->task != NULL)
+    {
+        cpu->task_tree_current_node->task->active = false;
+        cpu->task_tree_current_node->task->ip = cpu->ip;
+    }
+    cpu_set_task_node(cpu, node);
 }
 
 void cpu_run_cycle(CPU *cpu, TaskTreeNode *node)

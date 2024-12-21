@@ -1,12 +1,12 @@
 #include "delay.h"
 #include <unistd.h>
 #include <stdbool.h>
-#ifdef ARDUINO
 
 volatile uint16_t millis_counter = 0; // Milliseconds counter
 
+#ifdef ARDUINO
 // Initialize Timer0 to generate an interrupt every 1 millisecond
-void timer0_setup()
+void timer_init()
 {
     // Set Timer0 to CTC mode
     TCCR0A = (1 << WGM01);
@@ -92,14 +92,43 @@ void delay_us(uint32_t microseconds)
 }
 
 #elif MACOSX
-#include <sys/time.h>
+#include <time.h>
+
+// uint16_t gettimeofday2()
+// {
+//     struct timeval tv;
+//     gettimeofday(&tv, NULL);
+//     uint64_t milliseconds = (uint64_t)(tv.tv_sec) * 1000 + (uint64_t)(tv.tv_usec) / 1000;
+//     return (uint16_t)(milliseconds % 65536); // Wrap the time to fit into 16 bits
+// }
+
+void timer_init()
+{
+    // millis_counter = get_time_in_milliseconds();
+}
 
 uint16_t millis()
 {
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    uint64_t milliseconds = (uint64_t)(tv.tv_sec) * 1000 + (uint64_t)(tv.tv_usec) / 1000;
-    return (uint16_t)(milliseconds % 65536); // Wrap the time to fit into 16 bits
+    static struct timespec start_time;
+    static int initialized = 0;
+
+    struct timespec current_time;
+
+    // Initialize the start time on the first call
+    if (!initialized)
+    {
+        clock_gettime(CLOCK_MONOTONIC, &start_time);
+        initialized = 1;
+    }
+
+    // Get the current time
+    clock_gettime(CLOCK_MONOTONIC, &current_time);
+
+    // Calculate the elapsed time in milliseconds
+    uint64_t elapsed_time = (current_time.tv_sec - start_time.tv_sec) * 1000 +
+                            (current_time.tv_nsec - start_time.tv_nsec) / 1000000;
+
+    return (uint16_t)elapsed_time;
 }
 
 void delay_ms(CPU *cpu, uint16_t milliseconds)
@@ -110,7 +139,8 @@ void delay_ms(CPU *cpu, uint16_t milliseconds)
 #elif WINDOWS
 #include <windows.h>
 
-uint16_t millis() {
+uint16_t millis()
+{
     FILETIME ft;
     ULARGE_INTEGER uli;
 
@@ -123,8 +153,8 @@ uint16_t millis() {
     return (uint16_t)milliseconds;
 }
 
-void delay_ms(CPU *cpu, uint16_t milliseconds) {
+void delay_ms(CPU *cpu, uint16_t milliseconds)
+{
     Sleep(milliseconds);
 }
 #endif
-
