@@ -486,7 +486,6 @@ void ret(CPU *cpu)
 
 void async_call(CPU *cpu)
 {
-    // Erro aqui;
     uint16_t address;
     cpu_fetch_data(cpu, &address, sizeof(uint16_t));
     cpu_create_task(cpu, address);

@@ -17,18 +17,18 @@ struct CPU
     Memory *memory;
     TaskTreeNode *task_tree_root;
     TaskTreeNode *task_tree_current_node;
-    uint8_t *program;
+    const uint8_t *program;
     uint16_t program_size;
     Stack *stack;
     Stack *callstack;
     uint16_t ip;
-    InstructionPtr *instructions;
+    const InstructionPtr *instructions;
     PortBank *port_bank;
     uint16_t user_memory;
     uint16_t data_address;
 };
 
-void *cpu_create(uint16_t memory_size, uint16_t stack_size, uint16_t callstack_size, InstructionPtr *instruction_set, uint8_t port_banks);
+void *cpu_create(uint16_t memory_size, uint16_t stack_size, uint16_t callstack_size, const InstructionPtr *instruction_set, uint8_t port_banks);
 
 void cpu_free(CPU *cpu);
 
@@ -40,7 +40,7 @@ void cpu_fetch_data(CPU *cpu, void *value, uint16_t size);
 
 void cpu_execute(CPU *cpu, uint8_t opcode);
 
-void cpu_load_program(CPU *cpu, uint8_t *program, uint16_t program_size, uint16_t data_address);
+void cpu_load_program(CPU *cpu, const uint8_t *program, uint16_t program_size, uint16_t data_address);
 
 void cpu_run(CPU *cpu);
 

@@ -1,0 +1,25 @@
+CONST main STRING "main task started\n"
+CONST message STRING "tasks called\n"
+CONST started1 STRING "task 1 started\n"
+CONST finished1 STRING "task 1 finished\n"
+
+.main
+    PUSHL_U16 $main
+    SYSCALL 0
+    ASYNC_CALL .main_1
+    PUSHL_U16 $message
+    SYSCALL 0
+    .loop
+    JUMP .loop
+
+.main_1
+    PUSHL_U16 $started1
+    SYSCALL 0
+.loop_1
+    PUSH_MILLIS
+    PUSHL_U16 1000
+    COMPARE_GT
+    POP_JUMP_IF_FALSE .loop_1
+    PUSHL_U16 $finished1
+    SYSCALL 0
+    ASYNC_RETURN

@@ -10,7 +10,7 @@ uint16_t TASK_STACK_SIZE = 32;
 uint16_t TASK_CALLSTACK_SIZE = 32;
 uint16_t CONTEXT_MAX_CYCLES = 20;
 
-void *cpu_create(uint16_t memory_size, uint16_t stack_size, uint16_t callstack_size, InstructionPtr *instructions, uint8_t port_bank)
+void *cpu_create(uint16_t memory_size, uint16_t stack_size, uint16_t callstack_size, const InstructionPtr *instructions, uint8_t port_bank)
 {
     CPU *cpu = (CPU *)vmmalloc(sizeof(CPU));
     cpu->memory = memory_create(memory_size);
@@ -34,7 +34,7 @@ void cpu_delete_task(CPU *cpu, TaskTreeNode *node)
     task_tree_remove_child(node);
 }
 
-void cpu_load_program(CPU *cpu, uint8_t *program, uint16_t program_size, uint16_t data_address)
+void cpu_load_program(CPU *cpu, const uint8_t *program, uint16_t program_size, uint16_t data_address)
 {
     cpu->program = program;
     cpu->program_size = program_size;
@@ -85,10 +85,7 @@ void cpu_fetch_data(CPU *cpu, void *value, uint16_t size)
 
 void cpu_execute(CPU *cpu, uint8_t opcode)
 {
-    // vmprintf("\n");
-    // vmprintf("inst %d\n", opcode);
     cpu->instructions[opcode](cpu);
-    // cpu_print(cpu);
 }
 
 void cpu_set_task_node(CPU *cpu, TaskTreeNode *node)
@@ -120,7 +117,7 @@ void cpu_run_cycle(CPU *cpu, TaskTreeNode *node)
         cpu_execute(cpu, opcode);
         if (opcode == 57)
         {
-            break;
+            break; // asyn return
         }
         cycles--;
     }

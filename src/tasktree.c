@@ -62,6 +62,7 @@ void task_tree_remove_child(TaskTreeNode *node)
                 parent->children[j] = parent->children[j + 1];
             }
             parent->childCount--;
+            // vmprintf("Ended task %d\n", id);
             return;
         }
     }
