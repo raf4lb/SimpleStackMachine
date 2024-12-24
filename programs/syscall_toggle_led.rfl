@@ -3,6 +3,5 @@ CONST hello STRING "LED TOGGLED!\n"
 .loop
     PUSHL_U16 $hello
     SYSCALL 0
-    POP_U16
     SYSCALL 1
     JUMP .loop

@@ -4,7 +4,7 @@
 #include "sys.h"
 #include "io.h"
 
-Task *task_create(uint8_t id, uint16_t ip, uint16_t stack_size, uint16_t callstack_size)
+Task *task_create(uint8_t id, uint16_t ip, uint16_t stack_size, uint16_t callstack_size, uint16_t localstack_size)
 {
     Task *task = (Task *)vmmalloc(sizeof(Task));
     if (task == NULL)
@@ -17,6 +17,7 @@ Task *task_create(uint8_t id, uint16_t ip, uint16_t stack_size, uint16_t callsta
     task->ip = ip;
     task->stack = stack_create(stack_size);
     task->callstack = stack_create(callstack_size);
+    task->localstack = stack_create(localstack_size);
     return task;
 }
 
@@ -24,5 +25,6 @@ void task_free(Task *task)
 {
     stack_free(task->stack);
     stack_free(task->callstack);
+    stack_free(task->localstack);
     vmfree(task);
 }

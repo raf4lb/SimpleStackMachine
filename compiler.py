@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import sys
+import inspect
 import struct
 
 
@@ -107,6 +108,21 @@ class OperandF32Instruction(Instruction):
 class HaltInstruction(NoOperandInstruction):
     name = "HALT"
     opcode = 0
+
+
+class PopJumpIfFalseInstruction(OperandU16Instruction):
+    name = "POP_JUMP_IF_FALSE"
+    opcode = 8
+
+
+class CompareEqualInstruction(NoOperandInstruction):
+    name = "COMPARE_EQ"
+    opcode = 9
+
+
+class CompareGreaterThanInstruction(NoOperandInstruction):
+    name = "COMPARE_GT"
+    opcode = 11
 
 
 class PushLiteralU16Instruction(OperandU16Instruction):
@@ -244,6 +260,11 @@ class SysCallInstruction(OperandU16Instruction):
     opcode = 26
 
 
+class SubtractInstructionInstruction(NoOperandInstruction):
+    name = "SUB_U16"
+    opcode = 50
+
+
 class PopAddressU16Instruction(OperandU16Instruction):
     name = "POPA_U16"
     opcode = 53
@@ -269,60 +290,25 @@ class AsyncReturnInstruction(NoOperandInstruction):
     opcode = 57
 
 
-class PopJumpIfFalseInstruction(OperandU16Instruction):
-    name = "POP_JUMP_IF_FALSE"
-    opcode = 8
+class PushLocalU16Instruction(OperandU16Instruction):
+    name = "PUSH_LOCAL_U16"
+    opcode = 58
 
 
-class CompareEqualInstruction(NoOperandInstruction):
-    name = "COMPARE_EQ"
-    opcode = 9
+class PopLocalU16Instruction(OperandU16Instruction):
+    name = "POP_LOCAL_U16"
+    opcode = 59
 
 
-class CompareGreaterThanInstruction(NoOperandInstruction):
-    name = "COMPARE_GT"
-    opcode = 11
+instructions_classes = [
+    cls_obj
+    for cls_name, cls_obj in inspect.getmembers(sys.modules[__name__])
+    if inspect.isclass(cls_obj)
+    and cls_name.endswith("Instruction")
+    and len(cls_name) > 11
+]
 
-
-INSTRUCTIONS = {
-    HaltInstruction.name: HaltInstruction(),
-    PushLiteralU16Instruction.name: PushLiteralU16Instruction(),
-    "POP_U16": PopU16Instruction(),
-    "PUSH_U16": PushU16Instruction(),
-    "POPA_U16": PopAddressU16Instruction(),
-    "TOP_U16": TopU16Instruction(),
-    "ADD_U16": AddU16Instruction(),
-    "PUSHL_I16": PushLiteralI16Instruction(),
-    "POP_I16": PopI16Instruction(),
-    "TOP_I16": TopI16Instruction(),
-    "ADD_I16": AddI16Instruction(),
-    "SUB_I16": SubtractI16Instruction(),
-    "MUL_I16": MultiplyI16Instruction(),
-    "DIV_I16": DivideI16Instruction(),
-    "LOAD_I16": ReadI16Instruction(),
-    "STORE_I16": WriteI16Instruction(),
-    "ALLOC_I16": Allocate16Instruction(),
-    "FREE_I16": FreeI16Instruction(),
-    "PUSHL_F32": PushLiteralF32Instruction(),
-    "POP_F32": PopF32Instruction(),
-    "TOP_F32": TopF32Instruction(),
-    "ADD_F32": AddF32Instruction(),
-    "SUB_F32": SubtractF32Instruction(),
-    "MUL_F32": MultiplyF32Instruction(),
-    "DIV_F32": DivideF32Instruction(),
-    "DELAY": DelayInstruction(),
-    "JUMP": JumpInstruction(),
-    "CALL": CallInstruction(),
-    "RETURN": ReturnInstruction(),
-    "SYSCALL": SysCallInstruction(),
-    "PUSH_MILLIS": PushMillisInstruction(),
-    PopJumpIfFalseInstruction.name: PopJumpIfFalseInstruction(),
-    CompareEqualInstruction.name: CompareEqualInstruction(),
-    CompareGreaterThanInstruction.name: CompareGreaterThanInstruction(),
-    AsyncCallInstruction.name: AsyncCallInstruction(),
-    AsyncReturnInstruction.name: AsyncReturnInstruction(),
-}
-
+INSTRUCTIONS = {cls.name: cls() for cls in instructions_classes}
 
 PORTS = {
     "ddrb": "0",
@@ -348,34 +334,22 @@ def remove_blank_lines(lines: list[str]) -> list[str]:
     return [line for line in lines if line]
 
 
-def remove_jumps(lines: list[str]):
-    return [line for line in lines if not line.startswith(";")]
-
-
 def build_jumps(lines: list[str]) -> list[str]:
     new_lines = []
     addresses = {}
     address = 0
     for content in lines:
         if content.startswith("."):
-            addresses[content[1:]] = address - len(addresses)
+            addresses[content[1:]] = address
         else:
+            try:
+                instruction, label = content.split(" ")
+            except ValueError:
+                instruction = content
+            size = INSTRUCTIONS[instruction].size
+            address += size
             new_lines.append(content)
-        content_splitted = content.split(" ")
-        if content_splitted[0] in ["TOP", "POP"]:
-            address += 2
-        elif content_splitted[0] == "PSHL":
-            dtype = int(content_splitted[1])
-            if dtype in [1, 5]:  # 2 bytes
-                address += 4
-            elif dtype in [2, 6, 8]:  # 4 bytes
-                address += 6
-        elif len(content_splitted) == 2:
-            address += 3
-        else:
-            address += 1
 
-    new_lines = remove_jumps(new_lines)
     for line, content in enumerate(new_lines):
         if " ." in content:
             instruction, label = content.split(" ")
@@ -425,19 +399,50 @@ def build_const_data(lines: list[str]):
 
     for line in lines:
         if line.startswith("CONST"):
-            var_name, var_type, var_value = line.split(" ")[1:]
-            addresses[var_name] = len(data) + len(PORTS)  # free index
-            if var_type == "STRING":
-                allocate_str(var_value)
-            elif var_type == "U16":
-                allocate_U16(var_value)
+            const_name, const_type, const_value = line.split(" ")[1:]
+            addresses[const_name] = len(data) + len(PORTS)  # free index
+            if const_type == "STRING":
+                allocate_str(const_value)
+            elif const_type == "U16":
+                allocate_U16(const_value)
 
     new_lines = remove_static_data_lines(lines)
     for line, content in enumerate(new_lines):
         if "$" in content:
-            instruction, var_name = content.split(" ")
-            new_lines[line] = f"{instruction} {addresses[var_name[1:]]}"
+            instruction, const_name = content.split(" ")
+            if const_name[1:] in addresses:
+                new_lines[line] = f"{instruction} {addresses[const_name[1:]]}"
     return new_lines, data
+
+
+TYPE_SIZES = {
+    "U16": 2,
+}
+
+
+def build_local_variables(lines: list[str]):
+    addresses = {}
+    offset = 0
+    new_lines = []
+    for line in lines:
+        if line.startswith("ALLOC_"):
+            allocation, var_name = line.split(" ")
+            var_type = allocation.split("_")[1]
+            if var_name in addresses:
+                raise Exception(
+                    f"Variable {var_name} already allocated at {addresses[var_name]}"
+                )
+            addresses[var_name] = offset
+            offset += TYPE_SIZES[var_type]
+        else:
+            new_lines.append(line)
+
+    for line, content in enumerate(new_lines):
+        if "$" in content:
+            instruction, var_name = content.split(" ")
+            if var_name[1:] in addresses:
+                new_lines[line] = f"{instruction} {addresses[var_name[1:]]}"
+    return new_lines
 
 
 def map_ports(lines: list[str]) -> None:
@@ -476,6 +481,7 @@ def compile_rfl(filename: str, debug: bool = True) -> list[int]:
         lines = remove_blank_lines(lines)
         build_utf8_strings(lines)
         lines, data = build_const_data(lines)
+        lines = build_local_variables(lines)
         lines = build_jumps(lines)
         map_ports(lines)
         for line in lines:
@@ -492,41 +498,7 @@ def get_instruction(opcode):
 
 
 def disassembly(code):
-    disassembled = []
-    i = 0
-    while i < len(code):
-        inst = get_instruction(code[i])
-        try:
-            if inst == "PSHL":
-                dtype = code[i + 1]
-                if dtype in [1, 5]:  # 2 bytes
-                    value = code[i + 2] << 8 | code[i + 3]
-                    disassembled.append(f"{i}\t {inst} {dtype} {value}")
-                    i += 4
-                elif dtype in [2, 6, 8]:  # 4 bytes
-                    value = (
-                        code[i + 2] << 24
-                        | code[i + 3] << 16
-                        | code[i + 4] << 8
-                        | code[i + 5]
-                    )
-                    disassembled.append(f"{i}\t {inst} {dtype} {value}")
-                    i += 6
-            elif inst in ["TOP", "POP"]:
-                dtype = code[i + 1]
-                disassembled.append(f"{i}\t {inst} {dtype}")
-                i += 2
-            elif inst in LONG_INSTRUCTIONS:
-                param = code[i + 1] << 8 | code[i + 2]
-                disassembled.append(f"{i}\t {inst} {param}")
-                i += 3
-            else:
-                disassembled.append(f"{i}\t {inst}")
-                i += 1
-        except:
-            print(f"Error in line {i}: {code[i]}({inst})")
-            break
-    return disassembled
+    return code
 
 
 if __name__ == "__main__":

@@ -1,5 +1,4 @@
 CONST main STRING "main task started\n"
-CONST message STRING "tasks called\n"
 CONST started1 STRING "task 1 started\n"
 CONST finished1 STRING "task 1 finished\n"
 
@@ -7,8 +6,6 @@ CONST finished1 STRING "task 1 finished\n"
     PUSHL_U16 $main
     SYSCALL 0
     ASYNC_CALL .main_1
-    PUSHL_U16 $message
-    SYSCALL 0
     .loop
     JUMP .loop
 
@@ -16,10 +13,23 @@ CONST finished1 STRING "task 1 finished\n"
     PUSHL_U16 $started1
     SYSCALL 0
 .loop_1
-    PUSH_MILLIS
     PUSHL_U16 1000
-    COMPARE_GT
-    POP_JUMP_IF_FALSE .loop_1
+    CALL .delay
     PUSHL_U16 $finished1
     SYSCALL 0
     ASYNC_RETURN
+
+.delay
+    ALLOC_U16 delay_ms
+    POP_LOCAL_U16 $delay_ms
+    PUSH_MILLIS
+    ALLOC_U16 current_millis
+    POP_LOCAL_U16 $current_millis
+    .loop_delay
+        PUSH_MILLIS
+        PUSH_LOCAL_U16 $current_millis
+        SUB_U16
+        PUSH_LOCAL_U16 $delay_ms
+        COMPARE_EQ
+        POP_JUMP_IF_FALSE .loop_delay
+        RETURN

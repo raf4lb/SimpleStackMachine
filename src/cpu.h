@@ -21,6 +21,7 @@ struct CPU
     uint16_t program_size;
     Stack *stack;
     Stack *callstack;
+    Stack *localstack;
     uint16_t ip;
     const InstructionPtr *instructions;
     PortBank *port_bank;

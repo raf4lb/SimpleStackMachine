@@ -75,6 +75,8 @@ const InstructionPtr instructions_set[] = {
     &push_millis,
     &async_call,
     &async_ret,
+    &push_local_U16,
+    &pop_local_U16,
 };
 
 const uint8_t program[] = PROGRAM;

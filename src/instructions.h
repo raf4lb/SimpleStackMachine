@@ -127,4 +127,8 @@ void divide_F32(CPU *cpu);
 
 void push_millis(CPU *cpu);
 
+void push_local_U16(CPU *cpu);
+
+void pop_local_U16(CPU *cpu);
+
 #endif

@@ -22,10 +22,8 @@ CONST finished2 STRING "task 2 finished\n"
     PUSHL_U16 $started1
     SYSCALL 0
 .loop_1
-    PUSH_MILLIS
     PUSHL_U16 1000
-    COMPARE_GT
-    POP_JUMP_IF_FALSE .loop_1
+    CALL .delay
     PUSHL_U16 $finished1
     SYSCALL 0
     ASYNC_RETURN
@@ -34,10 +32,8 @@ CONST finished2 STRING "task 2 finished\n"
     PUSHL_U16 $started2
     SYSCALL 0
 .loop_2
-    PUSH_MILLIS
     PUSHL_U16 1000
-    COMPARE_GT
-    POP_JUMP_IF_FALSE .loop_2
+    CALL .delay
     PUSHL_U16 $finished2
     SYSCALL 0
     ASYNC_RETURN
@@ -46,10 +42,23 @@ CONST finished2 STRING "task 2 finished\n"
 ;    PUSHL_U16 $started3
 ;    SYSCALL 0
 ;.loop_3
-;    PUSH_MILLIS
 ;    PUSHL_U16 1000
-;    COMPARE_GT
-;    POP_JUMP_IF_FALSE .loop_3
+;    CALL .delay
 ;    PUSHL_U16 $finished3
 ;    SYSCALL 0
 ;    ASYNC_RETURN
+
+.delay
+    ALLOC_U16 delay_ms
+    POP_LOCAL_U16 $delay_ms
+    PUSH_MILLIS
+    ALLOC_U16 current_millis
+    POP_LOCAL_U16 $current_millis
+    .loop_delay
+        PUSH_MILLIS
+        PUSH_LOCAL_U16 $current_millis
+        SUB_U16
+        PUSH_LOCAL_U16 $delay_ms
+        COMPARE_GT
+        POP_JUMP_IF_FALSE .loop_delay
+        RETURN

@@ -7,7 +7,8 @@
 
 uint16_t MAX_TASKS = 1;
 uint16_t TASK_STACK_SIZE = 32;
-uint16_t TASK_CALLSTACK_SIZE = 32;
+uint16_t TASK_CALLSTACK_SIZE = 10;
+uint16_t TASK_LOCALSTACK_SIZE = 32;
 uint16_t CONTEXT_MAX_CYCLES = 20;
 
 void *cpu_create(uint16_t memory_size, uint16_t stack_size, uint16_t callstack_size, const InstructionPtr *instructions, uint8_t port_bank)
@@ -25,7 +26,7 @@ void *cpu_create(uint16_t memory_size, uint16_t stack_size, uint16_t callstack_s
 void cpu_create_task(CPU *cpu, uint16_t address)
 {
     uint8_t id = 0;
-    Task *task = task_create(id, address, TASK_STACK_SIZE, TASK_CALLSTACK_SIZE);
+    Task *task = task_create(id, address, TASK_STACK_SIZE, TASK_CALLSTACK_SIZE, TASK_LOCALSTACK_SIZE);
     task_tree_add_child(cpu->task_tree_current_node, task);
 }
 
@@ -39,7 +40,7 @@ void cpu_load_program(CPU *cpu, const uint8_t *program, uint16_t program_size, u
     cpu->program = program;
     cpu->program_size = program_size;
     cpu->data_address = data_address;
-    Task *main_task = task_create(0, 0, TASK_STACK_SIZE, TASK_CALLSTACK_SIZE);
+    Task *main_task = task_create(0, 0, TASK_STACK_SIZE, TASK_CALLSTACK_SIZE, TASK_LOCALSTACK_SIZE);
     cpu->task_tree_root = task_tree_create_node(main_task);
     cpu->task_tree_current_node = cpu->task_tree_root;
 }
@@ -54,7 +55,6 @@ void cpu_free(CPU *cpu)
 
 uint8_t cpu_fetch_8b(CPU *cpu)
 {
-
     if (0 <= cpu->ip && cpu->ip < cpu->program_size)
     {
         return cpu->program[cpu->ip++];
@@ -94,6 +94,7 @@ void cpu_set_task_node(CPU *cpu, TaskTreeNode *node)
     cpu->ip = node->task->ip;
     cpu->stack = node->task->stack;
     cpu->callstack = node->task->callstack;
+    cpu->localstack = node->task->localstack;
     cpu->task_tree_current_node = node;
 }
 

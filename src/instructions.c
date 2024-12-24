@@ -88,7 +88,7 @@ void load_U16(CPU *cpu)
     uint16_t address;
     cpu_fetch_data(cpu, &address, sizeof(address));
     uint16_t value;
-    stack_read_bend_data(cpu->callstack, address, &value, sizeof(value));
+    stack_read_bend_data_at(cpu->callstack, &value, sizeof(value), address);
     stack_push_bend_data(cpu->stack, &value, sizeof(value));
 }
 
@@ -98,7 +98,7 @@ void store_U16(CPU *cpu)
     cpu_fetch_data(cpu, &address, sizeof(address));
     uint16_t value;
     stack_pop_bend_data(cpu->stack, &value, sizeof(value));
-    stack_write_bend_data(cpu->callstack, address, &value, sizeof(value));
+    stack_write_bend_data_at(cpu->callstack, &value, sizeof(value), address);
 }
 
 void var_U16(CPU *cpu)
@@ -178,7 +178,7 @@ void load_I16(CPU *cpu)
     uint16_t address;
     cpu_fetch_data(cpu, &address, sizeof(address));
     int16_t value;
-    stack_read_bend_data(cpu->callstack, address, &value, sizeof(value));
+    stack_read_bend_data_at(cpu->callstack, &value, sizeof(value), address);
     stack_push_bend_data(cpu->stack, &value, sizeof(value));
 }
 
@@ -188,7 +188,7 @@ void store_I16(CPU *cpu)
     cpu_fetch_data(cpu, &address, sizeof(address));
     int16_t value;
     stack_pop_bend_data(cpu->stack, &value, sizeof(value));
-    stack_write_bend_data(cpu->callstack, address, &value, sizeof(value));
+    stack_write_bend_data_at(cpu->callstack, &value, sizeof(value), address);
 }
 
 void var_I16(CPU *cpu)
@@ -472,15 +472,15 @@ void bitwise_right_shift(CPU *cpu)
 void call(CPU *cpu)
 {
     uint16_t address;
-    cpu_fetch_data(cpu, &address, sizeof(uint16_t));
-    stack_push_bend_data(cpu->callstack, &cpu->ip, sizeof(uint16_t));
+    cpu_fetch_data(cpu, &address, sizeof(address));
+    stack_push_data(cpu->callstack, &cpu->ip, sizeof(address));
     cpu->ip = address;
 }
 
 void ret(CPU *cpu)
 {
     uint16_t address;
-    stack_pop_bend_data(cpu->callstack, &address, sizeof(uint16_t));
+    stack_pop_data(cpu->callstack, &address, sizeof(address));
     cpu->ip = address;
 }
 
@@ -515,4 +515,22 @@ void addf(CPU *cpu)
     float result = a + b;
     stack_push_bend_data(cpu->stack, &result, sizeof(result));
     stack_print(cpu->stack);
+}
+
+void push_local_U16(CPU *cpu)
+{
+    uint16_t address;
+    cpu_fetch_data(cpu, &address, sizeof(address));
+    uint16_t value;
+    stack_read_data_at(cpu->localstack, &value, sizeof(value), address);
+    stack_push_data(cpu->stack, &value, sizeof(value));
+}
+
+void pop_local_U16(CPU *cpu)
+{
+    uint16_t address;
+    cpu_fetch_data(cpu, &address, sizeof(address));
+    uint16_t value;
+    stack_pop_data(cpu->stack, &value, sizeof(value));
+    stack_write_bend_data_at(cpu->localstack, &value, sizeof(value), address);
 }

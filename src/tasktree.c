@@ -14,8 +14,8 @@ TaskTreeNode *task_tree_create_node(Task *task)
     TaskTreeNode *new_task = (TaskTreeNode *)vmmalloc(sizeof(TaskTreeNode));
     if (!new_task)
     {
-        vmprintf("Memory allocation failed!\n");
-        return NULL;
+        vmprintf("Memory allocation failed for task\n");
+        exit(EXIT_FAILURE);
     }
     new_task->id = nextId++;
     snprintf(new_task->name, sizeof(new_task->name), "Task %d", new_task->id);
@@ -39,7 +39,7 @@ TaskTreeNode *task_tree_add_child(TaskTreeNode *parent, Task *task)
         parent->children = (TaskTreeNode **)realloc(parent->children, parent->childCapacity * sizeof(TaskTreeNode *));
         if (!parent->children)
         {
-            vmprintf("Memory allocation failed!\n");
+            vmprintf("Memory allocation failed for task child\n");
             exit(EXIT_FAILURE);
         }
     }

@@ -78,14 +78,6 @@ void stack_print(Stack *stack)
     vmprintf("]\n");
 }
 
-void stack_push_bytes(Stack *stack, uint8_t *source, uint16_t data_size)
-{
-    for (int i = 0; i < data_size; i++)
-    {
-        stack_push(stack, source[i]);
-    }
-}
-
 void stack_pop_bytes(Stack *stack, uint8_t *destination, uint16_t data_size)
 {
     for (int i = 0; i < data_size; i++)
@@ -100,14 +92,6 @@ void stack_push_16b(Stack *stack, uint16_t value)
     stack_push(stack, value & 255);
 }
 
-void stack_push_32b(Stack *stack, uint32_t value)
-{
-    stack_push(stack, (uint8_t)((value >> 24) & 0xFF));
-    stack_push(stack, (uint8_t)((value >> 16) & 0xFF));
-    stack_push(stack, (uint8_t)((value >> 8) & 0xFF));
-    stack_push(stack, (uint8_t)(value & 0xFF));
-}
-
 uint16_t stack_pop_16b(Stack *stack)
 {
     uint8_t buffer[2];
@@ -116,64 +100,33 @@ uint16_t stack_pop_16b(Stack *stack)
     return data;
 }
 
-uint32_t stack_pop_32b(Stack *stack)
-{
-    uint8_t buffer[4];
-    stack_pop_bytes(stack, buffer, 4); // pop 4 bytes
-    uint32_t data = ((uint32_t)buffer[3] << 24) | ((uint32_t)buffer[2] << 16) | ((uint32_t)buffer[1] << 8) | buffer[0];
-    return data;
-}
-
-uint64_t stack_read_bytes(Stack *stack, uint16_t size)
-{
-    uint64_t result = 0;
-    // Ensure that size is within valid range (1, 2, 4, or 8)
-    if (size != 1 && size != 2 && size != 4 && size != 8)
-    {
-        vmprintf("stack_read_bytes: invalid size");
-        exit(EXIT_FAILURE);
-    }
-    for (uint16_t i = 0; i < size; i++)
-    {
-        result = (result << 8) | stack->data[stack->sp - size + i];
-    }
-    return result;
-}
-
 void stack_push_data(Stack *stack, void *value, uint16_t size)
 {
     stack_push_bend_data(stack, value, size);
 }
 
-void stack_push_lend_data(Stack *stack, void *value, uint16_t size)
-{
-    if (stack->sp + size <= stack->size)
-    {
-        memcpy(stack->data + stack->sp, value, size);
-        stack->sp += size;
-    }
-    else
-    {
-        vmprintf("stack_push_data: stack overflow\n");
-    }
-}
-
 void stack_push_bend_data(Stack *stack, void *value, uint16_t size)
 {
-    if (stack->sp + size <= stack->size)
+    stack_write_bend_data_at(stack, value, size, stack->sp);
+}
+
+void stack_write_bend_data_at(Stack *stack, void *value, uint16_t size, uint16_t address)
+{
+    uint16_t final_address = address + size;
+    if (final_address > stack->size)
     {
-        uint8_t temp[size];
-        for (uint16_t i = 0; i < size; i++)
-        {
-            temp[i] = *((uint8_t *)value + size - 1 - i);
-        }
-        memcpy(stack->data + stack->sp, temp, size);
-        stack->sp += size;
+        vmprintf("stack_write_bend_data_at: stackoverflow\n");
+        exit(EXIT_FAILURE);
     }
-    else
+
+    uint8_t temp[size];
+    for (uint16_t i = 0; i < size; i++)
     {
-        vmprintf("stack_push_data: stack overflow\n");
+        temp[i] = *((uint8_t *)value + size - 1 - i);
     }
+    memcpy(stack->data + address, temp, size);
+    if (final_address > stack->sp)
+        stack->sp = final_address;
 }
 
 void stack_pop_data(Stack *stack, void *value, uint16_t size)
@@ -183,44 +136,41 @@ void stack_pop_data(Stack *stack, void *value, uint16_t size)
 
 void stack_pop_bend_data(Stack *stack, void *value, uint16_t size)
 {
-    if (stack->sp >= size)
-    {
-        stack->sp -= size;
-
-        // Adjust pointer to start from the end of the extracted data
-        uint8_t *data_ptr = stack->data + stack->sp + size - 1;
-
-        // Iterate over the bytes in reverse order and copy them to the value buffer
-        for (int i = 0; i < size; i++)
-        {
-            ((uint8_t *)value)[i] = *data_ptr;
-            data_ptr--;
-        }
-    }
-    else
+    if (size > stack->sp)
     {
         vmprintf("stack_pop_bend_data: stack underflow\n");
+        exit(EXIT_FAILURE);
+    }
+
+    stack->sp -= size;
+
+    // Adjust pointer to start from the end of the extracted data
+    uint8_t *data_ptr = stack->data + stack->sp + size - 1;
+
+    // Iterate over the bytes in reverse order and copy them to the value buffer
+    for (int i = 0; i < size; i++)
+    {
+        ((uint8_t *)value)[i] = *data_ptr;
+        data_ptr--;
     }
 }
 
-void stack_read_data(Stack *stack, uint16_t address, void *value, uint16_t size)
+void stack_read_data_at(Stack *stack, void *value, uint16_t size, uint16_t address)
 {
-    stack_read_bend_data(stack, address, value, size);
+    stack_read_bend_data_at(stack, value, size, address);
 }
 
-void stack_read_bend_data(Stack *stack, uint16_t address, void *value, uint16_t size)
+void stack_read_bend_data_at(Stack *stack, void *value, uint16_t size, uint16_t address)
 {
-    if (stack->sp >= size)
+    if (size > stack->sp)
     {
-        // Copia os bytes da stack para o buffer value, invertendo a ordem dos bytes
-        for (int i = 0; i < size; i++)
-        {
-            ((uint8_t *)value)[i] = stack->data[address + (size - i - 1)];
-        }
+        vmprintf("stack_read_bend_data_at: stack underflow\n");
+        exit(EXIT_FAILURE);
     }
-    else
+    // Copia os bytes da stack para o buffer value, invertendo a ordem dos bytes
+    for (int i = 0; i < size; i++)
     {
-        vmprintf("stack_read_data: stack underflow\n");
+        ((uint8_t *)value)[i] = stack->data[address + (size - i - 1)];
     }
 }
 
@@ -228,7 +178,7 @@ uint16_t stack_read_U16(Stack *stack, uint16_t address)
 {
     uint16_t value;
     uint8_t size = sizeof(value);
-    stack_read_bend_data(stack, address, &value, size);
+    stack_read_bend_data_at(stack, &value, size, address);
     return value;
 }
 
@@ -236,7 +186,7 @@ int16_t stack_read_I16(Stack *stack, uint16_t address)
 {
     int16_t value;
     uint8_t size = sizeof(value);
-    stack_read_bend_data(stack, address, &value, size);
+    stack_read_bend_data_at(stack, &value, size, address);
     return value;
 }
 
@@ -244,35 +194,6 @@ float stack_read_F32(Stack *stack, uint16_t address)
 {
     float value;
     uint8_t size = sizeof(value);
-    stack_read_bend_data(stack, address, &value, size);
+    stack_read_bend_data_at(stack, &value, size, address);
     return value;
-}
-
-void stack_read_lend_data(Stack *stack, void *value, uint16_t size)
-{
-    if (stack->sp >= size)
-    {
-        memcpy(value, stack->data + stack->sp - size, size);
-    }
-    else
-    {
-        vmprintf("stack_read_data: stack underflow\n");
-    }
-}
-
-void stack_write_bend_data(Stack *stack, uint16_t address, void *value, uint16_t size)
-{
-    if (address + size < stack->size)
-    {
-        uint8_t temp[size];
-        for (uint16_t i = 0; i < size; i++)
-        {
-            temp[i] = *((uint8_t *)value + size - 1 - i);
-        }
-        memcpy(stack->data + address, temp, size);
-    }
-    else
-    {
-        vmprintf("stack_write_bend_data: stack out of space\n");
-    }
 }

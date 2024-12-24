@@ -56,7 +56,7 @@ windows-debug: compile
 
 arduino: compile
 	@echo "Compiling code to ARDUINO version"
-	avr-gcc $(PARAMS) -O2 -mmcu=atmega328p -DARDUINO -DSERIAL_ENABLED -o build/$@.elf
+	avr-gcc $(PARAMS) -Os -mmcu=atmega328p -DARDUINO -DSERIAL_ENABLED -o build/$@.elf
 	avr-objcopy -O ihex -R .eeprom build/$@.elf build/$@.hex
 	avr-size -C --mcu=atmega328p build/$@.elf 
 	@echo "ARDUINO version created"
