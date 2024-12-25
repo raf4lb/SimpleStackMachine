@@ -7,7 +7,7 @@
 
 uint16_t MAX_TASKS = 1;
 uint16_t TASK_STACK_SIZE = 32;
-uint16_t TASK_CALLSTACK_SIZE = 10;
+uint16_t TASK_CALLSTACK_SIZE = 32;
 uint16_t TASK_LOCALSTACK_SIZE = 32;
 uint16_t CONTEXT_MAX_CYCLES = 20;
 
@@ -154,4 +154,6 @@ void cpu_print(CPU *cpu)
     stack_print(cpu->stack);
     vmprintf("CallStack:\n");
     stack_print(cpu->callstack);
+    vmprintf("LocalStack:\n");
+    stack_print(cpu->localstack);
 }

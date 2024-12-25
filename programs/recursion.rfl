@@ -1,0 +1,27 @@
+;def incr(i):
+;    if i == 10:
+;        return i
+;    else:
+;        return incr(i+1)
+
+PUSHL_U16 1
+CALL .incr
+TOP_U16
+HALT
+
+.incr
+    ALLOC_U16 i
+    POP_LOCAL_U16 $i
+    PUSH_LOCAL_U16 $i
+    PUSHL_U16 10
+    COMPARE_EQ
+    POP_JUMP_IF_FALSE .call_incr
+    PUSH_LOCAL_U16 $i
+    RETURN
+    .call_incr
+        PUSH_LOCAL_U16 $i
+        PUSHL_U16 1
+        ADD_U16
+        CALL .incr
+        RETURN
+

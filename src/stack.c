@@ -61,7 +61,7 @@ void stack_push(Stack *stack, uint8_t value)
 
 void stack_print(Stack *stack)
 {
-    vmprintf("Stack Pointer: %d\n", stack->sp);
+    vmprintf("SP: %d\n", stack->sp);
     vmprintf("[");
     for (int i = 0; i < stack->size; i++)
     {
