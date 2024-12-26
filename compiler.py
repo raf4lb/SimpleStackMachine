@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
+import os
 import sys
 import inspect
 import struct
+from typing import List
 
 
 class Instruction(ABC):
@@ -317,12 +319,12 @@ PORTS = {
 }
 
 
-def strip(lines: list[str]) -> None:
+def strip(lines: List[str]) -> None:
     for i, line in enumerate(lines):
         lines[i] = line.strip()
 
 
-def remove_comments(lines: list[str]) -> list[str]:
+def remove_comments(lines: List[str]) -> List[str]:
     for line, content in enumerate(lines):
         index = content.find(";")
         if index > -1:
@@ -330,11 +332,11 @@ def remove_comments(lines: list[str]) -> list[str]:
     return lines
 
 
-def remove_blank_lines(lines: list[str]) -> list[str]:
+def remove_blank_lines(lines: List[str]) -> List[str]:
     return [line for line in lines if line]
 
 
-def build_jumps(lines: list[str]) -> list[str]:
+def build_jumps(lines: List[str]) -> List[str]:
     new_lines = []
     addresses = {}
     address = 0
@@ -357,7 +359,7 @@ def build_jumps(lines: list[str]) -> list[str]:
     return new_lines
 
 
-def remove_static_data_lines(lines: list[str]) -> list[str]:
+def remove_static_data_lines(lines: List[str]) -> List[str]:
     return [line for line in lines if not line.startswith("CONST")]
 
 
@@ -367,7 +369,7 @@ def to_utf8(string):
     return ",".join(str(c) for c in utf8_array) + ",0"
 
 
-def build_utf8_strings(lines: list[str]):
+def build_utf8_strings(lines: List[str]):
     for i, content in enumerate(lines):
         content = content.replace("\\n", "\n")
         if '"' in content:
@@ -387,7 +389,7 @@ def build_utf8_strings(lines: list[str]):
             lines[i] = content.replace(f'"{string}"', ascii_list)
 
 
-def build_const_data(lines: list[str]):
+def build_const_data(lines: List[str]):
     addresses = PORTS.copy()
     data = []
 
@@ -420,7 +422,7 @@ TYPE_SIZES = {
 }
 
 
-def build_local_variables(lines: list[str]):
+def build_local_variables(lines: List[str]):
     addresses = {}
     offset = 0
     new_lines = []
@@ -445,7 +447,7 @@ def build_local_variables(lines: list[str]):
     return new_lines
 
 
-def map_ports(lines: list[str]) -> None:
+def map_ports(lines: List[str]) -> None:
     for line, content in enumerate(lines):
         contents = content.split(" ")
         if len(contents) == 2:
@@ -458,7 +460,7 @@ def pprint(lines):
         print(f"{line}\t", content)
 
 
-def encode_line(line: str) -> list[int]:
+def encode_line(line: str) -> List[int]:
     try:
         inst_name, operand = line.split(" ")
     except ValueError:
@@ -472,10 +474,41 @@ def encode_line(line: str) -> list[int]:
         print(instruction)
 
 
-def compile_rfl(filename: str, debug: bool = True) -> list[int]:
+def copy_code_from(source_file: str) -> List[str]:
+    with open(source_file, "r") as p:
+        lines = p.readlines()
+        return lines
+
+
+def process_includes(lines: List[str], base_dir: str) -> List[str]:
+    included = []
+    new_lines = []
+    for line in lines:
+        if line.startswith("#include"):
+            _, source_file = line.split(" ")
+            source_file = source_file.replace("\n", "")
+            code = copy_code_from(base_dir + "/" + source_file)
+            included.extend(code)
+        else:
+            new_lines.append(line)
+
+    included.extend(new_lines)
+    return included
+
+
+def include_main_call(lines: List[str]) -> List[str]:
+    main_lines = ["CALL .main\n", "HALT"]
+    main_lines.extend(lines)
+    return main_lines
+
+
+def compile_rfl(filename: str, debug: bool = True) -> List[int]:
     program = []
     with open(filename, "r") as p:
+        base_dir = os.path.dirname(p.name)
         lines = p.readlines()
+        lines = process_includes(lines, base_dir)
+        lines = include_main_call(lines)
         lines = remove_comments(lines)
         strip(lines)
         lines = remove_blank_lines(lines)

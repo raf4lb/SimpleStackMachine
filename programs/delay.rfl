@@ -1,11 +1,9 @@
-CONST delay_started STRING "Delay started\n"
-CONST delay_finished STRING "Delay finished\n"
+; delay milliseconds
+; - param: ms (U16)
 
-CALL .main
-
-.delay
-    ALLOC_U16 delay_ms
-    POP_LOCAL_U16 $delay_ms
+.delay_ms
+    ALLOC_U16 ms
+    POP_LOCAL_U16 $ms
     PUSH_MILLIS
     ALLOC_U16 current_millis
     POP_LOCAL_U16 $current_millis
@@ -13,16 +11,7 @@ CALL .main
         PUSH_MILLIS
         PUSH_LOCAL_U16 $current_millis
         SUB_U16
-        PUSH_LOCAL_U16 $delay_ms
-        COMPARE_EQ
+        PUSH_LOCAL_U16 $ms
+        COMPARE_GT
         POP_JUMP_IF_FALSE .loop_delay
         RETURN
-
-.main
-    PUSHL_U16 1000 ; 1 second
-    PUSHL_U16 $delay_started
-    SYSCALL 0
-    CALL .delay
-    PUSHL_U16 $delay_finished
-    SYSCALL 0
-    HALT
