@@ -19,7 +19,7 @@
     PUSHL_U16 5
     POP_LOCAL_U16 $main_pin
     ALLOC_U16 main_delay_ms
-    PUSHL_U16 250
+    PUSHL_U16 500
     POP_LOCAL_U16 $main_delay_ms
     .loop
         ; PORTB = PORTB | (1 << PINB5)
