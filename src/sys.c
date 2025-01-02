@@ -27,26 +27,3 @@ uint16_t get_memory_usage()
 {
     return dynamic_memory_usage;
 }
-
-int biggestMemoryBlock(uint16_t min, uint16_t max)
-{
-    if (min == max - 1)
-        return min;
-
-    int size = max;
-    int lastSize = size;
-    uint8_t *buf;
-    while ((buf = (uint8_t *)malloc(size)) == NULL)
-    {
-        lastSize = size;
-        size -= (max - min) / 2;
-    };
-
-    free(buf);
-    return biggestMemoryBlock(size, lastSize);
-};
-
-int free_memory()
-{
-    return biggestMemoryBlock(0, 2048);
-}
