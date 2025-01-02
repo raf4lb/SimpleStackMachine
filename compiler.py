@@ -3,7 +3,7 @@ import os
 import sys
 import inspect
 import struct
-from typing import List
+from typing import List, Set
 
 
 class Instruction(ABC):
@@ -460,7 +460,7 @@ def pprint(lines):
         print(f"{line}\t", content)
 
 
-def encode_line(line: str) -> List[int]:
+def encode_line(i: int, line: str) -> List[int]:
     try:
         inst_name, operand = line.split(" ")
     except ValueError:
@@ -471,35 +471,53 @@ def encode_line(line: str) -> List[int]:
     try:
         return instruction.encode(operand)
     except:
-        print(instruction)
+        print("Error at:")
+        print(i, instruction)
 
 
 def copy_code_from(source_file: str) -> List[str]:
     with open(source_file, "r") as p:
-        lines = p.readlines()
-        return lines
+        return p.readlines()
 
 
-def process_includes(lines: List[str], base_dir: str) -> List[str]:
-    included = []
-    new_lines = []
+def process_includes(
+    lines: List[str], base_dir: str, included_files: Set[str] = None
+) -> List[str]:
+    if included_files is None:
+        included_files = set()
+
+    processed_lines = []
+
     for line in lines:
         if line.startswith("#include"):
             _, source_file = line.split(" ")
-            source_file = source_file.replace("\n", "")
-            code = copy_code_from(base_dir + "/" + source_file)
-            included.extend(code)
-        else:
-            new_lines.append(line)
+            source_file = source_file.strip()
+            full_path = f"{base_dir}/{source_file}"
 
-    included.extend(new_lines)
-    return included
+            if full_path not in included_files:
+                included_files.add(full_path)
+                included_lines = copy_code_from(full_path)
+                # Recursively process the included file
+                processed_lines.extend(
+                    process_includes(included_lines, base_dir, included_files)
+                )
+        else:
+            processed_lines.append(line)
+
+    return processed_lines
 
 
 def include_main_call(lines: List[str]) -> List[str]:
     main_lines = ["CALL .main\n", "HALT"]
     main_lines.extend(lines)
     return main_lines
+
+
+def print_lines(lines: List[str]) -> None:
+    max_lines = len(lines)
+    leadings = len(str(max_lines))
+    for i, line in enumerate(lines):
+        print(f"{str(i).zfill(leadings)}  {line}")
 
 
 def compile_rfl(filename: str, debug: bool = True) -> List[int]:
@@ -517,8 +535,8 @@ def compile_rfl(filename: str, debug: bool = True) -> List[int]:
         lines = build_local_variables(lines)
         lines = build_jumps(lines)
         map_ports(lines)
-        for line in lines:
-            program.extend(encode_line(line))
+        for i, line in enumerate(lines):
+            program.extend(encode_line(i, line))
     data_address = len(program)
     program.extend(data)
     return program, len(program), data_address
