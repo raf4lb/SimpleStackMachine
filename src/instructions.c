@@ -425,17 +425,33 @@ void divide(CPU *cpu)
 void bitwise_and(CPU *cpu)
 {
     // TODO: Pop value according the integer size
-    uint16_t b = stack_pop_16b(cpu->stack);
-    uint16_t a = stack_pop_16b(cpu->stack);
-    stack_push_16b(cpu->stack, a & b);
+    bitwise_and_U16(cpu);
+}
+
+void bitwise_and_U16(CPU *cpu)
+{
+    uint16_t b;
+    stack_pop_data(cpu->stack, &b, sizeof(b));
+    uint16_t a;
+    stack_pop_data(cpu->stack, &a, sizeof(a));
+    uint16_t result = a & b;
+    stack_push_data(cpu->stack, &result, sizeof(result));
 }
 
 void bitwise_or(CPU *cpu)
 {
     // TODO: Pop value according the integer size
-    uint16_t b = stack_pop_16b(cpu->stack);
-    uint16_t a = stack_pop_16b(cpu->stack);
-    stack_push_16b(cpu->stack, a | b);
+    bitwise_or_U16(cpu);
+}
+
+void bitwise_or_U16(CPU *cpu)
+{
+    uint16_t b;
+    stack_pop_data(cpu->stack, &b, sizeof(b));
+    uint16_t a;
+    stack_pop_data(cpu->stack, &a, sizeof(a));
+    uint16_t result = a | b;
+    stack_push_data(cpu->stack, &result, sizeof(result));
 }
 
 void bitwise_xor(CPU *cpu)
@@ -449,16 +465,31 @@ void bitwise_xor(CPU *cpu)
 void bitwise_not(CPU *cpu)
 {
     // TODO: Pop value according the integer size
-    uint16_t a = stack_pop_16b(cpu->stack);
-    stack_push_16b(cpu->stack, ~a);
+    bitwise_not_U16(cpu);
+}
+
+void bitwise_not_U16(CPU *cpu)
+{
+    uint16_t a;
+    stack_pop_data(cpu->stack, &a, sizeof(a));
+    a = ~a;
+    stack_push_data(cpu->stack, &a, sizeof(a));
 }
 
 void bitwise_left_shift(CPU *cpu)
 {
     // TODO: Pop value according the integer size
-    uint16_t b = stack_pop_16b(cpu->stack);
-    uint16_t a = stack_pop_16b(cpu->stack);
-    stack_push_16b(cpu->stack, a << b);
+    bitwise_left_shift_U16(cpu);
+}
+
+void bitwise_left_shift_U16(CPU *cpu)
+{
+    uint16_t b;
+    stack_pop_data(cpu->stack, &b, sizeof(b));
+    uint16_t a;
+    stack_pop_data(cpu->stack, &a, sizeof(a));
+    uint16_t result = a << b;
+    stack_push_data(cpu->stack, &result, sizeof(result));
 }
 
 void bitwise_right_shift(CPU *cpu)
@@ -532,5 +563,14 @@ void pop_local_U16(CPU *cpu)
     cpu_fetch_data(cpu, &address, sizeof(address));
     uint16_t value;
     stack_pop_data(cpu->stack, &value, sizeof(value));
+    stack_write_bend_data_at(cpu->localstack, &value, sizeof(value), address);
+}
+
+void parent_pop_local_U16(CPU *cpu)
+{
+    uint16_t address;
+    cpu_fetch_data(cpu, &address, sizeof(address));
+    uint16_t value;
+    stack_pop_data(cpu->task_tree_current_node->parent->task->stack, &value, sizeof(value));
     stack_write_bend_data_at(cpu->localstack, &value, sizeof(value), address);
 }

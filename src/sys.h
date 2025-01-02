@@ -10,6 +10,4 @@ void vmfree(void *ptr);
 
 uint16_t get_memory_usage();
 
-int free_memory();
-
 #endif

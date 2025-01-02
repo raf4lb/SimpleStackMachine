@@ -41,13 +41,21 @@ void divide(CPU *cpu);
 
 void bitwise_and(CPU *cpu);
 
+void bitwise_and_U16(CPU *cpu);
+
 void bitwise_or(CPU *cpu);
+
+void bitwise_or_U16(CPU *cpu);
 
 void bitwise_xor(CPU *cpu);
 
 void bitwise_not(CPU *cpu);
 
+void bitwise_not_U16(CPU *cpu);
+
 void bitwise_left_shift(CPU *cpu);
+
+void bitwise_left_shift_U16(CPU *cpu);
 
 void bitwise_right_shift(CPU *cpu);
 
@@ -130,5 +138,7 @@ void push_millis(CPU *cpu);
 void push_local_U16(CPU *cpu);
 
 void pop_local_U16(CPU *cpu);
+
+void parent_pop_local_U16(CPU *cpu);
 
 #endif

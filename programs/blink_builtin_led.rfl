@@ -1,17 +1,22 @@
 ; Blink builtin LED pin 13 (portb5)
 ; https://wokwi.com/projects/392567753366512641
 
-; set pin 13 output
-PUSHL_U16 32         ; push 0b00100000 to stack
-POPA_U16 $ddrb       ; set DDRB
+#include delay.rfl
 
-.loop
-    PUSHL_U16 32     ; push 0b00100000 to stack
-    POPA_U16 $portb  ; pop result to address 0x1 (PORTB)
-    DELAY 1000
+.main
+    ; set pin 13 output
+    PUSHL_U16 32         ; push 0b00100000 to stack
+    POPA_U16 $ddrb       ; set DDRB
 
-    PUSHL_U16 0      ; push 0b00000000 to stack
-    POPA_U16 $portb  ; pop result to address 0x1 (PORTB)
-    DELAY 1000
-    
-    JUMP .loop   ; jump to .loop
+    .loop
+        PUSHL_U16 32     ; push 0b00100000 to stack
+        POPA_U16 $portb  ; pop result to address 0x1 (PORTB)
+        PUSHL_U16 1000
+        CALL .delay_ms
+
+        PUSHL_U16 0      ; push 0b00000000 to stack
+        POPA_U16 $portb  ; pop result to address 0x1 (PORTB)
+        PUSHL_U16 1000
+        CALL .delay_ms
+        
+        JUMP .loop   ; jump to .loop

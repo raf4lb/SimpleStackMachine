@@ -116,6 +116,7 @@ void stack_write_bend_data_at(Stack *stack, void *value, uint16_t size, uint16_t
     if (final_address > stack->size)
     {
         vmprintf("stack_write_bend_data_at: stackoverflow\n");
+        stack_print(stack);
         exit(EXIT_FAILURE);
     }
 
@@ -139,6 +140,7 @@ void stack_pop_bend_data(Stack *stack, void *value, uint16_t size)
     if (size > stack->sp)
     {
         vmprintf("stack_pop_bend_data: stack underflow\n");
+        stack_print(stack);
         exit(EXIT_FAILURE);
     }
 
@@ -165,6 +167,7 @@ void stack_read_bend_data_at(Stack *stack, void *value, uint16_t size, uint16_t 
     if (size > stack->sp)
     {
         vmprintf("stack_read_bend_data_at: stack underflow\n");
+        stack_print(stack);
         exit(EXIT_FAILURE);
     }
     // Copia os bytes da stack para o buffer value, invertendo a ordem dos bytes

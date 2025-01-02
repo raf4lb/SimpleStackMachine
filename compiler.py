@@ -302,6 +302,31 @@ class PopLocalU16Instruction(OperandU16Instruction):
     opcode = 59
 
 
+class LeftShiftU16Instruction(NoOperandInstruction):
+    name = "LSHIFT_U16"
+    opcode = 60
+
+
+class OrU16Instruction(NoOperandInstruction):
+    name = "OR_U16"
+    opcode = 61
+
+
+class AndU16Instruction(NoOperandInstruction):
+    name = "AND_U16"
+    opcode = 62
+
+
+class NorU16Instruction(NoOperandInstruction):
+    name = "NOT_U16"
+    opcode = 63
+
+
+class ParentPopLocalU16Instruction(OperandU16Instruction):
+    name = "PARENT_POP_LOCAL_U16"
+    opcode = 64
+
+
 instructions_classes = [
     cls_obj
     for cls_name, cls_obj in inspect.getmembers(sys.modules[__name__])

@@ -77,6 +77,11 @@ const InstructionPtr instructions_set[] = {
     &async_ret,
     &push_local_U16,
     &pop_local_U16,
+    &bitwise_left_shift_U16,
+    &bitwise_or_U16,
+    &bitwise_and_U16,
+    &bitwise_not_U16,
+    &parent_pop_local_U16,
 };
 
 const uint8_t program[] = PROGRAM;
