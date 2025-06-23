@@ -15,6 +15,7 @@ PARAMS = \
 		$(SOURCE_DIR)/instructions.c \
 		$(SOURCE_DIR)/serial.c \
 		$(SOURCE_DIR)/builtin.c \
+		$(SOURCE_DIR)/messaging.c \
 		$(SOURCE_DIR)/task.c \
 		$(SOURCE_DIR)/tasktree.c \
 		$(SOURCE_DIR)/main.c \

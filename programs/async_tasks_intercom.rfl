@@ -1,0 +1,14 @@
+; Task intercommunication example
+; https://wokwi.com/projects/392567753366512641
+
+#include delay.rfl
+
+.main
+    ASYNC_CALL .task_1
+    CALL .main_task
+    
+.main_task 
+    JUMP .main_task
+
+.task_1
+    JUMP .task_1

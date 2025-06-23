@@ -27,6 +27,8 @@ struct CPU
     PortBank *port_bank;
     uint16_t user_memory;
     uint16_t data_address;
+    MessageQueue *message_queues;
+    uint16_t tasks_number;
 };
 
 void *cpu_create(uint16_t memory_size, uint16_t stack_size, uint16_t callstack_size, const InstructionPtr *instruction_set, uint8_t port_banks);
@@ -56,5 +58,7 @@ void cpu_set_task_node(CPU *cpu, TaskTreeNode *node);
 
 void cpu_create_task(CPU *cpu, uint16_t address);
 void cpu_delete_task(CPU *cpu, TaskTreeNode *node);
+
+void cpu_create_task_inbox(CPU *cpu, Task *task);
 
 #endif

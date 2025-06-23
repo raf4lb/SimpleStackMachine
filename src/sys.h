@@ -10,4 +10,6 @@ void vmfree(void *ptr);
 
 uint16_t get_memory_usage();
 
+uint16_t get_local_vm_id();
+
 #endif
