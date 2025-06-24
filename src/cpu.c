@@ -6,10 +6,10 @@
 #include "tasktree.h"
 #include "string.h"
 
-uint16_t TASK_STACK_SIZE = 32;
-uint16_t TASK_CALLSTACK_SIZE = 32;
-uint16_t TASK_LOCALSTACK_SIZE = 32;
-uint16_t CONTEXT_MAX_CYCLES = 20;
+uint16_t TASK_STACK_SIZE = 16;
+uint16_t TASK_CALLSTACK_SIZE = 16;
+uint16_t TASK_LOCALSTACK_SIZE = 16;
+uint16_t CONTEXT_MAX_CYCLES = 200;
 
 void *cpu_create(uint16_t memory_size, uint16_t stack_size, uint16_t callstack_size, const InstructionPtr *instructions, uint8_t port_bank)
 {
@@ -47,40 +47,6 @@ void cpu_create_task_inbox(CPU *cpu, Task *task){
         queue = queue->next;
     }
     queue->next = new_queue;
-
-    Message *test_message = (Message *)vmmalloc(sizeof(Message));
-    test_message->frag_id = 0;
-    test_message->frag_total = 0;
-    test_message->seq = 0;
-    test_message->vm_dst = get_local_vm_id();
-    test_message->vm_src = get_local_vm_id();
-    test_message->task_dst = 1;
-    test_message->len = 4;
-    test_message->payload = (uint8_t *)vmmalloc(4*sizeof(uint8_t));
-    test_message->payload[0] = 'O';
-    test_message->payload[1] = 'l';
-    test_message->payload[2] = 'a';
-    test_message->payload[3] = '\0';
-    test_message->crc = compute_crc(test_message);
-    send_message(cpu->message_queues, test_message);
-
-    Message *test_message2 = (Message *)vmmalloc(sizeof(Message));
-    test_message2->frag_id = 0;
-    test_message2->frag_total = 0;
-    test_message2->seq = 0;
-    test_message2->vm_dst = get_local_vm_id();
-    test_message2->vm_src = get_local_vm_id();
-    test_message2->task_dst = 1;
-    test_message2->len = 6;
-    test_message2->payload = (uint8_t *)vmmalloc(6*sizeof(uint8_t));
-    test_message2->payload[0] = 'm';
-    test_message2->payload[1] = 'u';
-    test_message2->payload[2] = 'n';
-    test_message2->payload[3] = 'd';
-    test_message2->payload[4] = 'o';
-    test_message2->payload[5] = '\0';
-    test_message2->crc = compute_crc(test_message2);
-    send_message(cpu->message_queues, test_message2);
 }
 
 void cpu_delete_task(CPU *cpu, TaskTreeNode *node)

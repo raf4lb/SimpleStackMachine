@@ -42,6 +42,6 @@ void task_process_inbox(Task *task)
 
         inbox_queue->head = message->next;
         inbox_queue->count--;
-        vmfree(message);
+        message_free(message);
     }
 }

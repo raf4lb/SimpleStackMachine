@@ -12,7 +12,7 @@ int generate_sequence_id()
 uint16_t compute_crc(Message *message)
 {
     uint16_t crc = 0;
-    for (int i = 0; i < message->len; i++)
+    for (int i = 0; i < message->payload_size; i++)
     {
         crc ^= message->payload[i];
     }
@@ -23,22 +23,25 @@ bool deliver_local(MessageQueue *message_queues, Message *message)
 {
     MessageQueue *queue = message_queues;
     while (queue != NULL)
-    {   
+    {
         if (queue->task_id == message->task_dst)
-        {   
+        {
             if (queue->count >= TASK_MESSAGE_QUEUE_SIZE)
             {
                 vmprintf("ERROR: task %d inbox is full\n", message->task_dst);
                 return false;
             }
-            if (queue->head == NULL){
+            if (queue->head == NULL)
+            {
                 queue->head = message;
                 queue->tail = message;
-            }else{
+            }
+            else
+            {
                 queue->tail->next = message;
                 queue->tail = message;
             }
-            
+
             queue->count++;
             return true;
         }
@@ -56,16 +59,10 @@ void send_remote_message(uint16_t vm_id, Message *msg)
 
 void send_message(MessageQueue *local_task_inbox, Message *message)
 {
-    if (message->crc != compute_crc(message))
-    {
-        vmprintf("invalid CRC\n");
-        return;
-    }
-
+    // vmprintf("sent message %s to task %d\n", message->payload, message->task_dst);
     if (message->vm_dst == get_local_vm_id())
     {
-        bool ok = deliver_local(local_task_inbox, message);
-        if (!ok)
+        if (!deliver_local(local_task_inbox, message))
         {
             vmprintf("Error delivering local message\n");
         }
@@ -125,7 +122,6 @@ MessageQueue *message_queue_create(uint16_t task_id)
     queue->tail = NULL;
     queue->count = 0;
     queue->next = NULL;
-    vmprintf("message_queue_created: task %d\n", task_id);
     return queue;
 }
 
@@ -139,4 +135,36 @@ void message_queue_free(MessageQueue *queue)
         message = next;
     }
     free(queue);
+}
+
+Message *message_create(uint16_t vm_src, uint16_t vm_dst, uint16_t task_dst_id, uint8_t *payload, uint16_t payload_size)
+{
+    Message *message = (Message *)vmmalloc(sizeof(Message));
+    message->frag_id = 0;
+    message->frag_total = 0;
+    message->seq = 0;
+    message->vm_dst = vm_dst;
+    message->vm_src = vm_src;
+    message->task_dst = task_dst_id;
+    message->payload_size = payload_size;
+    message->payload = (uint8_t *)vmmalloc(payload_size * sizeof(uint8_t));
+    for (uint16_t i = 0; i < payload_size; i++)
+    {
+        message->payload[i] = payload[i];
+    }
+    message->crc = compute_crc(message);
+    return message;
+}
+
+void message_free(Message *message)
+{
+    vmfree(message->payload);
+    vmfree(message);
+}
+
+void message_queue_send_message(MessageQueue *message_queue, uint16_t task_dst_id, uint8_t *payload, uint16_t payload_size)
+{
+    uint16_t vm_src = get_local_vm_id();
+    Message *message = message_create(vm_src, vm_src, task_dst_id, payload, payload_size);
+    send_message(message_queue, message);
 }

@@ -1,7 +1,7 @@
 CONST hello STRING "LED TOGGLED!\n"
 
-.loop
+.main
     PUSHL_U16 $hello
     SYSCALL 0
     SYSCALL 1
-    JUMP .loop
+    JUMP .main

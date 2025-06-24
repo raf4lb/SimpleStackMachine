@@ -13,7 +13,7 @@ struct Message{
     uint16_t seq;
     uint8_t frag_id;
     uint8_t frag_total;
-    uint16_t len;
+    uint16_t payload_size;
     uint16_t crc;
     uint8_t *payload;
 };
@@ -46,3 +46,9 @@ void send_message(MessageQueue *local_task_inbox, Message* msg);
 MessageQueue *message_queue_create(uint16_t task_id);
 
 void message_queue_free(MessageQueue *queue);
+
+Message *message_create(uint16_t vm_src, uint16_t vm_dst, uint16_t task_dst_id, uint8_t *payload, uint16_t payload_size);
+
+void message_free(Message *message);
+
+void message_queue_send_message(MessageQueue *message_queue, uint16_t task_dst_id, uint8_t *payload, uint16_t payload_size);

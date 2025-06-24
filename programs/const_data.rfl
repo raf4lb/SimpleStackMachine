@@ -2,7 +2,7 @@ CONST x U16 10
 CONST y U16 5
 CONST z U16 15
 
-.loop
+.main
     PUSH_U16 $x
     PUSH_U16 $y
     PUSH_U16 $z
@@ -11,7 +11,7 @@ CONST z U16 15
     TOP_U16
     POP_U16
     DELAY 1000
-    JUMP .loop
+    JUMP .main
 
 ; memory layout
 ; - program

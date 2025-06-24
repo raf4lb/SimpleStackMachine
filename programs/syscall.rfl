@@ -1,12 +1,12 @@
 CONST message_on STRING "HELLO WORLD!\n"
 CONST message_off STRING "OLÁ MUNDO!\n"
 
-.loop
+.main
     CALL .on
     DELAY 1000
     CALL .off
     DELAY 1000
-    JUMP .loop
+    JUMP .main
 
 .on
     PUSHL_U16 $message_on

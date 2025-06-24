@@ -1,11 +1,12 @@
-.loop
+
+.main
     CALL .func_u16
     DELAY 500
     CALL .func_i16
     DELAY 500
     CALL .func_f32
     DELAY 500
-    JUMP .loop
+    JUMP .main
 
 .func_u16
     PUSHL_U16 100
