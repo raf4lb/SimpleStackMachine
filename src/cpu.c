@@ -25,16 +25,21 @@ void *cpu_create(uint16_t memory_size, uint16_t stack_size, uint16_t callstack_s
     return cpu;
 }
 
-void default_message_handler(Message *message){
-    vmprintf("Task %d received message %s\n", message->task_dst, message->payload);
-}
-
 void cpu_create_task(CPU *cpu, uint16_t address)
 {   
+    if (cpu->tasks_number == MAX_TASKS)
+    {
+        vmprintf("reached max tasks\n");
+        return;
+    }
+
     cpu->tasks_number++;
     uint8_t id = cpu->tasks_number;
     
-    Task *task = task_create(id, address, TASK_STACK_SIZE, TASK_CALLSTACK_SIZE, TASK_LOCALSTACK_SIZE, default_message_handler);
+    uint16_t message_handler_address;
+    stack_pop_data(cpu->stack, &message_handler_address, sizeof(uint16_t));
+    
+    Task *task = task_create(id, address, TASK_STACK_SIZE, TASK_CALLSTACK_SIZE, TASK_LOCALSTACK_SIZE, message_handler_address);
     task_tree_add_child(cpu->task_tree_current_node, task);
     cpu_create_task_inbox(cpu, task);
 }
@@ -59,7 +64,7 @@ void cpu_load_program(CPU *cpu, const uint8_t *program, uint16_t program_size, u
     cpu->program = program;
     cpu->program_size = program_size;
     cpu->data_address = data_address;
-    Task *main_task = task_create(0, 0, TASK_STACK_SIZE, TASK_CALLSTACK_SIZE, TASK_LOCALSTACK_SIZE, default_message_handler);
+    Task *main_task = task_create(0, 0, TASK_STACK_SIZE, TASK_CALLSTACK_SIZE, TASK_LOCALSTACK_SIZE, 0);
     cpu->task_tree_root = task_tree_create_node(main_task);
     cpu->task_tree_current_node = cpu->task_tree_root;
     MessageQueue *queue = message_queue_create(0);
@@ -134,17 +139,35 @@ void cpu_context_switch(CPU *cpu, TaskTreeNode *node)
 void cpu_run_cycle(CPU *cpu, TaskTreeNode *node)
 {
     cpu_context_switch(cpu, node);
+    cpu_process_context_inbox(cpu);
     uint8_t cycles = CONTEXT_MAX_CYCLES;
-    task_process_inbox(node->task);
     while (cycles > 0)
     {
         uint8_t opcode = cpu_fetch_8b(cpu);
         cpu_execute(cpu, opcode);
         if (opcode == 57)
         {
-            break; // asyn return
+            break; // async return
         }
         cycles--;
+    }
+}
+
+void cpu_process_context_inbox(CPU *cpu)
+{
+    MessageQueue *inbox_queue = cpu->task_tree_current_node->task->inbox;
+
+    while (inbox_queue->count > 0)
+    {
+        Message *message = inbox_queue->head;
+        if (cpu->task_tree_current_node->task->message_handler_address > 0)
+            {
+                stack_push_data(cpu->callstack, &cpu->ip, sizeof(uint16_t));
+                cpu->ip = cpu->task_tree_current_node->task->message_handler_address;
+            }
+        inbox_queue->head = message->next;
+        inbox_queue->count--;
+        message_free(message);
     }
 }
 

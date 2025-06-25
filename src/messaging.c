@@ -137,7 +137,7 @@ void message_queue_free(MessageQueue *queue)
     free(queue);
 }
 
-Message *message_create(uint16_t vm_src, uint16_t vm_dst, uint16_t task_dst_id, uint8_t *payload, uint16_t payload_size)
+Message *message_create(uint16_t vm_src, uint16_t vm_dst, uint16_t task_src_id, uint16_t task_dst_id, uint8_t *payload, uint16_t payload_size)
 {
     Message *message = (Message *)vmmalloc(sizeof(Message));
     message->frag_id = 0;
@@ -145,6 +145,7 @@ Message *message_create(uint16_t vm_src, uint16_t vm_dst, uint16_t task_dst_id, 
     message->seq = 0;
     message->vm_dst = vm_dst;
     message->vm_src = vm_src;
+    message->task_src = task_src_id;
     message->task_dst = task_dst_id;
     message->payload_size = payload_size;
     message->payload = (uint8_t *)vmmalloc(payload_size * sizeof(uint8_t));
@@ -162,9 +163,9 @@ void message_free(Message *message)
     vmfree(message);
 }
 
-void message_queue_send_message(MessageQueue *message_queue, uint16_t task_dst_id, uint8_t *payload, uint16_t payload_size)
+void message_queue_send_message(MessageQueue *message_queue, uint16_t task_src_id, uint16_t task_dst_id, uint8_t *payload, uint16_t payload_size)
 {
     uint16_t vm_src = get_local_vm_id();
-    Message *message = message_create(vm_src, vm_src, task_dst_id, payload, payload_size);
+    Message *message = message_create(vm_src, vm_src, task_src_id, task_dst_id, payload, payload_size);
     send_message(message_queue, message);
 }

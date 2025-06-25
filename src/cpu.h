@@ -60,5 +60,5 @@ void cpu_create_task(CPU *cpu, uint16_t address);
 void cpu_delete_task(CPU *cpu, TaskTreeNode *node);
 
 void cpu_create_task_inbox(CPU *cpu, Task *task);
-
+void cpu_process_context_inbox(CPU *cpu);
 #endif

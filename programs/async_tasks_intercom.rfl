@@ -1,47 +1,62 @@
 ; Task intercommunication example
 ; https://wokwi.com/projects/392567753366512641
 
-CONST message1 STRING "HI!"
-CONST message0 STRING "HELLO!\n"
+CONST hi STRING "HI!"
+CONST message_received1 STRING "T1 RECV!"
+CONST message_received2 STRING "T2 RECV!"
 
 #include delay.rfl
 
 .main
-    PUSHL_U16 32         ; push 0b00100000 to stack
-    POPA_U16 $ddrb       ; set DDRB
+    PUSHL_U16 32                        ; push 0b00100000 to stack
+    POPA_U16 $ddrb                      ; set DDRB
+    PUSHL_U16 .task_1_message_handler   ; task message handler
     ASYNC_CALL .task_1
+    PUSHL_U16 .task_2_message_handler   ; task message handler
+    ASYNC_CALL .task_2
+    .loop
+        JUMP .loop
+
+.task_2
     .loop
         PUSHL_U16 1000
         CALL .delay_ms
         CALL .send_message_1
         JUMP .loop
 
-    
 .task_1
-    PUSHL_U16 32         ; push 0b00100000 to stack
-    POPA_U16 $portb      ; pop result to address 0x1 (PORTB)
+    PUSHL_U16 32                        ; push 0b00100000 to stack
+    POPA_U16 $portb                     ; pop result to address 0x1 (PORTB)
     PUSHL_U16 1000
     CALL .delay_ms
 
-    PUSHL_U16 0          ; push 0b00000000 to stack
-    POPA_U16 $portb      ; pop result to address 0x1 (PORTB)
+    PUSHL_U16 0                         ; push 0b00000000 to stack
+    POPA_U16 $portb                     ; pop result to address 0x1 (PORTB)
     PUSHL_U16 1000
     CALL .delay_ms
-    ; CALL .send_message_0
-    JUMP .task_1         ; loop
+    JUMP .task_1                        ; loop
 
-
-.send_message_1
-    PUSHL_U16 1          ; task id
-    PUSHL_U16 $message1  ; payload address
-    PUSHL_U16 3          ; payload size
-    SYSCALL 3            ; send message builtin function
+.task_1_message_handler
+    PUSHL_U16 $message_received1
+    SYSCALL 0
+    CALL .send_message_2
     RETURN
 
+.task_2_message_handler
+    PUSHL_U16 $message_received2
+    SYSCALL 0
+    RETURN
 
-.send_message_0
-    PUSHL_U16 0          ; task id
-    PUSHL_U16 $message0  ; payload address
-    PUSHL_U16 7          ; payload size
-    SYSCALL 3            ; send message builtin function
+.send_message_1
+    PUSHL_U16 1                         ; task id
+    PUSHL_U16 $hi                       ; payload address
+    PUSHL_U16 8                         ; payload size
+    SYSCALL 3                           ; send message builtin function
+    RETURN
+
+.send_message_2
+    PUSHL_U16 2                         ; task id
+    PUSHL_U16 $hi                       ; payload address
+    PUSHL_U16 8                         ; payload size
+    SYSCALL 3                           ; send message builtin function
     RETURN

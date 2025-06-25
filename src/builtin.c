@@ -4,7 +4,7 @@
 #include "stack.h"
 
 void builtin_print(CPU *cpu)
-{
+{   
     uint16_t buffer_address;
     stack_pop_bend_data(cpu->stack, &buffer_address, sizeof(uint16_t)); // pop 2 bytes
     // vmprintf("address %d = %d\n", buffer_address, cpu->memory->data[cpu->data_memory + buffer_address]);
@@ -55,7 +55,9 @@ void builtin_send_message(CPU *cpu){
     uint16_t task_dst_id;
     stack_pop_bend_data(cpu->stack, &task_dst_id, sizeof(task_dst_id));
     
-    message_queue_send_message(cpu->message_queues, task_dst_id, payload, payload_size);
+    uint16_t task_src_id = cpu->task_tree_current_node->task->id;
+
+    message_queue_send_message(cpu->message_queues, task_src_id, task_dst_id, payload, payload_size);
 }
 
 void builtin_syscall(CPU *cpu)
