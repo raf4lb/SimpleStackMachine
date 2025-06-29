@@ -454,12 +454,20 @@ void bitwise_or_U16(CPU *cpu)
     stack_push_data(cpu->stack, &result, sizeof(result));
 }
 
+void bitwise_xor_U16(CPU *cpu)
+{
+    uint16_t b;
+    stack_pop_data(cpu->stack, &b, sizeof(b));
+    uint16_t a;
+    stack_pop_data(cpu->stack, &a, sizeof(a));
+    uint16_t result = a ^ b;
+    stack_push_data(cpu->stack, &result, sizeof(result));
+}
+
 void bitwise_xor(CPU *cpu)
 {
     // TODO: Pop value according the integer size
-    uint16_t b = stack_pop_16b(cpu->stack);
-    uint16_t a = stack_pop_16b(cpu->stack);
-    stack_push_16b(cpu->stack, a ^ b);
+    bitwise_xor_U16(cpu);
 }
 
 void bitwise_not(CPU *cpu)

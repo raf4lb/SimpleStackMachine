@@ -59,6 +59,11 @@ void send_remote_message(uint16_t vm_id, Message *msg)
 
 void send_message(MessageQueue *local_task_inbox, Message *message)
 {
+    if (message == NULL)
+    {
+        vmprintf("ERROR: message is NULL\n");
+        return;
+    }
     // vmprintf("sent message %s to task %d\n", message->payload, message->task_dst);
     if (message->vm_dst == get_local_vm_id())
     {
