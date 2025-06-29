@@ -1,3 +1,4 @@
+.main
 ALLOC_U16 a ; a
 PUSHL_U16 0
 POPA_U16 $a

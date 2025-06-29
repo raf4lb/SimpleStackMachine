@@ -49,6 +49,8 @@ void bitwise_or_U16(CPU *cpu);
 
 void bitwise_xor(CPU *cpu);
 
+void bitwise_xor_U16(CPU *cpu);
+
 void bitwise_not(CPU *cpu);
 
 void bitwise_not_U16(CPU *cpu);

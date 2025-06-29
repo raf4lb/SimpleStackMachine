@@ -1,0 +1,52 @@
+; Task intercommunication example
+; https://wokwi.com/projects/434796710305388545
+
+CONST hi STRING "SENT!\n"
+CONST working STRING "Working\n"
+CONST message_pin_toogled STRING "TOGGLED!\n"
+
+#include delay.rfl
+#include toggle.rfl
+
+.main
+    PUSHL_U16 34                        ; push 0b00100010 to stack
+    POPA_U16 $ddrb                      ; set DDRB
+    PUSHL_U16 .task_1_message_handler   ; task message handler
+    ASYNC_CALL .task_1
+    .loop
+        ; check if PINB0 is ON
+        PUSH_U16 $pinb    ; push PINB to stack
+        PUSHL_U16 1      ; push 1 to stack
+        AND_U16         ; bitwise AND operation
+        PUSHL_U16 1
+        COMPARE_EQ
+        POP_JUMP_IF_FALSE .loop
+        CALL .send_toggle_pin_message
+        PUSHL_U16 250
+        CALL .delay_ms
+        JUMP .loop
+
+
+.task_1
+    PUSHL_U16 $working
+    SYSCALL 0
+    PUSHL_U16 1000
+    CALL .delay_ms
+    JUMP .task_1       ; loop
+
+.task_1_message_handler
+    PUSHL_U16 5
+    CALL .toggle_portb_pin
+    PUSHL_U16 $message_pin_toogled
+    SYSCALL 0
+    RETURN
+
+
+.send_toggle_pin_message
+    PUSHL_U16 $hi
+    SYSCALL 0
+    PUSHL_U16 1                         ; task id
+    PUSHL_U16 $hi                       ; payload address
+    PUSHL_U16 3                         ; payload size
+    SYSCALL 3                           ; send message builtin function
+    RETURN

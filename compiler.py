@@ -312,19 +312,24 @@ class OrU16Instruction(NoOperandInstruction):
     opcode = 61
 
 
+class XorU16Instruction(NoOperandInstruction):
+    name = "XOR_U16"
+    opcode = 62
+
+
 class AndU16Instruction(NoOperandInstruction):
     name = "AND_U16"
-    opcode = 62
+    opcode = 63
 
 
 class NorU16Instruction(NoOperandInstruction):
     name = "NOT_U16"
-    opcode = 63
+    opcode = 64
 
 
 class ParentPopLocalU16Instruction(OperandU16Instruction):
     name = "PARENT_POP_LOCAL_U16"
-    opcode = 64
+    opcode = 65
 
 
 instructions_classes = [
