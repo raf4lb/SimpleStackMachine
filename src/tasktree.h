@@ -5,16 +5,16 @@
 typedef struct CPU CPU;
 
 typedef struct TaskTreeNode TaskTreeNode;
-struct TaskTreeNode
+typedef struct TaskTreeNode
 {
-    int id;                         // Task ID
-    char name[10];                  // Task name
-    struct TaskTreeNode **children; // Array of pointers to child nodes
-    int childCount;                 // Number of children
-    int childCapacity;              // Capacity of the children array
-    struct TaskTreeNode *parent;    // Pointer to the parent node
+    uint16_t id;
+    char name[10];
+    struct TaskTreeNode **children;
+    uint16_t childCount;
+    uint16_t childCapacity;
+    struct TaskTreeNode *parent;
     Task *task;
-};
+} TaskTreeNode;
 
 TaskTreeNode *task_tree_create_node(Task *task);
 TaskTreeNode *task_tree_add_child(TaskTreeNode *parent, Task *task);

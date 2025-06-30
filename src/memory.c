@@ -28,8 +28,8 @@ Memory *memory_create(uint16_t size)
 
 void memory_free(Memory *memory)
 {
-    vmfree(memory->data);
-    vmfree(memory);
+    vmfree(memory->data, sizeof(uint8_t) * memory->size);
+    vmfree(memory, sizeof(Memory));
 }
 
 void memory_print(Memory *memory)

@@ -54,7 +54,7 @@ int serial_printf(const char *format, ...)
 
     // Now you can use the buffer as needed, for example, printing it
     serial_write(buffer);
-    vmfree(buffer);
+    vmfree(buffer, sizeof(char) + 1);
 #endif
     return 0;
 }

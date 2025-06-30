@@ -26,7 +26,7 @@ void *cpu_create(uint16_t memory_size, uint16_t stack_size, uint16_t callstack_s
 }
 
 void cpu_create_task(CPU *cpu, uint16_t address)
-{   
+{
     if (cpu->tasks_number == MAX_TASKS)
     {
         vmprintf("reached max tasks\n");
@@ -35,20 +35,22 @@ void cpu_create_task(CPU *cpu, uint16_t address)
 
     cpu->tasks_number++;
     uint8_t id = cpu->tasks_number;
-    
+
     uint16_t message_handler_address;
     stack_pop_data(cpu->stack, &message_handler_address, sizeof(uint16_t));
-    
+
     Task *task = task_create(id, address, TASK_STACK_SIZE, TASK_CALLSTACK_SIZE, TASK_LOCALSTACK_SIZE, message_handler_address);
     task_tree_add_child(cpu->task_tree_current_node, task);
     cpu_create_task_inbox(cpu, task);
 }
 
-void cpu_create_task_inbox(CPU *cpu, Task *task){
+void cpu_create_task_inbox(CPU *cpu, Task *task)
+{
     MessageQueue *new_queue = message_queue_create(task->id);
     task->inbox = new_queue;
     MessageQueue *queue = cpu->message_queues;
-    while (queue->next != NULL){
+    while (queue->next != NULL)
+    {
         queue = queue->next;
     }
     queue->next = new_queue;
@@ -70,7 +72,6 @@ void cpu_load_program(CPU *cpu, const uint8_t *program, uint16_t program_size, u
     MessageQueue *queue = message_queue_create(0);
     main_task->inbox = queue;
     cpu->message_queues = queue;
-
 }
 
 void cpu_free(CPU *cpu)
@@ -78,7 +79,7 @@ void cpu_free(CPU *cpu)
     memory_free(cpu->memory);
     port_bank_free(cpu->port_bank);
     task_tree_free(cpu->task_tree_root);
-    free(cpu);
+    vmfree(cpu, sizeof(CPU));
 }
 
 uint8_t cpu_fetch_8b(CPU *cpu)
@@ -161,10 +162,10 @@ void cpu_process_context_inbox(CPU *cpu)
     {
         Message *message = inbox_queue->head;
         if (cpu->task_tree_current_node->task->message_handler_address > 0)
-            {
-                stack_push_data(cpu->callstack, &cpu->ip, sizeof(uint16_t));
-                cpu->ip = cpu->task_tree_current_node->task->message_handler_address;
-            }
+        {
+            stack_push_data(cpu->callstack, &cpu->ip, sizeof(uint16_t));
+            cpu->ip = cpu->task_tree_current_node->task->message_handler_address;
+        }
         inbox_queue->head = message->next;
         inbox_queue->count--;
         message_free(message);

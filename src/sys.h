@@ -6,7 +6,7 @@
 
 void *vmmalloc(uint16_t size);
 
-void vmfree(void *ptr);
+void vmfree(void *ptr, uint16_t size);
 
 uint16_t get_memory_usage();
 

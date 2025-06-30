@@ -34,8 +34,8 @@ Stack *stack_create(uint16_t size)
 
 void stack_free(Stack *stack)
 {
-    vmfree(stack->data);
-    vmfree(stack);
+    vmfree(stack->data, sizeof(uint8_t) * stack->size);
+    vmfree(stack, sizeof(Stack));
 }
 
 uint8_t stack_pop(Stack *stack)
