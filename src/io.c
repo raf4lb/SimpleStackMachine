@@ -1,7 +1,6 @@
 #include "sys.h"
 #include "io.h"
 
-
 #ifdef ARDUINO
 
 int (*vmprintf)(const char *, ...) = serial_printf;
@@ -15,7 +14,6 @@ volatile uint8_t PINB;
 int (*vmprintf)(const char *, ...) = printf;
 
 #endif
-
 
 void map_ports(PortBank *port_bank)
 {
@@ -57,8 +55,8 @@ void port_bank_print(PortBank *port_bank)
 
 void port_bank_free(PortBank *port_bank)
 {
-    vmfree(port_bank->ports);
-    vmfree(port_bank);
+    vmfree(port_bank->ports, sizeof(uint8_t) * port_bank->size);
+    vmfree(port_bank, sizeof(PortBank));
 }
 
 void port_bank_set_address(PortBank *port_bank, uint8_t address, uint8_t value)

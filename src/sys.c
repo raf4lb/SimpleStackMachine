@@ -12,15 +12,12 @@ void *vmmalloc(uint16_t size)
     return ptr;
 }
 
-void vmfree(void *ptr)
+void vmfree(void *ptr, uint16_t size)
 {
-    if (ptr != NULL)
-    {
-        // Determine the size of the memory block before freeing it
-        // and subtract it from dynamic_memory_usage
-        dynamic_memory_usage -= sizeof(*ptr);
-        free(ptr);
-    }
+    // Determine the size of the memory block before freeing it
+    // and subtract it from dynamic_memory_usage
+    dynamic_memory_usage -= size;
+    free(ptr);
 }
 
 uint16_t get_memory_usage()
@@ -28,6 +25,7 @@ uint16_t get_memory_usage()
     return dynamic_memory_usage;
 }
 
-uint16_t get_local_vm_id(){
+uint16_t get_local_vm_id()
+{
     return 1;
 }

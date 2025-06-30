@@ -18,16 +18,17 @@ struct CPU
     TaskTreeNode *task_tree_root;
     TaskTreeNode *task_tree_current_node;
     const uint8_t *program;
-    uint16_t program_size;
     Stack *stack;
     Stack *callstack;
     Stack *localstack;
-    uint16_t ip;
     const InstructionPtr *instructions;
     PortBank *port_bank;
+    MessageQueue *message_queues;
+
+    uint16_t program_size;
+    uint16_t ip;
     uint16_t user_memory;
     uint16_t data_address;
-    MessageQueue *message_queues;
     uint16_t tasks_number;
 };
 

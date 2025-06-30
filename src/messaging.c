@@ -64,7 +64,6 @@ void send_message(MessageQueue *local_task_inbox, Message *message)
         vmprintf("ERROR: message is NULL\n");
         return;
     }
-    // vmprintf("sent message %s to task %d\n", message->payload, message->task_dst);
     if (message->vm_dst == get_local_vm_id())
     {
         if (!deliver_local(local_task_inbox, message))
@@ -136,10 +135,10 @@ void message_queue_free(MessageQueue *queue)
     while (message != NULL)
     {
         Message *next = message->next;
-        free(message);
+        message_free(message);
         message = next;
     }
-    free(queue);
+    vmfree(queue, sizeof(MessageQueue));
 }
 
 Message *message_create(uint16_t vm_src, uint16_t vm_dst, uint16_t task_src_id, uint16_t task_dst_id, uint8_t *payload, uint16_t payload_size)
@@ -164,8 +163,8 @@ Message *message_create(uint16_t vm_src, uint16_t vm_dst, uint16_t task_src_id, 
 
 void message_free(Message *message)
 {
-    vmfree(message->payload);
-    vmfree(message);
+    vmfree(message->payload, sizeof(uint8_t) * message->payload_size);
+    vmfree(message, sizeof(Message));
 }
 
 void message_queue_send_message(MessageQueue *message_queue, uint16_t task_src_id, uint16_t task_dst_id, uint8_t *payload, uint16_t payload_size)

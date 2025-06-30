@@ -27,5 +27,6 @@ void task_free(Task *task)
     stack_free(task->stack);
     stack_free(task->callstack);
     stack_free(task->localstack);
-    vmfree(task);
+    message_queue_free(task->inbox);
+    vmfree(task, sizeof(Task));
 }
