@@ -9,7 +9,7 @@ Task *task_create(uint8_t id, uint16_t ip, uint16_t stack_size, uint16_t callsta
     Task *task = (Task *)vmmalloc(sizeof(Task));
     if (task == NULL)
     {
-        vmprintf("Memory allocation for task failed\n");
+        vmprintf("mem_alloc_failed: task\n");
         exit(EXIT_FAILURE);
     }
     task->id = id;

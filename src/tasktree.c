@@ -14,7 +14,7 @@ TaskTreeNode *task_tree_create_node(Task *task)
     TaskTreeNode *new_task = (TaskTreeNode *)vmmalloc(sizeof(TaskTreeNode));
     if (!new_task)
     {
-        vmprintf("Memory allocation failed for task\n");
+        vmprintf("mem_alloc_failed: task\n");
         exit(EXIT_FAILURE);
     }
     new_task->id = nextId++;
@@ -39,7 +39,7 @@ TaskTreeNode *task_tree_add_child(TaskTreeNode *parent, Task *task)
         parent->children = (TaskTreeNode **)realloc(parent->children, parent->childCapacity * sizeof(TaskTreeNode *));
         if (!parent->children)
         {
-            vmprintf("Memory allocation failed for task child\n");
+            vmprintf("mem_alloc_failed: task child\n");
             exit(EXIT_FAILURE);
         }
     }
@@ -85,7 +85,7 @@ void task_tree_print(TaskTreeNode *root, int depth)
 }
 
 // Function to perform a Depth-First Search traversal
-void task_tree_traverse_dfs(CPU *cpu, TaskTreeNode *root, void (*process)(CPU *cpu, TaskTreeNode *))
+void task_tree_traverse_dfs(CPU *cpu, TaskTreeNode *root, void (*process)(CPU *cpu, TaskTreeNode *node))
 {
     if (root == NULL)
     {

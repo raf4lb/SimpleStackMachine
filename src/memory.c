@@ -7,14 +7,14 @@ Memory *memory_create(uint16_t size)
     Memory *memory = (Memory *)vmmalloc(sizeof(Memory));
     if (memory == NULL)
     {
-        vmprintf("Memory allocation failed for Memory\n");
+        vmprintf("mem_alloc_failed: Memory\n");
         exit(EXIT_FAILURE);
     }
     memory->size = size;
     uint8_t *data = (uint8_t *)vmmalloc(size * sizeof(uint8_t));
     if (data == NULL)
     {
-        vmprintf("Memory allocation failed for Memory->data\n");
+        vmprintf("mem_alloc_failed: Memory->data\n");
         exit(EXIT_FAILURE);
     }
     // Initialize memory
@@ -52,7 +52,7 @@ uint8_t memory_get_address(Memory *memory, uint16_t address)
     {
         return memory->data[address];
     }
-    vmprintf("memory_get_address: Memory address %d out of the range\n", address);
+    vmprintf("Get: memory address %d out of the range\n", address);
     exit(EXIT_FAILURE);
 }
 
@@ -64,7 +64,7 @@ void memory_set_address(Memory *memory, uint16_t address, uint8_t value)
     }
     else
     {
-        vmprintf("Error: memory_set_address: Memory address %d out of the range\n", address);
+        vmprintf("Set: memory address %d out of the range\n", address);
         exit(EXIT_FAILURE);
     }
 }

@@ -1,3 +1,6 @@
+#ifndef MESSAGING_H
+#define MESSAGING_H
+
 #include <stdint.h>
 #include "sys.h"
 
@@ -55,3 +58,5 @@ Message *message_create(uint16_t vm_src, uint16_t vm_dst, uint16_t task_src_id, 
 void message_free(Message *message);
 
 void message_queue_send_message(MessageQueue *message_queue, uint16_t task_src_id, uint16_t task_dst_id, uint8_t *payload, uint16_t payload_size);
+
+#endif

@@ -16,82 +16,14 @@
 #define DATA_ADDRESS 0
 #endif
 
-const InstructionPtr instructions_set[] = {
-    &halt,
-    &push_literal,
-    &push,
-    &pop,
-    &pop_address,
-    &top,
-    &delay,
-    &jump,
-    &pop_jump_if_false,
-    &compare_equal,
-    &compare_less,
-    &compare_greater,
-    &compare_less_equal,
-    &compare_greater_equal,
-    &add,
-    &subtract,
-    &multiply,
-    &divide,
-    &bitwise_and,
-    &bitwise_or,
-    &bitwise_xor,
-    &bitwise_not,
-    &bitwise_left_shift,
-    &bitwise_right_shift,
-    &call,
-    &ret,
-    &syscall,
-    &addf,
-    &push_literal_U16,
-    &pop_U16,
-    &top_U16,
-    &add_U16,
-    &push_literal_I16,
-    &pop_I16,
-    &top_I16,
-    &add_I16,
-    &subtract_I16,
-    &multiply_I16,
-    &divide_I16,
-    &push_literal_F32,
-    &pop_F32,
-    &top_F32,
-    &add_F32,
-    &subtract_F32,
-    &multiply_F32,
-    &divide_F32,
-    &load_I16,
-    &store_I16,
-    &var_I16,
-    &del_I16,
-    &subtract_U16,
-    &multiply_U16,
-    &divide_U16,
-    &pop_address_U16,
-    &push_U16,
-    &push_millis,
-    &async_call,
-    &async_ret,
-    &push_local_U16,
-    &pop_local_U16,
-    &bitwise_left_shift_U16,
-    &bitwise_or_U16,
-    &bitwise_xor_U16,
-    &bitwise_and_U16,
-    &bitwise_not_U16,
-    &parent_pop_local_U16,
-};
+#define program_size PROGRAM_SIZE
+#define data_address DATA_ADDRESS
+#define memory_size 0
+#define stack_size 32
+#define callstack_size 16
+#define port_banks 3
 
 const uint8_t program[] = PROGRAM;
-uint16_t program_size = PROGRAM_SIZE;
-uint16_t data_address = DATA_ADDRESS;
-uint16_t memory_size = 0;
-uint16_t stack_size = 32;
-uint16_t callstack_size = 16;
-uint8_t port_banks = 3;
 
 int main(void)
 {
@@ -101,7 +33,7 @@ int main(void)
     serial_setup(9600);
 #endif
     vmprintf("Starting VM\n");
-    CPU *cpu = cpu_create(memory_size, stack_size, callstack_size, instructions_set, port_banks);
+    CPU *cpu = cpu_create(memory_size, stack_size, callstack_size, port_banks);
     cpu_load_program(cpu, program, program_size, data_address);
     cpu_run(cpu);
     cpu_free(cpu);

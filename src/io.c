@@ -27,14 +27,14 @@ PortBank *port_bank_create(uint8_t size)
     PortBank *port_bank = (PortBank *)vmmalloc(sizeof(PortBank));
     if (port_bank == NULL)
     {
-        vmprintf("Memory allocation failed for port bank\n");
+        vmprintf("mem_alloc_failed: port bank\n");
         exit(1);
     }
     port_bank->size = size;
     port_bank->ports = (volatile uint8_t **)vmmalloc(size * sizeof(volatile uint8_t *));
     if (port_bank->ports == NULL)
     {
-        vmprintf("Memory allocation failed for ports of the bank\n");
+        vmprintf("mem_alloc_failed: ports of the bank\n");
         exit(1);
     }
     map_ports(port_bank);

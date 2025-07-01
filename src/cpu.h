@@ -10,8 +10,6 @@
 
 typedef struct CPU CPU;
 
-typedef void (*InstructionPtr)(CPU *cpu);
-
 struct CPU
 {
     Memory *memory;
@@ -21,7 +19,6 @@ struct CPU
     Stack *stack;
     Stack *callstack;
     Stack *localstack;
-    const InstructionPtr *instructions;
     PortBank *port_bank;
     MessageQueue *message_queues;
 
@@ -32,7 +29,7 @@ struct CPU
     uint16_t tasks_number;
 };
 
-void *cpu_create(uint16_t memory_size, uint16_t stack_size, uint16_t callstack_size, const InstructionPtr *instruction_set, uint8_t port_banks);
+void *cpu_create(uint16_t memory_size, uint16_t stack_size, uint16_t callstack_size, uint8_t port_banks);
 
 void cpu_free(CPU *cpu);
 

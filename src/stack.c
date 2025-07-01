@@ -12,14 +12,14 @@ Stack *stack_create(uint16_t size)
     Stack *stack = (Stack *)vmmalloc(sizeof(Stack));
     if (stack == NULL)
     {
-        stack_error_print("Memory allocation failed for Stack\n");
+        stack_error_print("mem_alloc_failed for Stack\n");
         exit(EXIT_FAILURE);
     }
     stack->size = size;
     uint8_t *data = (uint8_t *)vmmalloc(size * sizeof(uint8_t));
     if (data == NULL)
     {
-        stack_error_print("Memory allocation failed for Stack->data\n");
+        stack_error_print("mem_alloc_failed for Stack->data\n");
         exit(EXIT_FAILURE);
     }
     // Initialize stack

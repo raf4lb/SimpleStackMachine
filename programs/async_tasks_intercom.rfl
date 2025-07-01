@@ -3,7 +3,6 @@
 
 CONST hi STRING "SENT!\n"
 CONST message STRING "memory usage: "
-CONST working STRING "Working\n"
 CONST message_pin_toogled STRING "TOGGLED!\n"
 
 #include delay.rfl
@@ -23,7 +22,7 @@ CONST message_pin_toogled STRING "TOGGLED!\n"
         COMPARE_EQ
         POP_JUMP_IF_FALSE .loop
         CALL .send_toggle_pin_message
-        PUSHL_U16 100
+        PUSHL_U16 250
         CALL .delay_ms
         JUMP .loop
 

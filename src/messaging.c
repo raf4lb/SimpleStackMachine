@@ -28,7 +28,7 @@ bool deliver_local(MessageQueue *message_queues, Message *message)
         {
             if (queue->count >= TASK_MESSAGE_QUEUE_SIZE)
             {
-                vmprintf("ERROR: task %d inbox is full\n", message->task_dst);
+                vmprintf("task %d inbox is full\n", message->task_dst);
                 return false;
             }
             if (queue->head == NULL)
@@ -47,7 +47,7 @@ bool deliver_local(MessageQueue *message_queues, Message *message)
         }
         queue = queue->next;
     }
-    vmprintf("ERROR: task %d not found\n", message->task_dst);
+    vmprintf("task %d not found\n", message->task_dst);
     return false;
 }
 
@@ -61,7 +61,7 @@ void send_message(MessageQueue *local_task_inbox, Message *message)
 {
     if (message == NULL)
     {
-        vmprintf("ERROR: message is NULL\n");
+        vmprintf("message is NULL\n");
         return;
     }
     if (message->vm_dst == get_local_vm_id())
