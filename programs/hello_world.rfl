@@ -1,7 +1,12 @@
+#include memory_usage.rfl
+
 CONST hello STRING "HELLO WORLD!\n"
 
 .main
     PUSHL_U16 $hello
     SYSCALL 0
-    HALT
+    .loop
+        CALL .print_memory_usage
+        DELAY 1000
+        JUMP .loop
     

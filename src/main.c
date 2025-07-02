@@ -1,4 +1,3 @@
-#include <string.h>
 #include "instructions.h"
 #include "sys.h"
 #include "delay.h"
@@ -18,9 +17,6 @@
 
 #define program_size PROGRAM_SIZE
 #define data_address DATA_ADDRESS
-#define memory_size 0
-#define stack_size 32
-#define callstack_size 16
 #define port_banks 3
 
 const uint8_t program[] = PROGRAM;
@@ -28,12 +24,12 @@ const uint8_t program[] = PROGRAM;
 int main(void)
 {
 
-    timer_init();
 #ifdef SERIAL_ENABLED
+    timer_init();
     serial_setup(9600);
 #endif
     vmprintf("Starting VM\n");
-    CPU *cpu = cpu_create(memory_size, stack_size, callstack_size, port_banks);
+    CPU *cpu = cpu_create(port_banks);
     cpu_load_program(cpu, program, program_size, data_address);
     cpu_run(cpu);
     cpu_free(cpu);

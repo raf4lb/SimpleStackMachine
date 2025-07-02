@@ -1,18 +1,19 @@
 #ifndef CPU_H
 #define CPU_H
-
 #include "stack.h"
 #include "io.h"
-#include <stdint.h>
-#include <string.h>
 #include "task.h"
 #include "tasktree.h"
+
+#define TASK_STACK_SIZE 16
+#define TASK_CALLSTACK_SIZE 16
+#define TASK_LOCALSTACK_SIZE 16
+#define CONTEXT_MAX_CYCLES 255
 
 typedef struct CPU CPU;
 
 struct CPU
 {
-    Memory *memory;
     TaskTreeNode *task_tree_root;
     TaskTreeNode *task_tree_current_node;
     const uint8_t *program;
@@ -24,12 +25,11 @@ struct CPU
 
     uint16_t program_size;
     uint16_t ip;
-    uint16_t user_memory;
     uint16_t data_address;
     uint16_t tasks_number;
 };
 
-void *cpu_create(uint16_t memory_size, uint16_t stack_size, uint16_t callstack_size, uint8_t port_banks);
+void *cpu_create(uint8_t port_banks);
 
 void cpu_free(CPU *cpu);
 
@@ -44,8 +44,6 @@ void cpu_execute(CPU *cpu, uint8_t opcode);
 void cpu_load_program(CPU *cpu, const uint8_t *program, uint16_t program_size, uint16_t data_address);
 
 void cpu_run(CPU *cpu);
-
-void cpu_print_user_memory(CPU *cpu);
 
 void cpu_print(CPU *cpu);
 

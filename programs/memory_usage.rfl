@@ -1,14 +1,9 @@
-#include delay.rfl
-
 CONST message STRING "memory usage: "
 
-.main
-    ALLOC_U16 memory_usage
-    SYSCALL 4
+.print_memory_usage
     PUSHL_U16 $message
     SYSCALL 0
+    SYSCALL 4
     TOP_U16
-    POP_LOCAL_U16 $memory_usage
-    PUSHL_U16 1000
-    CALL .delay_ms
-    JUMP .main
+    POP_U16
+    RETURN

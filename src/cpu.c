@@ -5,20 +5,12 @@
 #include "task.h"
 #include "delay.h"
 #include "tasktree.h"
-#include "string.h"
 
-uint16_t TASK_STACK_SIZE = 16;
-uint16_t TASK_CALLSTACK_SIZE = 16;
-uint16_t TASK_LOCALSTACK_SIZE = 16;
-uint16_t CONTEXT_MAX_CYCLES = 200;
-
-void *cpu_create(uint16_t memory_size, uint16_t stack_size, uint16_t callstack_size, uint8_t port_bank)
+void *cpu_create(uint8_t port_bank)
 {
     CPU *cpu = (CPU *)vmmalloc(sizeof(CPU));
-    cpu->memory = memory_create(memory_size);
     cpu->port_bank = port_bank_create(port_bank);
     cpu->ip = 0;
-    cpu->user_memory = 0;
     cpu->data_address = 0;
     cpu->tasks_number = 0;
     cpu->message_queues = NULL;
@@ -76,7 +68,6 @@ void cpu_load_program(CPU *cpu, const uint8_t *program, uint16_t program_size, u
 
 void cpu_free(CPU *cpu)
 {
-    memory_free(cpu->memory);
     port_bank_free(cpu->port_bank);
     task_tree_free(cpu->task_tree_root);
     vmfree(cpu, sizeof(CPU));
@@ -116,204 +107,178 @@ void cpu_execute(CPU *cpu, uint8_t opcode)
 {
     switch (opcode)
     {
-    case 0:
+    case OP_HALT:
         halt(cpu);
         break;
-    case 1:
-        push_literal(cpu);
-        break;
-    case 2:
-        push(cpu);
-        break;
-    case 3:
-        pop(cpu);
-        break;
-    case 4:
-        pop_address(cpu);
-        break;
-    case 5:
-        top(cpu);
-        break;
-    case 6:
+
+    // Control flow
+    case OP_DELAY:
         delay(cpu);
         break;
-    case 7:
+    case OP_JUMP:
         jump(cpu);
         break;
-    case 8:
+    case OP_POP_JUMP_IF_FALSE:
         pop_jump_if_false(cpu);
         break;
-    case 9:
+
+    // Comparisons
+    case OP_COMPARE_EQ:
         compare_equal(cpu);
         break;
-    case 10:
+    case OP_COMPARE_LT:
         compare_less(cpu);
         break;
-    case 11:
+    case OP_COMPARE_GT:
         compare_greater(cpu);
         break;
-    case 12:
+    case OP_COMPARE_LE:
         compare_less_equal(cpu);
         break;
-    case 13:
+    case OP_COMPARE_GE:
         compare_greater_equal(cpu);
         break;
-    case 14:
-        add(cpu);
-        break;
-    case 15:
-        subtract(cpu);
-        break;
-    case 16:
-        multiply(cpu);
-        break;
-    case 17:
-        divide(cpu);
-        break;
-    case 18:
-        bitwise_and(cpu);
-        break;
-    case 19:
-        bitwise_or(cpu);
-        break;
-    case 20:
-        bitwise_xor(cpu);
-        break;
-    case 21:
-        bitwise_not(cpu);
-        break;
-    case 22:
-        bitwise_left_shift(cpu);
-        break;
-    case 23:
-        bitwise_right_shift(cpu);
-        break;
-    case 24:
+
+    // Calls and syscalls
+    case OP_CALL:
         call(cpu);
         break;
-    case 25:
+    case OP_RETURN:
         ret(cpu);
         break;
-    case 26:
+    case OP_SYSCALL:
         syscall(cpu);
         break;
-    case 27:
-        addf(cpu);
-        break;
-    case 28:
-        push_literal_U16(cpu);
-        break;
-    case 29:
-        pop_U16(cpu);
-        break;
-    case 30:
-        top_U16(cpu);
-        break;
-    case 31:
-        add_U16(cpu);
-        break;
-    case 32:
-        push_literal_I16(cpu);
-        break;
-    case 33:
-        pop_I16(cpu);
-        break;
-    case 34:
-        top_I16(cpu);
-        break;
-    case 35:
-        add_I16(cpu);
-        break;
-    case 36:
-        subtract_I16(cpu);
-        break;
-    case 37:
-        multiply_I16(cpu);
-        break;
-    case 38:
-        divide_I16(cpu);
-        break;
-    case 39:
-        push_literal_F32(cpu);
-        break;
-    case 40:
-        pop_F32(cpu);
-        break;
-    case 41:
-        top_F32(cpu);
-        break;
-    case 42:
-        add_F32(cpu);
-        break;
-    case 43:
-        subtract_F32(cpu);
-        break;
-    case 44:
-        multiply_F32(cpu);
-        break;
-    case 45:
-        divide_F32(cpu);
-        break;
-    case 46:
-        load_I16(cpu);
-        break;
-    case 47:
-        store_I16(cpu);
-        break;
-    case 48:
-        var_I16(cpu);
-        break;
-    case 49:
-        del_I16(cpu);
-        break;
-    case 50:
-        subtract_U16(cpu);
-        break;
-    case 51:
-        multiply_U16(cpu);
-        break;
-    case 52:
-        divide_U16(cpu);
-        break;
-    case 53:
-        pop_address_U16(cpu);
-        break;
-    case 54:
-        push_U16(cpu);
-        break;
-    case 55:
-        push_millis(cpu);
-        break;
-    case 56:
+    case OP_ASYNC_CALL:
         async_call(cpu);
         break;
-    case 57:
+    case OP_ASYNC_RETURN:
         async_ret(cpu);
         break;
-    case 58:
+
+    // U16 operations
+    case OP_PUSHL_U16:
+        push_literal_U16(cpu);
+        break;
+    case OP_POP_U16:
+        pop_U16(cpu);
+        break;
+    case OP_TOP_U16:
+        top_U16(cpu);
+        break;
+    case OP_ADD_U16:
+        add_U16(cpu);
+        break;
+    case OP_SUB_U16:
+        subtract_U16(cpu);
+        break;
+    case OP_MUL_U16:
+        multiply_U16(cpu);
+        break;
+    case OP_DIV_U16:
+        divide_U16(cpu);
+        break;
+    case OP_POPA_U16:
+        pop_address_U16(cpu);
+        break;
+
+    // U16 stack/local
+    case OP_PUSH_U16:
+        push_U16(cpu);
+        break;
+    case OP_PUSH_LOCAL_U16:
         push_local_U16(cpu);
         break;
-    case 59:
+    case OP_POP_LOCAL_U16:
         pop_local_U16(cpu);
         break;
-    case 60:
-        bitwise_left_shift_U16(cpu);
-        break;
-    case 61:
-        bitwise_or_U16(cpu);
-        break;
-    case 62:
-        bitwise_xor_U16(cpu);
-        break;
-    case 63:
-        bitwise_and_U16(cpu);
-        break;
-    case 64:
-        bitwise_not_U16(cpu);
-        break;
-    case 65:
+    case OP_PARENT_POP_LOCAL_U16:
         parent_pop_local_U16(cpu);
         break;
+
+    // I16 operations and memory
+    case OP_PUSHL_I16:
+        push_literal_I16(cpu);
+        break;
+    case OP_POP_I16:
+        pop_I16(cpu);
+        break;
+    case OP_TOP_I16:
+        top_I16(cpu);
+        break;
+    case OP_ADD_I16:
+        add_I16(cpu);
+        break;
+    case OP_SUB_I16:
+        subtract_I16(cpu);
+        break;
+    case OP_MUL_I16:
+        multiply_I16(cpu);
+        break;
+    case OP_DIV_I16:
+        divide_I16(cpu);
+        break;
+    case OP_READ_I16:
+        load_I16(cpu);
+        break;
+    case OP_WRITE_I16:
+        store_I16(cpu);
+        break;
+    case OP_ALLOC_I16:
+        var_I16(cpu);
+        break;
+    case OP_FREE_I16:
+        del_I16(cpu);
+        break;
+
+    // F32 operations
+    case OP_PUSHL_F32:
+        push_literal_F32(cpu);
+        break;
+    case OP_POP_F32:
+        pop_F32(cpu);
+        break;
+    case OP_TOP_F32:
+        top_F32(cpu);
+        break;
+    case OP_ADD_F32:
+        add_F32(cpu);
+        break;
+    case OP_SUB_F32:
+        subtract_F32(cpu);
+        break;
+    case OP_MUL_F32:
+        multiply_F32(cpu);
+        break;
+    case OP_DIV_F32:
+        divide_F32(cpu);
+        break;
+
+    // Time
+    case OP_PUSH_MILLIS:
+        push_millis(cpu);
+        break;
+
+    // Bitwise operations
+    case OP_LSHIFT_U16:
+        bitwise_left_shift_U16(cpu);
+        break;
+    case OP_RSHIFT_U16:
+        bitwise_right_shift_U16(cpu);
+        break;
+    case OP_OR_U16:
+        bitwise_or_U16(cpu);
+        break;
+    case OP_XOR_U16:
+        bitwise_xor_U16(cpu);
+        break;
+    case OP_AND_U16:
+        bitwise_and_U16(cpu);
+        break;
+    case OP_NOT_U16:
+        bitwise_not_U16(cpu);
+        break;
+
     default:
         vmprintf("unknown opcode %d", opcode);
         break;
@@ -349,7 +314,7 @@ void cpu_run_cycle(CPU *cpu, TaskTreeNode *node)
     {
         uint8_t opcode = cpu_fetch_8b(cpu);
         cpu_execute(cpu, opcode);
-        if (opcode == 57)
+        if (opcode == OP_ASYNC_RETURN)
         {
             break; // async return
         }
@@ -382,20 +347,6 @@ void cpu_run(CPU *cpu)
     {
         task_tree_traverse_dfs(cpu, cpu->task_tree_root, cpu_run_cycle);
     }
-}
-
-void cpu_print_user_memory(CPU *cpu)
-{
-    vmprintf("[");
-    for (int i = cpu->user_memory; i < cpu->memory->size; i++)
-    {
-        if (i > cpu->user_memory)
-        {
-            vmprintf(", ");
-        }
-        vmprintf("%u", cpu->memory->data[i]);
-    }
-    vmprintf("]\n");
 }
 
 void cpu_print(CPU *cpu)

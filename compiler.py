@@ -111,236 +111,217 @@ class HaltInstruction(NoOperandInstruction):
     name = "HALT"
     opcode = 0
 
-
-class PopJumpIfFalseInstruction(OperandU16Instruction):
-    name = "POP_JUMP_IF_FALSE"
-    opcode = 8
-
-
-class CompareEqualInstruction(NoOperandInstruction):
-    name = "COMPARE_EQ"
-    opcode = 9
-
-
-class CompareGreaterThanInstruction(NoOperandInstruction):
-    name = "COMPARE_GT"
-    opcode = 11
-
-
-class PushLiteralU16Instruction(OperandU16Instruction):
-    name = "PUSHL_U16"
-    opcode = 28
-
-
-class PopU16Instruction(NoOperandInstruction):
-    name = "POP_U16"
-    opcode = 29
-
-
-class TopU16Instruction(NoOperandInstruction):
-    name = "TOP_U16"
-    opcode = 30
-
-
-class AddU16Instruction(NoOperandInstruction):
-    name = "ADD_U16"
-    opcode = 31
-
-
-class PushLiteralI16Instruction(OperandI16Instruction):
-    name = "PUSHL_I16"
-    opcode = 32
-
-
-class PopI16Instruction(NoOperandInstruction):
-    name = "POP_I16"
-    opcode = 33
-
-
-class TopI16Instruction(NoOperandInstruction):
-    name = "TOP_I16"
-    opcode = 34
-
-
-class AddI16Instruction(NoOperandInstruction):
-    name = "ADD_I16"
-    opcode = 35
-
-
-class SubtractI16Instruction(NoOperandInstruction):
-    name = "SUB_I16"
-    opcode = 36
-
-
-class MultiplyI16Instruction(NoOperandInstruction):
-    name = "MUL_I16"
-    opcode = 37
-
-
-class DivideI16Instruction(NoOperandInstruction):
-    name = "DIV_I16"
-    opcode = 38
-
-
-class ReadI16Instruction(OperandI16Instruction):
-    name = "READ_I16"
-    opcode = 46
-
-
-class WriteI16Instruction(OperandI16Instruction):
-    name = "WRITE_I16"
-    opcode = 47
-
-
-class Allocate16Instruction(OperandU16Instruction):
-    name = "ALLOC_I16"
-    opcode = 48
-
-
-class FreeI16Instruction(OperandI16Instruction):
-    name = "FREE_I16"
-    opcode = 49
-
-
-class PushLiteralF32Instruction(OperandF32Instruction):
-    name = "PUSHL_F32"
-    opcode = 39
-
-
-class PopF32Instruction(NoOperandInstruction):
-    name = "POP_F32"
-    opcode = 40
-
-
-class TopF32Instruction(NoOperandInstruction):
-    name = "TOP_F32"
-    opcode = 41
-
-
-class AddF32Instruction(NoOperandInstruction):
-    name = "ADD_F32"
-    opcode = 42
-
-
-class SubtractF32Instruction(NoOperandInstruction):
-    name = "SUB_F32"
-    opcode = 43
-
-
-class MultiplyF32Instruction(NoOperandInstruction):
-    name = "MUL_F32"
-    opcode = 44
-
-
-class DivideF32Instruction(NoOperandInstruction):
-    name = "DIV_F32"
-    opcode = 45
-
-
 class DelayInstruction(OperandU16Instruction):
     name = "DELAY"
-    opcode = 6
-
+    opcode = 1
 
 class JumpInstruction(OperandU16Instruction):
     name = "JUMP"
+    opcode = 2
+
+class PopJumpIfFalseInstruction(OperandU16Instruction):
+    name = "POP_JUMP_IF_FALSE"
+    opcode = 3
+
+class CompareEqualInstruction(NoOperandInstruction):
+    name = "COMPARE_EQ"
+    opcode = 4
+
+class CompareLessInstruction(NoOperandInstruction):
+    name = "COMPARE_LT"
+    opcode = 5
+
+class CompareGreaterInstruction(NoOperandInstruction):
+    name = "COMPARE_GT"
+    opcode = 6
+
+class CompareLessEqualInstruction(NoOperandInstruction):
+    name = "COMPARE_LE"
     opcode = 7
 
+class CompareGreaterEqualInstruction(NoOperandInstruction):
+    name = "COMPARE_GE"
+    opcode = 8
 
 class CallInstruction(OperandU16Instruction):
     name = "CALL"
-    opcode = 24
-
+    opcode = 9
 
 class ReturnInstruction(NoOperandInstruction):
     name = "RETURN"
-    opcode = 25
-
+    opcode = 10
 
 class SysCallInstruction(OperandU16Instruction):
     name = "SYSCALL"
-    opcode = 26
-
-
-class SubtractInstructionInstruction(NoOperandInstruction):
-    name = "SUB_U16"
-    opcode = 50
-
-
-class PopAddressU16Instruction(OperandU16Instruction):
-    name = "POPA_U16"
-    opcode = 53
-
-
-class PushU16Instruction(OperandU16Instruction):
-    name = "PUSH_U16"
-    opcode = 54
-
-
-class PushMillisInstruction(NoOperandInstruction):
-    name = "PUSH_MILLIS"
-    opcode = 55
-
+    opcode = 11
 
 class AsyncCallInstruction(OperandU16Instruction):
     name = "ASYNC_CALL"
-    opcode = 56
-
+    opcode = 12
 
 class AsyncReturnInstruction(NoOperandInstruction):
     name = "ASYNC_RETURN"
-    opcode = 57
+    opcode = 13
 
+class PushLiteralU16Instruction(OperandU16Instruction):
+    name = "PUSHL_U16"
+    opcode = 14
+
+class PopU16Instruction(NoOperandInstruction):
+    name = "POP_U16"
+    opcode = 15
+
+class TopU16Instruction(NoOperandInstruction):
+    name = "TOP_U16"
+    opcode = 16
+
+class AddU16Instruction(NoOperandInstruction):
+    name = "ADD_U16"
+    opcode = 17
+
+class SubtractInstructionInstruction(NoOperandInstruction):
+    name = "SUB_U16"
+    opcode = 18
+
+class MultiplyU16Instruction(NoOperandInstruction):
+    name = "MUL_U16"
+    opcode = 19
+
+class DivideU16Instruction(NoOperandInstruction):
+    name = "DIV_U16"
+    opcode = 20
+
+class PopAddressU16Instruction(OperandU16Instruction):
+    name = "POPA_U16"
+    opcode = 21
+
+class PushU16Instruction(OperandU16Instruction):
+    name = "PUSH_U16"
+    opcode = 22
 
 class PushLocalU16Instruction(OperandU16Instruction):
     name = "PUSH_LOCAL_U16"
-    opcode = 58
-
+    opcode = 23
 
 class PopLocalU16Instruction(OperandU16Instruction):
     name = "POP_LOCAL_U16"
-    opcode = 59
-
-
-class LeftShiftU16Instruction(NoOperandInstruction):
-    name = "LSHIFT_U16"
-    opcode = 60
-
-
-class OrU16Instruction(NoOperandInstruction):
-    name = "OR_U16"
-    opcode = 61
-
-
-class XorU16Instruction(NoOperandInstruction):
-    name = "XOR_U16"
-    opcode = 62
-
-
-class AndU16Instruction(NoOperandInstruction):
-    name = "AND_U16"
-    opcode = 63
-
-
-class NorU16Instruction(NoOperandInstruction):
-    name = "NOT_U16"
-    opcode = 64
-
+    opcode = 24
 
 class ParentPopLocalU16Instruction(OperandU16Instruction):
     name = "PARENT_POP_LOCAL_U16"
-    opcode = 65
+    opcode = 25
+
+class PushLiteralI16Instruction(OperandI16Instruction):
+    name = "PUSHL_I16"
+    opcode = 26
+
+class PopI16Instruction(NoOperandInstruction):
+    name = "POP_I16"
+    opcode = 27
+
+class TopI16Instruction(NoOperandInstruction):
+    name = "TOP_I16"
+    opcode = 28
+
+class AddI16Instruction(NoOperandInstruction):
+    name = "ADD_I16"
+    opcode = 29
+
+class SubtractI16Instruction(NoOperandInstruction):
+    name = "SUB_I16"
+    opcode = 30
+
+class MultiplyI16Instruction(NoOperandInstruction):
+    name = "MUL_I16"
+    opcode = 31
+
+class DivideI16Instruction(NoOperandInstruction):
+    name = "DIV_I16"
+    opcode = 32
+
+class ReadI16Instruction(OperandI16Instruction):
+    name = "READ_I16"
+    opcode = 33
+
+class WriteI16Instruction(OperandI16Instruction):
+    name = "WRITE_I16"
+    opcode = 34
+
+class Allocate16Instruction(OperandU16Instruction):
+    name = "ALLOC_I16"
+    opcode = 35
+
+class FreeI16Instruction(OperandI16Instruction):
+    name = "FREE_I16"
+    opcode = 36
+
+class PushLiteralF32Instruction(OperandF32Instruction):
+    name = "PUSHL_F32"
+    opcode = 37
+
+class PopF32Instruction(NoOperandInstruction):
+    name = "POP_F32"
+    opcode = 38
+
+class TopF32Instruction(NoOperandInstruction):
+    name = "TOP_F32"
+    opcode = 39
+
+class AddF32Instruction(NoOperandInstruction):
+    name = "ADD_F32"
+    opcode = 40
+
+class SubtractF32Instruction(NoOperandInstruction):
+    name = "SUB_F32"
+    opcode = 41
+
+class MultiplyF32Instruction(NoOperandInstruction):
+    name = "MUL_F32"
+    opcode = 42
+
+class DivideF32Instruction(NoOperandInstruction):
+    name = "DIV_F32"
+    opcode = 43
+
+class PushMillisInstruction(NoOperandInstruction):
+    name = "PUSH_MILLIS"
+    opcode = 44
+
+class LeftShiftU16Instruction(NoOperandInstruction):
+    name = "LSHIFT_U16"
+    opcode = 45
+
+class RightShiftU16Instruction(NoOperandInstruction):
+    name = "RSHIFT_U16"
+    opcode = 46
+
+class OrU16Instruction(NoOperandInstruction):
+    name = "OR_U16"
+    opcode = 47
+
+class XorU16Instruction(NoOperandInstruction):
+    name = "XOR_U16"
+    opcode = 48
+
+class AndU16Instruction(NoOperandInstruction):
+    name = "AND_U16"
+    opcode = 49
+
+class NotU16Instruction(NoOperandInstruction):
+    name = "NOT_U16"
+    opcode = 50
 
 
-instructions_classes = [
+instruction_classes = [
     cls_obj
     for cls_name, cls_obj in inspect.getmembers(sys.modules[__name__])
     if inspect.isclass(cls_obj)
-    and cls_name.endswith("Instruction")
+    and cls_name.lower().endswith("instruction")
     and len(cls_name) > 11
+    and "operand" not in cls_name.lower()
 ]
 
-INSTRUCTIONS = {cls.name: cls() for cls in instructions_classes}
+INSTRUCTIONS = {cls.name: cls() for cls in instruction_classes}
 
 PORTS = {
     "ddrb": "0",

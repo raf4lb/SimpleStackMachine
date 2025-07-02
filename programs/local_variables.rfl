@@ -1,3 +1,4 @@
+.main
 ALLOC_U16 a
 PUSHL_U16 5
 POP_LOCAL_U16 $a

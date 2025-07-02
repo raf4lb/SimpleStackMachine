@@ -4,10 +4,11 @@
 ;    else:
 ;        return incr(i+1)
 
-PUSHL_U16 1
-CALL .incr
-TOP_U16
-HALT
+.main
+    PUSHL_U16 1
+    CALL .incr
+    TOP_U16
+    HALT
 
 .incr
     ALLOC_U16 i

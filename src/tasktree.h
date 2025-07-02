@@ -8,7 +8,6 @@ typedef struct TaskTreeNode TaskTreeNode;
 typedef struct TaskTreeNode
 {
     uint16_t id;
-    char name[10];
     struct TaskTreeNode **children;
     uint16_t childCount;
     uint16_t childCapacity;

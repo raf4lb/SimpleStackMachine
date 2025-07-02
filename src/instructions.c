@@ -12,30 +12,6 @@ void halt(CPU *cpu)
     exit(0);
 }
 
-void push(CPU *cpu)
-{
-    uint16_t address = cpu_fetch_16b(cpu);
-    uint16_t value;
-    if (address < cpu->port_bank->size)
-    {
-        value = port_bank_get_address(cpu->port_bank, address);
-    }
-    else
-    {
-        address = address + cpu->user_memory - cpu->port_bank->size;
-        value = memory_get_address_16b(cpu->memory, address);
-    }
-    // TODO: Pop value according the size of type stored
-    stack_push_16b(cpu->stack, value);
-}
-
-void push_literal(CPU *cpu)
-{
-    uint16_t value;
-    cpu_fetch_data(cpu, &value, sizeof(value));
-    stack_push_bend_data(cpu->stack, &value, sizeof(value));
-}
-
 void push_literal_U16(CPU *cpu)
 {
     uint16_t value;
@@ -78,8 +54,8 @@ void pop_address_U16(CPU *cpu)
     }
     else
     {
-        address = cpu->user_memory + address - cpu->port_bank->size;
-        memory_set_address_16b(cpu->memory, address, value);
+        vmprintf("ERROR: invalid cpu address\n");
+        exit(EXIT_FAILURE);
     }
 }
 
@@ -316,20 +292,6 @@ void divide_F32(CPU *cpu)
     stack_push_bend_data(cpu->stack, &result, sizeof(result));
 }
 
-void pop(CPU *cpu)
-{
-    pop_U16(cpu);
-}
-
-void pop_address(CPU *cpu)
-{
-    pop_address_U16(cpu);
-}
-
-void top(CPU *cpu)
-{
-    top_U16(cpu);
-}
 void delay(CPU *cpu)
 {
     uint16_t milliseconds;
@@ -402,32 +364,6 @@ void compare_greater_equal(CPU *cpu)
     stack_push_16b(cpu->stack, a >= b);
 }
 
-void add(CPU *cpu)
-{
-    add_U16(cpu);
-}
-
-void subtract(CPU *cpu)
-{
-    subtract_U16(cpu);
-}
-
-void multiply(CPU *cpu)
-{
-    multiply_U16(cpu);
-}
-
-void divide(CPU *cpu)
-{
-    divide_U16(cpu);
-}
-
-void bitwise_and(CPU *cpu)
-{
-    // TODO: Pop value according the integer size
-    bitwise_and_U16(cpu);
-}
-
 void bitwise_and_U16(CPU *cpu)
 {
     uint16_t b;
@@ -436,12 +372,6 @@ void bitwise_and_U16(CPU *cpu)
     stack_pop_data(cpu->stack, &a, sizeof(a));
     uint16_t result = a & b;
     stack_push_data(cpu->stack, &result, sizeof(result));
-}
-
-void bitwise_or(CPU *cpu)
-{
-    // TODO: Pop value according the integer size
-    bitwise_or_U16(cpu);
 }
 
 void bitwise_or_U16(CPU *cpu)
@@ -464,30 +394,12 @@ void bitwise_xor_U16(CPU *cpu)
     stack_push_data(cpu->stack, &result, sizeof(result));
 }
 
-void bitwise_xor(CPU *cpu)
-{
-    // TODO: Pop value according the integer size
-    bitwise_xor_U16(cpu);
-}
-
-void bitwise_not(CPU *cpu)
-{
-    // TODO: Pop value according the integer size
-    bitwise_not_U16(cpu);
-}
-
 void bitwise_not_U16(CPU *cpu)
 {
     uint16_t a;
     stack_pop_data(cpu->stack, &a, sizeof(a));
     a = ~a;
     stack_push_data(cpu->stack, &a, sizeof(a));
-}
-
-void bitwise_left_shift(CPU *cpu)
-{
-    // TODO: Pop value according the integer size
-    bitwise_left_shift_U16(cpu);
 }
 
 void bitwise_left_shift_U16(CPU *cpu)
@@ -500,12 +412,14 @@ void bitwise_left_shift_U16(CPU *cpu)
     stack_push_data(cpu->stack, &result, sizeof(result));
 }
 
-void bitwise_right_shift(CPU *cpu)
+void bitwise_right_shift_U16(CPU *cpu)
 {
-    // TODO: Pop value according the integer size
-    uint16_t b = stack_pop_16b(cpu->stack);
-    uint16_t a = stack_pop_16b(cpu->stack);
-    stack_push_16b(cpu->stack, a >> b);
+    uint16_t b;
+    stack_pop_data(cpu->stack, &b, sizeof(b));
+    uint16_t a;
+    stack_pop_data(cpu->stack, &a, sizeof(a));
+    uint16_t result = a >> b;
+    stack_push_data(cpu->stack, &result, sizeof(result));
 }
 
 void call(CPU *cpu)
@@ -544,16 +458,6 @@ void push_millis(CPU *cpu)
 {
     uint16_t time = millis();
     stack_push_bend_data(cpu->stack, &time, sizeof(time));
-}
-
-void addf(CPU *cpu)
-{
-    float a, b;
-    stack_pop_data(cpu->stack, &b, sizeof(b));
-    stack_pop_data(cpu->stack, &a, sizeof(a));
-    float result = a + b;
-    stack_push_bend_data(cpu->stack, &result, sizeof(result));
-    stack_print(cpu->stack);
 }
 
 void push_local_U16(CPU *cpu)

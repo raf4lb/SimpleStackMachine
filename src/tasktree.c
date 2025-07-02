@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include "io.h"
 #include "sys.h"
 #include "tasktree.h"
@@ -18,7 +17,6 @@ TaskTreeNode *task_tree_create_node(Task *task)
         exit(EXIT_FAILURE);
     }
     new_task->id = nextId++;
-    snprintf(new_task->name, sizeof(new_task->name), "Task %d", new_task->id);
     new_task->children = NULL;
     new_task->childCount = 0;
     new_task->childCapacity = 0;
@@ -76,7 +74,7 @@ void task_tree_print(TaskTreeNode *root, int depth)
         {
             vmprintf("  ");
         }
-        vmprintf("Task ID: %d, Name: %s\n", root->id, root->name);
+        vmprintf("Task ID: %d\n", root->id);
         for (int i = 0; i < root->childCount; i++)
         {
             task_tree_print(root->children[i], depth + 1);
