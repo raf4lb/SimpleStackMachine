@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "sys.h"
 #include "instructions.h"
 #include "delay.h"
@@ -5,8 +6,6 @@
 
 void halt(CPU *cpu)
 {
-    // stack_print(cpu->callstack);
-    // stack_print(cpu->stack);
     vmprintf("Exit\n");
     cpu_free(cpu);
     exit(0);

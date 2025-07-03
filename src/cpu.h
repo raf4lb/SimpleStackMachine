@@ -4,6 +4,7 @@
 #include "io.h"
 #include "task.h"
 #include "tasktree.h"
+#include "server.h"
 
 #define TASK_STACK_SIZE 16
 #define TASK_CALLSTACK_SIZE 16
@@ -22,6 +23,7 @@ struct CPU
     Stack *localstack;
     PortBank *port_bank;
     MessageQueue *message_queues;
+    Server *server;
 
     uint16_t program_size;
     uint16_t ip;
@@ -57,4 +59,5 @@ void cpu_delete_task(CPU *cpu, TaskTreeNode *node);
 
 void cpu_create_task_inbox(CPU *cpu, Task *task);
 void cpu_process_context_inbox(CPU *cpu);
+void cpu_check_incoming_messages(CPU *cpu);
 #endif

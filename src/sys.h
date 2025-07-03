@@ -2,9 +2,10 @@
 #define SYS_H
 
 #include <stdint.h>
-#include <stdlib.h>
 
 void *vmmalloc(uint16_t size);
+
+void *vmcalloc(uint16_t count, uint16_t size);
 
 void vmfree(void *ptr, uint16_t size);
 

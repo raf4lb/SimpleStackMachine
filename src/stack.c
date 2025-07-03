@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "stack.h"
 #include "sys.h"
 #include "io.h"

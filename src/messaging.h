@@ -2,6 +2,7 @@
 #define MESSAGING_H
 
 #include <stdint.h>
+#include <stdbool.h>
 #include "sys.h"
 
 #define MAX_PAYLOAD_SIZE 32
@@ -58,5 +59,9 @@ Message *message_create(uint16_t vm_src, uint16_t vm_dst, uint16_t task_src_id, 
 void message_free(Message *message);
 
 void message_queue_send_message(MessageQueue *message_queue, uint16_t task_src_id, uint16_t task_dst_id, uint8_t *payload, uint16_t payload_size);
+
+uint8_t *message_serialize(const Message *msg, size_t *out_size);
+
+Message *message_deserialize(const uint8_t *buffer, size_t buffer_size);
 
 #endif

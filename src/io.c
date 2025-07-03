@@ -1,6 +1,8 @@
 #include "sys.h"
 #include "io.h"
 
+#include <stdlib.h>
+
 #ifdef ARDUINO
 
 int (*vmprintf)(const char *, ...) = serial_printf;
@@ -28,14 +30,14 @@ PortBank *port_bank_create(uint8_t size)
     if (port_bank == NULL)
     {
         vmprintf("mem_alloc_failed: port bank\n");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     port_bank->size = size;
     port_bank->ports = (volatile uint8_t **)vmmalloc(size * sizeof(volatile uint8_t *));
     if (port_bank->ports == NULL)
     {
         vmprintf("mem_alloc_failed: ports of the bank\n");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     map_ports(port_bank);
     return port_bank;

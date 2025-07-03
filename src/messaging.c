@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stdlib.h>
 #include <stdbool.h>
 #include "io.h"
 #include "messaging.h"
@@ -48,6 +49,7 @@ bool deliver_local(MessageQueue *message_queues, Message *message)
         queue = queue->next;
     }
     vmprintf("task %d not found\n", message->task_dst);
+    message_free(message);
     return false;
 }
 
@@ -118,7 +120,7 @@ MessageQueue *message_queue_create(uint16_t task_id)
     MessageQueue *queue = (MessageQueue *)vmmalloc(sizeof(MessageQueue));
     if (queue == NULL)
     {
-        vmprintf("Memory allocation for message queue failed\n");
+        vmprintf("mem_alloc_failed: message queue\n");
         exit(EXIT_FAILURE);
     }
     queue->task_id = task_id;
@@ -172,4 +174,89 @@ void message_queue_send_message(MessageQueue *message_queue, uint16_t task_src_i
     uint16_t vm_src = get_local_vm_id();
     Message *message = message_create(vm_src, vm_src, task_src_id, task_dst_id, payload, payload_size);
     send_message(message_queue, message);
+}
+
+uint8_t *message_serialize(const Message *msg, size_t *out_size)
+{
+    *out_size = 16 + msg->payload_size;
+    uint8_t *buffer = vmmalloc(*out_size);
+    if (!buffer)
+    {
+        vmprintf("mem_alloc_failed: message buffer\n");
+        return NULL;
+    }
+
+    uint8_t *ptr = buffer;
+
+    memcpy(ptr, &msg->vm_src, 2);
+    ptr += 2;
+    memcpy(ptr, &msg->vm_dst, 2);
+    ptr += 2;
+    memcpy(ptr, &msg->task_src, 2);
+    ptr += 2;
+    memcpy(ptr, &msg->task_dst, 2);
+    ptr += 2;
+    memcpy(ptr, &msg->seq, 2);
+    ptr += 2;
+    memcpy(ptr, &msg->payload_size, 2);
+    ptr += 2;
+    memcpy(ptr, &msg->crc, 2);
+    ptr += 2;
+    *ptr++ = msg->frag_id;
+    *ptr++ = msg->frag_total;
+
+    if (msg->payload_size > 0 && msg->payload)
+    {
+        memcpy(ptr, msg->payload, msg->payload_size);
+    }
+
+    return buffer;
+}
+
+Message *message_deserialize(const uint8_t *buffer, size_t buffer_size)
+{
+    if (buffer_size < 16)
+    {
+        return NULL;
+    }
+
+    Message *msg = vmcalloc(1, sizeof(Message));
+    if (!msg)
+    {
+        vmprintf("mem_alloc_failed: message buffer\n");
+        return NULL;
+    }
+
+    const uint8_t *ptr = buffer;
+
+    memcpy(&msg->vm_src, ptr, 2);
+    ptr += 2;
+    memcpy(&msg->vm_dst, ptr, 2);
+    ptr += 2;
+    memcpy(&msg->task_src, ptr, 2);
+    ptr += 2;
+    memcpy(&msg->task_dst, ptr, 2);
+    ptr += 2;
+    memcpy(&msg->seq, ptr, 2);
+    ptr += 2;
+    memcpy(&msg->payload_size, ptr, 2);
+    ptr += 2;
+    memcpy(&msg->crc, ptr, 2);
+    ptr += 2;
+    msg->frag_id = *ptr++;
+    msg->frag_total = *ptr++;
+
+    if (msg->payload_size > 0 && (ptr + msg->payload_size <= buffer + buffer_size))
+    {
+        msg->payload = vmmalloc(msg->payload_size);
+        if (!msg->payload)
+        {
+            vmprintf("mem_alloc_failed: message payload\n");
+            message_free(msg);
+            return NULL;
+        }
+        memcpy(msg->payload, ptr, msg->payload_size);
+    }
+
+    return msg;
 }

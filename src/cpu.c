@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "cpu.h"
 #include "instructions.h"
 #include "stack.h"
@@ -10,6 +11,7 @@ void *cpu_create(uint8_t port_bank)
 {
     CPU *cpu = (CPU *)vmmalloc(sizeof(CPU));
     cpu->port_bank = port_bank_create(port_bank);
+    cpu->server = server_create(SERVER_PORT);
     cpu->ip = 0;
     cpu->data_address = 0;
     cpu->tasks_number = 0;
@@ -307,6 +309,7 @@ void cpu_context_switch(CPU *cpu, TaskTreeNode *node)
 
 void cpu_run_cycle(CPU *cpu, TaskTreeNode *node)
 {
+    cpu_check_incoming_messages(cpu);
     cpu_context_switch(cpu, node);
     cpu_process_context_inbox(cpu);
     uint8_t cycles = CONTEXT_MAX_CYCLES;
@@ -319,6 +322,32 @@ void cpu_run_cycle(CPU *cpu, TaskTreeNode *node)
             break; // async return
         }
         cycles--;
+    }
+}
+
+void cpu_check_incoming_messages(CPU *cpu)
+{
+    Message *message = server_receive_message(cpu->server);
+    if (message)
+    {
+        // printf("Mensagem recebida:\n");
+        // printf("  vm_src: %u\n", msg->vm_src);
+        // printf("  vm_dst: %u\n", msg->vm_dst);
+        // printf("  task_src: %u\n", msg->task_src);
+        // printf("  task_dst: %u\n", msg->task_dst);
+        // printf("  seq: %u\n", msg->seq);
+        // printf("  payload_size: %u\n", msg->payload_size);
+        // printf("  frag_id: %u\n", msg->frag_id);
+        // printf("  frag_total: %u\n", msg->frag_total);
+
+        // if (msg->payload && msg->payload_size > 0)
+        // {
+        //     printf("  payload: ");
+        //     fwrite(msg->payload, 1, msg->payload_size, stdout);
+        //     printf("\n");
+        // }
+
+        deliver_local(cpu->message_queues, message);
     }
 }
 

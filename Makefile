@@ -18,6 +18,7 @@ PARAMS = \
 		$(SOURCE_DIR)/messaging.c \
 		$(SOURCE_DIR)/task.c \
 		$(SOURCE_DIR)/tasktree.c \
+		$(SOURCE_DIR)/server.c \
 		$(SOURCE_DIR)/main.c \
 		-DPROGRAM_SIZE=$(PROGRAM_SIZE) \
 		-DPROGRAM="$(PROGRAM)" \
@@ -82,3 +83,11 @@ test:
 
 clean-test:
 	rm -r $(TEST_BUILD_DIR)	
+
+macosx-build-send-message:
+	gcc -o $(BUILD_DIR)/send_message \
+		tools/send_message.c \
+		$(SOURCE_DIR)/messaging.c \
+		$(SOURCE_DIR)/io.c \
+		$(SOURCE_DIR)/sys.c \
+		-DMACOSX

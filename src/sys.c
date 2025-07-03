@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 #include "sys.h"
 
 uint16_t dynamic_memory_usage = 0;
@@ -12,10 +14,18 @@ void *vmmalloc(uint16_t size)
     return ptr;
 }
 
+void *vmcalloc(uint16_t count, uint16_t size)
+{
+    void *ptr = calloc(count, size);
+    if (ptr != NULL)
+    {
+        dynamic_memory_usage += size;
+    }
+    return ptr;
+}
+
 void vmfree(void *ptr, uint16_t size)
 {
-    // Determine the size of the memory block before freeing it
-    // and subtract it from dynamic_memory_usage
     dynamic_memory_usage -= size;
     free(ptr);
 }
