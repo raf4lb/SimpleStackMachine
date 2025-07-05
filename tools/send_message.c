@@ -7,32 +7,31 @@
 #include <sys/socket.h>
 #include "../src/messaging.h"
 
-#define SERVER_PORT 8080
-#define SERVER_IP "127.0.0.1"
-
 int main(int argc, char *argv[])
 {
-    if (argc < 3)
+    if (argc < 5)
     {
-        fprintf(stderr, "Usage: %s <task_dst> <message>\n", argv[0]);
+        fprintf(stderr, "Usage: %s <message> <task_dst_id> <vm_dst_ip> <vm_dst_port>\n", argv[0]);
         return EXIT_FAILURE;
     }
 
-    uint16_t task_dst = (uint16_t)atoi(argv[1]);
-    const char *text = argv[2];
-    size_t payload_len = strlen(text);
+    const char *payload = argv[1];
+    size_t payload_len = strlen(payload);
+    uint16_t task_dst_id = (uint16_t)atoi(argv[2]);
+    const char *vm_dst_ip = argv[3];
+    uint16_t vm_dst_port = (uint16_t)atoi(argv[4]);
 
     Message msg = {
-        .vm_src = 1,
-        .vm_dst = 2,
+        .vm_src = 0,
+        .vm_dst = 1,
         .task_src = 0,
-        .task_dst = task_dst,
-        .seq = 1234,
+        .task_dst = task_dst_id,
+        .seq = 0,
         .payload_size = payload_len,
         .crc = 0xBEEF,
         .frag_id = 0,
         .frag_total = 1,
-        .payload = (uint8_t *)text,
+        .payload = (uint8_t *)payload,
     };
 
     size_t serialized_len;
@@ -53,8 +52,8 @@ int main(int argc, char *argv[])
 
     struct sockaddr_in server_addr = {
         .sin_family = AF_INET,
-        .sin_port = htons(SERVER_PORT)};
-    if (inet_pton(AF_INET, SERVER_IP, &server_addr.sin_addr) <= 0)
+        .sin_port = htons(vm_dst_port)};
+    if (inet_pton(AF_INET, vm_dst_ip, &server_addr.sin_addr) <= 0)
     {
         perror("inet_pton");
         close(sock);
@@ -77,7 +76,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        printf("Message sent (%ld bytes) to task %u: %s\n", sent, task_dst, text);
+        printf("Message sent: %s\n", payload);
     }
 
     close(sock);

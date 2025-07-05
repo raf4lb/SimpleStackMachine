@@ -12,7 +12,7 @@
 #include "sys.h"
 #include "messaging.h"
 
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 128
 
 static int make_socket_non_blocking(int sfd)
 {

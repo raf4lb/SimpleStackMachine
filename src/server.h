@@ -5,7 +5,7 @@
 
 #include "messaging.h"
 
-#define SERVER_PORT 8080
+#define SERVER_PORT 31337
 
 typedef struct
 {

@@ -48,8 +48,6 @@ void send_message(MessageQueue *local_task_inbox, Message *msg);
 
 // void send_large_message(MessageQueue *local_task_inbox, uint16_t vm_dst, uint16_t task_dst, const uint8_t* data, uint32_t full_len);
 
-// void on_message_received(MessageQueue *local_task_inbox, const uint8_t* raw_data, uint16_t size);
-
 MessageQueue *message_queue_create(uint16_t task_id);
 
 void message_queue_free(MessageQueue *queue);

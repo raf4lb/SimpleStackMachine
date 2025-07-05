@@ -105,16 +105,6 @@ void send_message(MessageQueue *local_task_inbox, Message *message)
 //     }
 // }
 
-// void on_message_received(MessageQueue *local_task_inbox, const uint8_t *raw_data, uint16_t size)
-// {
-//     if (size < sizeof(Message))
-//         return;
-
-//     Message *msg;
-//     memcpy(msg, raw_data, sizeof(Message));
-//     deliver_local(local_task_inbox, msg);
-// }
-
 MessageQueue *message_queue_create(uint16_t task_id)
 {
     MessageQueue *queue = (MessageQueue *)vmmalloc(sizeof(MessageQueue));
