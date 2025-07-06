@@ -121,12 +121,11 @@ void stack_write_bend_data_at(Stack *stack, void *value, uint16_t size, uint16_t
         exit(EXIT_FAILURE);
     }
 
-    uint8_t temp[size];
     for (uint16_t i = 0; i < size; i++)
     {
-        temp[i] = *((uint8_t *)value + size - 1 - i);
+        stack->data[address + i] = *((uint8_t *)value + size - 1 - i);
     }
-    memcpy(stack->data + address, temp, size);
+
     if (final_address > stack->sp)
         stack->sp = final_address;
 }
