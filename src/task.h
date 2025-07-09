@@ -10,8 +10,8 @@
 
 typedef struct
 {
+    Stack *opstack;
     Stack *stack;
-    Stack *callstack;
     Stack *localstack;
     MessageQueue *inbox;
 

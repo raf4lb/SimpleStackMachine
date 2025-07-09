@@ -30,6 +30,7 @@ Stack *stack_create(uint16_t size)
     }
     stack->data = data;
     stack->sp = 0;
+    stack->bp = 0;
     return stack;
 }
 

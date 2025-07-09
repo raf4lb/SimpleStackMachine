@@ -31,9 +31,9 @@ void cpu_create_task(CPU *cpu, uint16_t address)
     uint8_t id = cpu->tasks_number;
 
     uint16_t message_handler_address;
-    stack_pop_data(cpu->stack, &message_handler_address, sizeof(uint16_t));
+    stack_pop_data(cpu->opstack, &message_handler_address, sizeof(uint16_t));
 
-    Task *task = task_create(id, address, TASK_STACK_SIZE, TASK_CALLSTACK_SIZE, TASK_LOCALSTACK_SIZE, message_handler_address);
+    Task *task = task_create(id, address, TASK_OPSTACK_SIZE, TASK_STACK_SIZE, TASK_LOCALSTACK_SIZE, message_handler_address);
     task_tree_add_child(cpu->task_tree_current_node, task);
     cpu_create_task_inbox(cpu, task);
 }
@@ -60,7 +60,7 @@ void cpu_load_program(CPU *cpu, const uint8_t *program, uint16_t program_size, u
     cpu->program = program;
     cpu->program_size = program_size;
     cpu->data_address = data_address;
-    Task *main_task = task_create(0, 0, TASK_STACK_SIZE, TASK_CALLSTACK_SIZE, TASK_LOCALSTACK_SIZE, 0);
+    Task *main_task = task_create(0, 0, TASK_OPSTACK_SIZE, TASK_STACK_SIZE, TASK_LOCALSTACK_SIZE, 0);
     cpu->task_tree_root = task_tree_create_node(main_task);
     cpu->task_tree_current_node = cpu->task_tree_root;
     MessageQueue *queue = message_queue_create(0);
@@ -184,7 +184,7 @@ void cpu_execute(CPU *cpu, uint8_t opcode)
         pop_address_U16(cpu);
         break;
 
-    // U16 stack/local
+    // U16 opstack/local
     case OP_PUSH_U16:
         push_U16(cpu);
         break;
@@ -291,8 +291,8 @@ void cpu_set_task_node(CPU *cpu, TaskTreeNode *node)
 {
     node->task->active = true;
     cpu->ip = node->task->ip;
+    cpu->opstack = node->task->opstack;
     cpu->stack = node->task->stack;
-    cpu->callstack = node->task->callstack;
     cpu->localstack = node->task->localstack;
     cpu->task_tree_current_node = node;
 }
@@ -360,8 +360,7 @@ void cpu_process_context_inbox(CPU *cpu)
         Message *message = inbox_queue->head;
         if (cpu->task_tree_current_node->task->message_handler_address > 0)
         {
-            stack_push_data(cpu->callstack, &cpu->ip, sizeof(uint16_t));
-            cpu->ip = cpu->task_tree_current_node->task->message_handler_address;
+            call_address(cpu, cpu->task_tree_current_node->task->message_handler_address);
         }
         inbox_queue->head = message->next;
         inbox_queue->count--;
@@ -382,9 +381,9 @@ void cpu_print(CPU *cpu)
 {
     vmprintf("IP: %d\n", cpu->ip);
     vmprintf("Stack:\n");
-    stack_print(cpu->stack);
+    stack_print(cpu->opstack);
     vmprintf("CallStack:\n");
-    stack_print(cpu->callstack);
+    stack_print(cpu->stack);
     vmprintf("LocalStack:\n");
     stack_print(cpu->localstack);
 }

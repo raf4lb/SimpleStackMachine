@@ -6,8 +6,8 @@
 #include "tasktree.h"
 #include "server.h"
 
+#define TASK_OPSTACK_SIZE 16
 #define TASK_STACK_SIZE 16
-#define TASK_CALLSTACK_SIZE 16
 #define TASK_LOCALSTACK_SIZE 16
 #define CONTEXT_MAX_CYCLES 255
 
@@ -18,8 +18,8 @@ struct CPU
     TaskTreeNode *task_tree_root;
     TaskTreeNode *task_tree_current_node;
     const uint8_t *program;
+    Stack *opstack;
     Stack *stack;
-    Stack *callstack;
     Stack *localstack;
     PortBank *port_bank;
     MessageQueue *message_queues;

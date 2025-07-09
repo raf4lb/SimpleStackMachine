@@ -9,6 +9,7 @@ typedef struct
     uint8_t *data;
     uint16_t size;
     uint16_t sp;
+    uint16_t bp;
 } Stack;
 
 Stack *stack_create(uint16_t size);

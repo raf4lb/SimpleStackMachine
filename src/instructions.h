@@ -36,7 +36,7 @@ typedef enum
     OP_DIV_U16,
     OP_POPA_U16,
 
-    // U16 stack/local
+    // U16 opstack/local
     OP_PUSH_U16,
     OP_PUSH_LOCAL_U16,
     OP_POP_LOCAL_U16,
@@ -108,6 +108,8 @@ void bitwise_left_shift_U16(CPU *cpu);
 void bitwise_right_shift_U16(CPU *cpu);
 
 void call(CPU *cpu);
+
+void call_address(CPU *cpu, uint16_t address);
 
 void ret(CPU *cpu);
 

@@ -247,7 +247,7 @@ class WriteI16Instruction(OperandI16Instruction):
     name = "WRITE_I16"
     opcode = 34
 
-class Allocate16Instruction(OperandU16Instruction):
+class AllocateI16Instruction(OperandU16Instruction):
     name = "ALLOC_I16"
     opcode = 35
 
