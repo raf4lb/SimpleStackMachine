@@ -1,59 +1,59 @@
-.main
-ALLOC_U16 a ; a
-PUSHL_U16 0
-POPA_U16 $a
-ALLOC_U16 1 ; b
-PUSHL_U16 1
-POPA_U16 $b
-ALLOC_U16 2 ; c
-ALLOC_U16 3 ; i
+fn .main
+    ALLOC_LOCAL 2 $a    ; a
+    PUSHL_U16 0
+    POP_LOCAL 2 $a
+    
+    ALLOC_LOCAL 2 $b    ; b
+    PUSHL_U16 1
+    POP_LOCAL 2 $b
+    
+    ALLOC_LOCAL 2 $c    ; c
+    ALLOC_LOCAL 2 $i    ; i
 
-ALLOC_U16 4 ; n
-PUSHL_U16 30  ; n here
-POPA_U16 $n
+    ALLOC_LOCAL 2 $n    ; n
+    PUSHL_U16 24        ; n here
+    POP_LOCAL 2 $n
 
-PUSH_U16 $n
-PUSHL_U16 1
-CPGE
-PJIF .false_1
-PUSH_U16 $a
-TOP_U16
-.false_1
-PUSH_U16 $n
-PUSHL_U16 2
-CPGE
-PJIF .false_2
-PUSH_U16 $b
-TOP_U16
-.false_2
-PUSHL_U16 3
-POPA_U16 $i
-ALLOC_U16 5 ; inc
-PUSHL_U16 1
-POPA_U16 $inc
-.for
-    CALL .for_content
-    PUSH_U16 $i
-    PUSH_U16 $inc
-    ADD_U16
-    POPA_U16 $i
-    PUSH_U16 $i
-    PUSH_U16 $n
-    CPG
-    PJIF .for
-    HALT
-
-.for_content
-    PUSH_U16 $a
-    PUSH_U16 $b
-    ADD_U16
+    PUSH_LOCAL 2 $n
+    PUSHL_U16 1
+    COMPARE_GE
+    POP_JUMP_IF_FALSE .false_1
+    PUSH_LOCAL 2 $a
     TOP_U16
-    POPA_U16 $c
-    PUSH_U16 $b
-    POPA_U16 $a
-    PUSH_U16 $c
-    POPA_U16 $b
-    RETURN
+    .false_1
+    PUSH_LOCAL 2 $n
+    PUSHL_U16 2
+    COMPARE_GE
+    POP_JUMP_IF_FALSE .false_2
+    PUSH_LOCAL 2 $b
+    TOP_U16
+    .false_2
+    PUSHL_U16 3
+    POP_LOCAL 2 $i
+    ALLOC_LOCAL 2 $inc ; inc
+    PUSHL_U16 1
+    POP_LOCAL 2 $inc
+    .for
+        ; for content
+        PUSH_LOCAL 2 $a
+        PUSH_LOCAL 2 $b
+        ADD_U16
+        TOP_U16
+        POP_LOCAL 2 $c
+        PUSH_LOCAL 2 $b
+        POP_LOCAL 2 $a
+        PUSH_LOCAL 2 $c
+        POP_LOCAL 2 $b
 
+        ; for increment
+        PUSH_LOCAL 2 $i
+        PUSH_LOCAL 2 $inc
+        ADD_U16
+        POP_LOCAL 2 $i
 
-
+        ; check for condition
+        PUSH_LOCAL 2 $i
+        PUSH_LOCAL 2 $n
+        COMPARE_GT
+        POP_JUMP_IF_FALSE .for
+        HALT

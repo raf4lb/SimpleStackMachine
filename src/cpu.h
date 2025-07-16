@@ -7,7 +7,7 @@
 #include "server.h"
 
 #define TASK_OPSTACK_SIZE 32
-#define TASK_STACK_SIZE 32
+#define TASK_STACK_SIZE 64
 #define CONTEXT_MAX_CYCLES 255
 
 typedef struct CPU CPU;

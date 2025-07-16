@@ -1,6 +1,6 @@
 #include delay.rfl
 
-.main
+fn .main
     PUSHL_U16 500
     CALL .delay_ms
     RETURN

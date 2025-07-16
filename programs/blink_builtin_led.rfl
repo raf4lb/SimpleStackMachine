@@ -3,7 +3,7 @@
 
 #include delay.rfl
 
-.main
+fn .main
     ; set pin 13 output
     PUSHL_U16 32         ; push 0b00100000 to stack
     POPA_U16 $ddrb       ; set DDRB

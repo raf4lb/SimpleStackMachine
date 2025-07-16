@@ -7,21 +7,21 @@
 ; DDRB address is 0b0
 ; PORTB address is 0b1
 
-.main 
+fn .main 
     PUSHL_U16 2           ; push 0b10 to stack
     POPA_U16 $ddrb       ; set DDRB 0 input 1 output
 
-.loop
-    ; check if PINB0 is ON (PINB & 1)
-    PUSH_U16 $pinb           ; push PINB to stack
-    PUSHL_U16 1      
-    AND_U16          
-    PUSHL_U16 1
-    COMPARE_EQ
-    POP_JUMP_IF_FALSE .loop
-    PUSHL_U16 1
-    CALL .toggle_portb_pin   ; toogle pinb1
-    PUSHL_U16 250            ; delay 250ms
-    CALL .delay_ms
-    JUMP .loop
-    
+    .loop
+        ; check if PINB0 is ON (PINB & 1)
+        PUSH_U16 $pinb           ; push PINB to stack
+        PUSHL_U16 1      
+        AND_U16          
+        PUSHL_U16 1
+        COMPARE_EQ
+        POP_JUMP_IF_FALSE .loop
+        PUSHL_U16 1
+        CALL .toggle_portb_pin   ; toogle pinb1
+        PUSHL_U16 250            ; delay 250ms
+        CALL .delay_ms
+        JUMP .loop
+        

@@ -1,17 +1,19 @@
-.loop
-    CALL .move_top_pop_1
-    DELAY 1000
-    CALL .move_top_pop_0
-    DELAY 1000
-    JUMP .loop
 
-.move_top_pop_1
+fn .main
+    .loop
+        CALL .move_top_pop_1
+        DELAY 1000
+        CALL .move_top_pop_0
+        DELAY 1000
+        JUMP .loop
+
+fn .move_top_pop_1
     PUSHL_U16 1
     TOP_U16
     POP_U16
     RETURN
 
-.move_top_pop_0
+fn .move_top_pop_0
     PUSHL_U16 0
     TOP_U16
     POP_U16

@@ -1,14 +1,15 @@
 
-.main
+fn .main
+    .loop
     CALL .func_u16
     DELAY 500
     CALL .func_i16
     DELAY 500
     CALL .func_f32
     DELAY 500
-    JUMP .main
+    JUMP .loop
 
-.func_u16
+fn .func_u16
     PUSHL_U16 100
     PUSHL_U16 4
     ADD_U16
@@ -16,7 +17,7 @@
     POP_U16
     RETURN
 
-.func_i16
+fn .func_i16
     PUSHL_I16 -1320
     PUSHL_I16 340
     ADD_I16
@@ -24,7 +25,7 @@
     POP_I16
     RETURN
 
-.func_f32
+fn .func_f32
     PUSHL_F32 2.5
     PUSHL_F32 10.5
     MUL_F32

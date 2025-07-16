@@ -1,19 +1,19 @@
 CONST message_on STRING "HELLO WORLD!\n"
 CONST message_off STRING "OLÁ MUNDO!\n"
 
-.main
+fn .main
     CALL .on
     DELAY 1000
     CALL .off
     DELAY 1000
     JUMP .main
 
-.on
+fn .on
     PUSHL_U16 $message_on
     SYSCALL 0
     RETURN
 
-.off
+fn .off
     PUSHL_U16 $message_off
     SYSCALL 0
     RETURN

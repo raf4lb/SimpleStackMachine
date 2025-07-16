@@ -4,28 +4,28 @@
 ; 
 ; main() {
 ;   result <i16>
-;   result = sum(1, 2)
-;   return result
+;   result = sum(1, -2)
+;   print(result)
 ; } <void>
+; expected output: -1
 
-.main
-    ALLOC_I16 0
-    PUSHL_I16 -10
-    PUSHL_I16 123
+
+fn .main
+    ALLOC_LOCAL 2 $result
+    PUSHL_I16 1
+    PUSHL_I16 -2
     CALL .sum
-    STORE_I16 0
-    LOAD_I16 0
+    POP_LOCAL 2 $result
+    PUSH_LOCAL 2 $result
     TOP_I16
     HALT
 
-.sum
-    ALLOC_I16 4
-    ALLOC_I16 6
-    STORE_I16 4
-    STORE_I16 6
-    LOAD_I16 4
-    LOAD_I16 6
+fn .sum
+    ALLOC_LOCAL 2 $y
+    POP_LOCAL 2 $y
+    ALLOC_LOCAL 2 $x
+    POP_LOCAL 2 $x
+    PUSH_LOCAL 2 $x
+    PUSH_LOCAL 2 $y
     ADD_I16
-    FREE_I16 4
-    FREE_I16 6
     RETURN

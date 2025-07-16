@@ -1,6 +1,6 @@
 CONST hello STRING "LED TOGGLED!\n"
 
-.main
+fn .main
     PUSHL_U16 $hello
     SYSCALL 0
     SYSCALL 1

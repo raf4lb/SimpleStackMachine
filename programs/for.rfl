@@ -4,26 +4,27 @@
 ; for i = 0; i < max; i++
 ;   print i
 
-VAR i
-VAR max
-VAR inc
+fn .main
+    ALLOC_LOCAL 2 $i
+    PUSHL_I16 0
+    POP_LOCAL 2 $i
 
-.main
-    PSHL 0
-    POPA $i
-    PSHL 10
-    POPA $max
-    PSHL 1
-    POPA $inc
+    ALLOC_LOCAL 2 $max
+    PUSHL_I16 10
+    POP_LOCAL 2 $max
     
-.for
-    PSH $i
-    TOP
-    PSH $inc
-    ADD
-    POPA $i
-    PSH $i
-    PSH $max
-    CPGE
-    PJIF .for 
-    HLT
+    ALLOC_LOCAL 2 $inc
+    PUSHL_I16 1
+    POP_LOCAL 2 $inc
+    
+    .for
+        PUSH_LOCAL 2 $i
+        TOP_U16
+        PUSH_LOCAL 2 $inc
+        ADD_I16
+        POP_LOCAL 2 $i
+        PUSH_LOCAL 2 $i
+        PUSH_LOCAL 2 $max
+        COMPARE_EQ
+        POP_JUMP_IF_FALSE .for 
+        HALT

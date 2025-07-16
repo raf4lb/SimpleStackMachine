@@ -1,41 +1,42 @@
 ; Count from 0 to 10 and from 10 to 0
 
-VAR i
-VAR MIN
-VAR MAX
 
-.main
-    PSHL 0
-    POPA $MIN
-    PSHL 10
-    POPA $MAX
-    PSHL 0
-    TOP
-    POPA $i
+fn .main
+    ALLOC_LOCAL 2 $i
+    ALLOC_LOCAL 2 $MIN
+    ALLOC_LOCAL 2 $MAX
+
+    PUSHL_U16 0
+    POP_LOCAL 2 $MIN
+    PUSHL_U16 10
+    POP_LOCAL 2 $MAX
+    PUSHL_U16 0
+    TOP_U16
+    POP_LOCAL 2 $i
     
 .incr
-    PSH $i
-    PSHL 1
-    ADD
-    TOP
-    POPA $i
-    PSH $i
-    PSH $MAX
-    CPL
-    PJIF .decr
-    JMP .incr
+    PUSH_LOCAL 2 $i
+    PUSHL_U16 1
+    ADD_U16
+    TOP_U16
+    POP_LOCAL 2 $i
+    PUSH_LOCAL 2 $i
+    PUSH_LOCAL 2 $MAX
+    COMPARE_LT
+    POP_JUMP_IF_FALSE .decr
+    JUMP .incr
 
 .decr
-    PSH $i
-    PSHL 1
-    SUB
-    TOP
-    POPA $i
-    PSH $i
-    PSH $MIN
-    CPG
-    PJIF .end 
-    JMP .decr
+    PUSH_LOCAL 2 $i
+    PUSHL_U16 1
+    SUB_U16
+    TOP_U16
+    POP_LOCAL 2 $i
+    PUSH_LOCAL 2 $i
+    PUSH_LOCAL 2 $MIN
+    COMPARE_GT
+    POP_JUMP_IF_FALSE .end 
+    JUMP .decr
 
 .end
-    HLT
+    HALT
