@@ -23,10 +23,11 @@ const uint8_t program[] = PROGRAM;
 
 int main(void)
 {
-
-#ifdef SERIAL_ENABLED
+#ifdef ARDUINO
     timer_init();
+#ifdef SERIAL_ENABLED
     serial_setup(9600);
+#endif
 #endif
     vmprintf("Starting VM\n");
     CPU *cpu = cpu_create(port_banks);

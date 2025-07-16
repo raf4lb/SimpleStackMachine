@@ -6,75 +6,56 @@
 typedef enum
 {
     OP_HALT = 0,
-
-    // Control flow
-    OP_DELAY,
-    OP_JUMP,
-    OP_POP_JUMP_IF_FALSE,
-
-    // Comparisons
-    OP_COMPARE_EQ,
-    OP_COMPARE_LT,
-    OP_COMPARE_GT,
-    OP_COMPARE_LE,
-    OP_COMPARE_GE,
-
-    // Calls and syscalls
-    OP_CALL,
-    OP_RETURN,
-    OP_SYSCALL,
-    OP_ASYNC_CALL,
-    OP_ASYNC_RETURN,
-
-    // U16 operations
-    OP_PUSHL_U16,
-    OP_POP_U16,
-    OP_TOP_U16,
-    OP_ADD_U16,
-    OP_SUB_U16,
-    OP_MUL_U16,
-    OP_DIV_U16,
-    OP_POPA_U16,
-
-    // U16 stack/local
-    OP_PUSH_U16,
-    OP_PUSH_LOCAL_U16,
-    OP_POP_LOCAL_U16,
-    OP_PARENT_POP_LOCAL_U16,
-
-    // I16 operations and memory
-    OP_PUSHL_I16,
-    OP_POP_I16,
-    OP_TOP_I16,
-    OP_ADD_I16,
-    OP_SUB_I16,
-    OP_MUL_I16,
-    OP_DIV_I16,
-    OP_READ_I16,
-    OP_WRITE_I16,
-    OP_ALLOC_I16,
-    OP_FREE_I16,
-
-    // F32 operations
-    OP_PUSHL_F32,
-    OP_POP_F32,
-    OP_TOP_F32,
-    OP_ADD_F32,
-    OP_SUB_F32,
-    OP_MUL_F32,
-    OP_DIV_F32,
-
-    // Time
-    OP_PUSH_MILLIS,
-
-    // Bitwise operations
-    OP_LSHIFT_U16,
-    OP_RSHIFT_U16,
-    OP_OR_U16,
-    OP_XOR_U16,
-    OP_AND_U16,
-    OP_NOT_U16
-
+    OP_DELAY = 1,
+    OP_JUMP = 2,
+    OP_POP_JUMP_IF_FALSE = 3,
+    OP_COMPARE_EQ = 4,
+    OP_COMPARE_LT = 5,
+    OP_COMPARE_GT = 6,
+    OP_COMPARE_LE = 7,
+    OP_COMPARE_GE = 8,
+    OP_CALL = 9,
+    OP_RETURN = 10,
+    OP_SYSCALL = 11,
+    OP_ASYNC_CALL = 12,
+    OP_ASYNC_RETURN = 13,
+    OP_PUSHL_U16 = 14,
+    OP_POP_U16 = 15,
+    OP_TOP_U16 = 16,
+    OP_ADD_U16 = 17,
+    OP_SUB_U16 = 18,
+    OP_MUL_U16 = 19,
+    OP_DIV_U16 = 20,
+    OP_POPA_U16 = 21,
+    OP_PUSH_U16 = 22,
+    OP_ALLOC_LOCAL = 23,
+    OP_PUSH_LOCAL = 24,
+    OP_POP_LOCAL = 25,
+    OP_PUSHL_I16 = 26,
+    OP_POP_I16 = 27,
+    OP_TOP_I16 = 28,
+    OP_ADD_I16 = 29,
+    OP_SUB_I16 = 30,
+    OP_MUL_I16 = 31,
+    OP_DIV_I16 = 32,
+    OP_READ_I16 = 33,
+    OP_WRITE_I16 = 34,
+    OP_ALLOC_I16 = 35,
+    OP_FREE_I16 = 36,
+    OP_PUSHL_F32 = 37,
+    OP_POP_F32 = 38,
+    OP_TOP_F32 = 39,
+    OP_ADD_F32 = 40,
+    OP_SUB_F32 = 41,
+    OP_MUL_F32 = 42,
+    OP_DIV_F32 = 43,
+    OP_PUSH_MILLIS = 44,
+    OP_LSHIFT_U16 = 45,
+    OP_RSHIFT_U16 = 46,
+    OP_OR_U16 = 47,
+    OP_XOR_U16 = 48,
+    OP_AND_U16 = 49,
+    OP_NOT_U16 = 50,
 } OpCode;
 
 void halt(CPU *cpu);
@@ -108,6 +89,8 @@ void bitwise_left_shift_U16(CPU *cpu);
 void bitwise_right_shift_U16(CPU *cpu);
 
 void call(CPU *cpu);
+
+void call_address(CPU *cpu, uint16_t address);
 
 void ret(CPU *cpu);
 
@@ -181,10 +164,10 @@ void divide_F32(CPU *cpu);
 
 void push_millis(CPU *cpu);
 
-void push_local_U16(CPU *cpu);
+void allocate_local(CPU *cpu);
 
-void pop_local_U16(CPU *cpu);
+void push_local(CPU *cpu);
 
-void parent_pop_local_U16(CPU *cpu);
+void pop_local(CPU *cpu);
 
 #endif

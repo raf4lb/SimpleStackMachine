@@ -1,20 +1,20 @@
-.main
-ALLOC_U16 a
-PUSHL_U16 5
-POP_LOCAL_U16 $a
-PUSH_LOCAL_U16 $a
-TOP_U16
 
-ALLOC_U16 b
-PUSHL_U16 10
-POP_LOCAL_U16 $b
-PUSH_LOCAL_U16 $b
-TOP_U16
+fn .main
+    ALLOC_LOCAL 2 $result
+    PUSHL_U16 2
+    PUSHL_U16 3
+    CALL .sum
+    POP_LOCAL 2 $result
+    PUSH_LOCAL 2 $result
+    TOP_U16
+    RETURN
 
-ADD_U16
-ALLOC_U16 c
-POP_LOCAL_U16 $c
-PUSH_LOCAL_U16 $c
-TOP_U16
-
-HALT
+fn .sum
+    ALLOC_LOCAL 2 $a
+    ALLOC_LOCAL 2 $b
+    POP_LOCAL 2 $a
+    POP_LOCAL 2 $b
+    PUSH_LOCAL 2 $a
+    PUSH_LOCAL 2 $b
+    ADD_U16
+    RETURN
