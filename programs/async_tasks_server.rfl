@@ -4,7 +4,7 @@
 CONST t1 STRING "task 1 received message\n"
 CONST t2 STRING "task 2 received message\n"
 
-.main
+fn .main
     PUSHL_U16 .message_handler_1     ; task message handler
     ASYNC_CALL .task_1
     PUSHL_U16 .message_handler_2     ; task message handler
@@ -15,18 +15,20 @@ CONST t2 STRING "task 2 received message\n"
     CALL .delay_ms
     JUMP .loop
 
-.task_1
-    JUMP .task_1
+fn .task_1
+    .t1_loop
+    JUMP .t1_loop
 
-.message_handler_1
+fn .message_handler_1
     PUSHL_U16 $t1
     SYSCALL 0
     RETURN
 
-.task_2
-    JUMP .task_2
+fn .task_2
+    .t2_loop
+    JUMP .t2_loop
 
-.message_handler_2
+fn .message_handler_2
     PUSHL_U16 $t2
     SYSCALL 0
     RETURN

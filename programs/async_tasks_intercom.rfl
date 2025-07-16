@@ -1,14 +1,15 @@
 ; Task intercommunication example
 ; https://wokwi.com/projects/434796710305388545
 
+#include delay.rfl
+#include toggle.rfl
+#include memory_usage.rfl
+
 CONST hi STRING "SENT!\n"
 CONST message STRING "memory usage: "
 CONST message_pin_toogled STRING "TOGGLED!\n"
 
-#include delay.rfl
-#include toggle.rfl
-
-.main
+fn .main
     PUSHL_U16 34                        ; push 0b00100010 to stack
     POPA_U16 $ddrb                      ; set DDRB
     PUSHL_U16 .task_1_message_handler   ; task message handler
@@ -27,18 +28,13 @@ CONST message_pin_toogled STRING "TOGGLED!\n"
         JUMP .loop
 
 
-.task_1
-    ALLOC_U16 memory_usage
-    SYSCALL 4                   ; get memory usage syscall
-    PUSHL_U16 $message
-    SYSCALL 0                   ; print syscall
-    TOP_U16
-    POP_LOCAL_U16 $memory_usage
+fn .task_1
+    CALL .print_memory_usage
     PUSHL_U16 1000
     CALL .delay_ms
     JUMP .task_1                ; loop
 
-.task_1_message_handler
+fn .task_1_message_handler
     PUSHL_U16 5
     CALL .toggle_portb_pin
     PUSHL_U16 $message_pin_toogled
@@ -46,7 +42,7 @@ CONST message_pin_toogled STRING "TOGGLED!\n"
     RETURN
 
 
-.send_toggle_pin_message
+fn .send_toggle_pin_message
     PUSHL_U16 $hi
     SYSCALL 0
     PUSHL_U16 1                         ; task id

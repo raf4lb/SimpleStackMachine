@@ -308,11 +308,11 @@ void jump(CPU *cpu)
 void pop_jump_if_false(CPU *cpu)
 {
     uint16_t address;
-    cpu_fetch_data(cpu, &address, sizeof(uint16_t));
+    cpu_fetch_data(cpu, &address, sizeof(address));
     // TODO: Pop value according the size of type stored
     // Here result is a bool so it should be okay
     bool result;
-    stack_pop_bend_data(cpu->opstack, &result, sizeof(bool));
+    stack_pop_bend_data(cpu->opstack, &result, sizeof(result));
     if (!result)
         cpu->ip = address;
 }
@@ -468,29 +468,34 @@ void push_millis(CPU *cpu)
     stack_push_bend_data(cpu->opstack, &time, sizeof(time));
 }
 
-void push_local_U16(CPU *cpu)
+void allocate_local(CPU *cpu)
 {
+    uint16_t size;
+    cpu_fetch_data(cpu, &size, sizeof(size));
     uint16_t address;
     cpu_fetch_data(cpu, &address, sizeof(address));
-    uint16_t value;
-    stack_read_data_at(cpu->localstack, &value, sizeof(value), address);
-    stack_push_data(cpu->opstack, &value, sizeof(value));
+    // do nothing with the address?
+    cpu->stack->sp += size;
 }
 
-void pop_local_U16(CPU *cpu)
+void push_local(CPU *cpu)
 {
+    uint16_t size;
+    cpu_fetch_data(cpu, &size, sizeof(size));
     uint16_t address;
     cpu_fetch_data(cpu, &address, sizeof(address));
-    uint16_t value;
-    stack_pop_data(cpu->opstack, &value, sizeof(value));
-    stack_write_bend_data_at(cpu->localstack, &value, sizeof(value), address);
+    void *value;
+    stack_read_data_at(cpu->stack, &value, sizeof(value), cpu->stack->bp + address);
+    stack_push_bend_data(cpu->opstack, &value, size);
 }
 
-void parent_pop_local_U16(CPU *cpu)
+void pop_local(CPU *cpu)
 {
+    uint16_t size;
+    cpu_fetch_data(cpu, &size, sizeof(size));
     uint16_t address;
     cpu_fetch_data(cpu, &address, sizeof(address));
-    uint16_t value;
-    stack_pop_data(cpu->task_tree_current_node->parent->task->opstack, &value, sizeof(value));
-    stack_write_bend_data_at(cpu->localstack, &value, sizeof(value), address);
+    void *value;
+    stack_pop_bend_data(cpu->opstack, &value, size);
+    stack_write_bend_data_at(cpu->stack, &value, sizeof(value), cpu->stack->bp + address);
 }

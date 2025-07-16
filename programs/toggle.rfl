@@ -1,14 +1,13 @@
-; Use a button to control a led
-; https://wokwi.com/projects/434796710305388545
+; toggle a portb pin
+; - param: pin_number (U16)
 
-
-.toggle_portb_pin    
-    ALLOC_U16 pin_number
-    POP_LOCAL_U16 $pin_number
+fn .toggle_portb_pin    
+    ALLOC_LOCAL 2 $pin_number
+    POP_LOCAL 2 $pin_number
     ; PORTB ^= (1 << PIN NUMBER);
     PUSH_U16 $portb   ; push PORTB to stack
     PUSHL_U16 1       ; push 1 to stack
-    PUSH_LOCAL_U16 $pin_number       ; push 1 to stack
+    PUSH_LOCAL 2 $pin_number       ; push 1 to stack
     LSHIFT_U16        ; bitwise LEFT SHIFT operation
     XOR_U16           ; bitwise XOR operation
     POPA_U16 $portb   ; pop result to PORTB

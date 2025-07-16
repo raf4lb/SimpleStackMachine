@@ -1,3 +1,5 @@
+#ifdef MACOSX
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -112,3 +114,4 @@ void server_free(Server *server)
         vmfree(server, sizeof(Server));
     }
 }
+#endif

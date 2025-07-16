@@ -1,17 +1,17 @@
 ; delay milliseconds
 ; - param: ms (U16)
 
-.delay_ms
-    ALLOC_U16 ms
-    POP_LOCAL_U16 $ms
+fn .delay_ms
+    ALLOC_LOCAL 2 $ms
+    POP_LOCAL 2 $ms
     PUSH_MILLIS
-    ALLOC_U16 current_millis
-    POP_LOCAL_U16 $current_millis
+    ALLOC_LOCAL 2 $current_millis
+    POP_LOCAL 2 $current_millis
     .loop_delay
         PUSH_MILLIS
-        PUSH_LOCAL_U16 $current_millis
+        PUSH_LOCAL 2 $current_millis
         SUB_U16
-        PUSH_LOCAL_U16 $ms
+        PUSH_LOCAL 2 $ms
         COMPARE_GT
         POP_JUMP_IF_FALSE .loop_delay
         RETURN

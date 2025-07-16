@@ -3,7 +3,6 @@ import os
 import sys
 import inspect
 import struct
-from typing import List, Set
 
 
 class Instruction(ABC):
@@ -70,40 +69,52 @@ class NoOperandInstruction(Instruction):
     opcode = -1
     size = 1
 
-    def encode(self, operand):
+    def encode(self, operands: list[str]):
         return [self.opcode]
 
 
-class OperandU16Instruction(Instruction):
-    name = "OperandU16Instruction"
+class U16OperandInstruction(Instruction):
+    name = "U16OperandInstruction"
     opcode = -1
     size = 3
 
-    def encode(self, operand):
+    def encode(self, operands: list[str]):
         encoded = [self.opcode]
-        encoded.extend(string_to_uint8_list(operand, 2))
+        encoded.extend(string_to_uint8_list(operands[0], 2))
         return encoded
 
 
-class OperandI16Instruction(Instruction):
-    name = "OperandI16Instruction"
-    opcode = -1
-    size = 3
-
-    def encode(self, operand):
-        encoded = [self.opcode]
-        encoded.extend(string_to_int8_list(operand, 2))
-        return encoded
-
-
-class OperandF32Instruction(Instruction):
-    name = "OperandF32Instruction"
+class TwoU16OperandInstruction(Instruction):
+    name = "TwoU16OperandInstruction"
     opcode = -1
     size = 5
 
-    def encode(self, operand):
+    def encode(self, operands: list[str]):
         encoded = [self.opcode]
-        encoded.extend(string_to_float_ieee754(operand))
+        for operand in operands:
+            encoded.extend(string_to_uint8_list(operand, 2))
+        return encoded
+
+
+class I16OperandInstruction(Instruction):
+    name = "I16OperandInstruction"
+    opcode = -1
+    size = 3
+
+    def encode(self, operands: list[str]):
+        encoded = [self.opcode]
+        encoded.extend(string_to_int8_list(operands[0], 2))
+        return encoded
+
+
+class F32OperandInstruction(Instruction):
+    name = "F32OperandInstruction"
+    opcode = -1
+    size = 5
+
+    def encode(self, operands: list[str]):
+        encoded = [self.opcode]
+        encoded.extend(string_to_float_ieee754(operands[0]))
         return encoded
 
 
@@ -111,201 +122,251 @@ class HaltInstruction(NoOperandInstruction):
     name = "HALT"
     opcode = 0
 
-class DelayInstruction(OperandU16Instruction):
+
+class DelayInstruction(U16OperandInstruction):
     name = "DELAY"
     opcode = 1
 
-class JumpInstruction(OperandU16Instruction):
+
+class JumpInstruction(U16OperandInstruction):
     name = "JUMP"
     opcode = 2
 
-class PopJumpIfFalseInstruction(OperandU16Instruction):
+
+class PopJumpIfFalseInstruction(U16OperandInstruction):
     name = "POP_JUMP_IF_FALSE"
     opcode = 3
+
 
 class CompareEqualInstruction(NoOperandInstruction):
     name = "COMPARE_EQ"
     opcode = 4
 
+
 class CompareLessInstruction(NoOperandInstruction):
     name = "COMPARE_LT"
     opcode = 5
+
 
 class CompareGreaterInstruction(NoOperandInstruction):
     name = "COMPARE_GT"
     opcode = 6
 
+
 class CompareLessEqualInstruction(NoOperandInstruction):
     name = "COMPARE_LE"
     opcode = 7
+
 
 class CompareGreaterEqualInstruction(NoOperandInstruction):
     name = "COMPARE_GE"
     opcode = 8
 
-class CallInstruction(OperandU16Instruction):
+
+class CallInstruction(U16OperandInstruction):
     name = "CALL"
     opcode = 9
+
 
 class ReturnInstruction(NoOperandInstruction):
     name = "RETURN"
     opcode = 10
 
-class SysCallInstruction(OperandU16Instruction):
+
+class SysCallInstruction(U16OperandInstruction):
     name = "SYSCALL"
     opcode = 11
 
-class AsyncCallInstruction(OperandU16Instruction):
+
+class AsyncCallInstruction(U16OperandInstruction):
     name = "ASYNC_CALL"
     opcode = 12
+
 
 class AsyncReturnInstruction(NoOperandInstruction):
     name = "ASYNC_RETURN"
     opcode = 13
 
-class PushLiteralU16Instruction(OperandU16Instruction):
+
+class PushLiteralU16Instruction(U16OperandInstruction):
     name = "PUSHL_U16"
     opcode = 14
+
 
 class PopU16Instruction(NoOperandInstruction):
     name = "POP_U16"
     opcode = 15
 
+
 class TopU16Instruction(NoOperandInstruction):
     name = "TOP_U16"
     opcode = 16
+
 
 class AddU16Instruction(NoOperandInstruction):
     name = "ADD_U16"
     opcode = 17
 
+
 class SubtractInstructionInstruction(NoOperandInstruction):
     name = "SUB_U16"
     opcode = 18
+
 
 class MultiplyU16Instruction(NoOperandInstruction):
     name = "MUL_U16"
     opcode = 19
 
+
 class DivideU16Instruction(NoOperandInstruction):
     name = "DIV_U16"
     opcode = 20
 
-class PopAddressU16Instruction(OperandU16Instruction):
+
+class PopAddressU16Instruction(U16OperandInstruction):
     name = "POPA_U16"
     opcode = 21
 
-class PushU16Instruction(OperandU16Instruction):
+
+class PushU16Instruction(U16OperandInstruction):
     name = "PUSH_U16"
     opcode = 22
 
-class PushLocalU16Instruction(OperandU16Instruction):
-    name = "PUSH_LOCAL_U16"
+
+class AllocateLocalStackInstruction(TwoU16OperandInstruction):
+    name = "ALLOC_LOCAL"
     opcode = 23
 
-class PopLocalU16Instruction(OperandU16Instruction):
-    name = "POP_LOCAL_U16"
+
+class PushLocalStackInstruction(TwoU16OperandInstruction):
+    name = "PUSH_LOCAL"
     opcode = 24
 
-class ParentPopLocalU16Instruction(OperandU16Instruction):
-    name = "PARENT_POP_LOCAL_U16"
+
+class PopLocalStackInstruction(TwoU16OperandInstruction):
+    name = "POP_LOCAL"
     opcode = 25
 
-class PushLiteralI16Instruction(OperandI16Instruction):
+
+class PushLiteralI16Instruction(I16OperandInstruction):
     name = "PUSHL_I16"
     opcode = 26
+
 
 class PopI16Instruction(NoOperandInstruction):
     name = "POP_I16"
     opcode = 27
 
+
 class TopI16Instruction(NoOperandInstruction):
     name = "TOP_I16"
     opcode = 28
+
 
 class AddI16Instruction(NoOperandInstruction):
     name = "ADD_I16"
     opcode = 29
 
+
 class SubtractI16Instruction(NoOperandInstruction):
     name = "SUB_I16"
     opcode = 30
+
 
 class MultiplyI16Instruction(NoOperandInstruction):
     name = "MUL_I16"
     opcode = 31
 
+
 class DivideI16Instruction(NoOperandInstruction):
     name = "DIV_I16"
     opcode = 32
 
-class ReadI16Instruction(OperandI16Instruction):
+
+class ReadI16Instruction(I16OperandInstruction):
     name = "READ_I16"
     opcode = 33
 
-class WriteI16Instruction(OperandI16Instruction):
+
+class WriteI16Instruction(I16OperandInstruction):
     name = "WRITE_I16"
     opcode = 34
 
-class AllocateI16Instruction(OperandU16Instruction):
+
+class AllocateI16Instruction(U16OperandInstruction):
     name = "ALLOC_I16"
     opcode = 35
 
-class FreeI16Instruction(OperandI16Instruction):
+
+class FreeI16Instruction(I16OperandInstruction):
     name = "FREE_I16"
     opcode = 36
 
-class PushLiteralF32Instruction(OperandF32Instruction):
+
+class PushLiteralF32Instruction(F32OperandInstruction):
     name = "PUSHL_F32"
     opcode = 37
+
 
 class PopF32Instruction(NoOperandInstruction):
     name = "POP_F32"
     opcode = 38
 
+
 class TopF32Instruction(NoOperandInstruction):
     name = "TOP_F32"
     opcode = 39
+
 
 class AddF32Instruction(NoOperandInstruction):
     name = "ADD_F32"
     opcode = 40
 
+
 class SubtractF32Instruction(NoOperandInstruction):
     name = "SUB_F32"
     opcode = 41
+
 
 class MultiplyF32Instruction(NoOperandInstruction):
     name = "MUL_F32"
     opcode = 42
 
+
 class DivideF32Instruction(NoOperandInstruction):
     name = "DIV_F32"
     opcode = 43
+
 
 class PushMillisInstruction(NoOperandInstruction):
     name = "PUSH_MILLIS"
     opcode = 44
 
+
 class LeftShiftU16Instruction(NoOperandInstruction):
     name = "LSHIFT_U16"
     opcode = 45
+
 
 class RightShiftU16Instruction(NoOperandInstruction):
     name = "RSHIFT_U16"
     opcode = 46
 
+
 class OrU16Instruction(NoOperandInstruction):
     name = "OR_U16"
     opcode = 47
+
 
 class XorU16Instruction(NoOperandInstruction):
     name = "XOR_U16"
     opcode = 48
 
+
 class AndU16Instruction(NoOperandInstruction):
     name = "AND_U16"
     opcode = 49
+
 
 class NotU16Instruction(NoOperandInstruction):
     name = "NOT_U16"
@@ -330,12 +391,12 @@ PORTS = {
 }
 
 
-def strip(lines: List[str]) -> None:
+def strip(lines: list[str]) -> None:
     for i, line in enumerate(lines):
         lines[i] = line.strip()
 
 
-def remove_comments(lines: List[str]) -> List[str]:
+def remove_comments(lines: list[str]) -> list[str]:
     for line, content in enumerate(lines):
         index = content.find(";")
         if index > -1:
@@ -343,20 +404,23 @@ def remove_comments(lines: List[str]) -> List[str]:
     return lines
 
 
-def remove_blank_lines(lines: List[str]) -> List[str]:
+def remove_blank_lines(lines: list[str]) -> list[str]:
     return [line for line in lines if line]
 
 
-def build_jumps(lines: List[str]) -> List[str]:
+def build_jumps(lines: list[str]) -> list[str]:
     new_lines = []
     addresses = {}
     address = 0
     for content in lines:
-        if content.startswith("."):
-            addresses[content[1:]] = address
+        if content.startswith(".") or content.startswith("fn ."):
+            if content.startswith("."):
+                addresses[content[1:]] = address
+            else:
+                addresses[content[4:]] = address
         else:
             try:
-                instruction, label = content.split(" ")
+                instruction, label, *_ = content.split(" ")
             except ValueError:
                 instruction = content
             size = INSTRUCTIONS[instruction].size
@@ -370,7 +434,7 @@ def build_jumps(lines: List[str]) -> List[str]:
     return new_lines
 
 
-def remove_static_data_lines(lines: List[str]) -> List[str]:
+def remove_static_data_lines(lines: list[str]) -> list[str]:
     return [line for line in lines if not line.startswith("CONST")]
 
 
@@ -380,7 +444,7 @@ def to_utf8(string):
     return ",".join(str(c) for c in utf8_array) + ",0"
 
 
-def build_utf8_strings(lines: List[str]):
+def build_utf8_strings(lines: list[str]):
     for i, content in enumerate(lines):
         content = content.replace("\\n", "\n")
         if '"' in content:
@@ -400,7 +464,7 @@ def build_utf8_strings(lines: List[str]):
             lines[i] = content.replace(f'"{string}"', ascii_list)
 
 
-def build_const_data(lines: List[str]):
+def build_const_data(lines: list[str]):
     addresses = PORTS.copy()
     data = []
 
@@ -422,43 +486,48 @@ def build_const_data(lines: List[str]):
     new_lines = remove_static_data_lines(lines)
     for line, content in enumerate(new_lines):
         if "$" in content:
-            instruction, const_name = content.split(" ")
+            instruction, const_name, *_ = content.split(" ")
             if const_name[1:] in addresses:
                 new_lines[line] = f"{instruction} {addresses[const_name[1:]]}"
     return new_lines, data
 
 
-TYPE_SIZES = {
-    "U16": 2,
-}
-
-
-def build_local_variables(lines: List[str]):
+def build_local_variables(lines: list[str]):
     addresses = {}
     offset = 0
     new_lines = []
     for line in lines:
-        if line.startswith("ALLOC_"):
-            allocation, var_name = line.split(" ")
-            var_type = allocation.split("_")[1]
+        if line.startswith("fn ."):
+            offset = 0
+            var_prefix = line[4:] + "_"
+
+        if line.startswith("ALLOC_LOCAL"):
+            var_size, var_name = line.split(" ")[1:]
+            var_name = var_prefix + var_name[1:]
             if var_name in addresses:
                 raise Exception(
                     f"Variable {var_name} already allocated at {addresses[var_name]}"
                 )
             addresses[var_name] = offset
-            offset += TYPE_SIZES[var_type]
-        else:
-            new_lines.append(line)
+            offset += int(var_size)
+        new_lines.append(line)
 
     for line, content in enumerate(new_lines):
-        if "$" in content:
-            instruction, var_name = content.split(" ")
-            if var_name[1:] in addresses:
-                new_lines[line] = f"{instruction} {addresses[var_name[1:]]}"
+        if content.startswith("fn ."):
+            offset = 0
+            var_prefix = content[4:] + "_"
+        if "$" in content and "_LOCAL" in content:
+            instruction, var_size, var_name = content.split(" ")
+            var_name = var_prefix + var_name[1:]
+            if var_name in addresses:
+                new_lines[line] = f"{instruction} {var_size} {addresses[var_name]}"
+            else:
+                print(addresses)
+                raise Exception(f"{var_name} not found in addressess")
     return new_lines
 
 
-def map_ports(lines: List[str]) -> None:
+def map_ports(lines: list[str]) -> None:
     for line, content in enumerate(lines):
         contents = content.split(" ")
         if len(contents) == 2:
@@ -471,14 +540,12 @@ def pprint(lines):
         print(f"{line}\t", content)
 
 
-def encode_line(i: int, line: str) -> List[int]:
-    try:
-        inst_name, operand = line.split(" ")
-    except ValueError:
-        inst_name = line
-        operand = None
+def encode_line(i: int, line: str) -> list[int]:
+    inst_name, *operand = line.split(" ")
     # print(f"decoding {inst_name}")
     instruction = INSTRUCTIONS[inst_name]
+    if not instruction:
+        print(f"Error at line {i}: unknow instruction {inst_name}")
     try:
         return instruction.encode(operand)
     except:
@@ -486,14 +553,14 @@ def encode_line(i: int, line: str) -> List[int]:
         print(i, instruction)
 
 
-def copy_code_from(source_file: str) -> List[str]:
+def copy_code_from(source_file: str) -> list[str]:
     with open(source_file, "r") as p:
         return p.readlines()
 
 
 def process_includes(
-    lines: List[str], base_dir: str, included_files: Set[str] = None
-) -> List[str]:
+    lines: list[str], base_dir: str, included_files: set[str] = None
+) -> list[str]:
     if included_files is None:
         included_files = set()
 
@@ -518,20 +585,32 @@ def process_includes(
     return processed_lines
 
 
-def include_main_call(lines: List[str]) -> List[str]:
+def include_main_call(lines: list[str]) -> list[str]:
     main_lines = ["CALL .main\n", "HALT"]
     main_lines.extend(lines)
     return main_lines
 
 
-def print_lines(lines: List[str]) -> None:
+def print_lines(lines: list[str]) -> None:
     max_lines = len(lines)
     leadings = len(str(max_lines))
     for i, line in enumerate(lines):
         print(f"{str(i).zfill(leadings)}  {line}")
 
 
-def compile_rfl(filename: str, debug: bool = True) -> List[int]:
+def print_code(code: list[str]) -> None:
+    address = 0
+    while address < len(code):
+        if instruction := get_instruction(code[address]):
+            operands = code[address+1:address+instruction.size]
+            print(address, instruction.name, *operands)
+            address += instruction.size
+        else:
+            print(f"invalid opcode: {code[address]}")
+            break
+
+
+def compile_rfl(filename: str, debug: bool = True) -> list[int]:
     program = []
     with open(filename, "r") as p:
         base_dir = os.path.dirname(p.name)
@@ -548,6 +627,8 @@ def compile_rfl(filename: str, debug: bool = True) -> List[int]:
         map_ports(lines)
         for i, line in enumerate(lines):
             program.extend(encode_line(i, line))
+    if debug:
+        print_code(program)
     data_address = len(program)
     program.extend(data)
     return program, len(program), data_address
@@ -555,17 +636,20 @@ def compile_rfl(filename: str, debug: bool = True) -> List[int]:
 
 def get_instruction(opcode):
     for inst in INSTRUCTIONS:
-        if opcode == inst.opcode:
-            return inst.name
-
-
-def disassembly(code):
-    return code
+        if opcode == INSTRUCTIONS[inst].opcode:
+            return INSTRUCTIONS[inst]
 
 
 if __name__ == "__main__":
-    program, program_size, data_address = compile_rfl(sys.argv[1], False)
-    # for line in disassembly(program):
-    #     print(line)
+    try:
+        filename = sys.argv[1]
+    except IndexError:
+        raise IndexError("Missing arg filename")
+    try:
+        debug = bool(sys.argv[2])
+    except IndexError:
+        debug = False
+
+    program, program_size, data_address = compile_rfl(filename, debug)
     output = "{" + ",".join([str(inst) for inst in program]) + "}"
     print(output, program_size, data_address)

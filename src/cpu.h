@@ -6,9 +6,8 @@
 #include "tasktree.h"
 #include "server.h"
 
-#define TASK_OPSTACK_SIZE 16
-#define TASK_STACK_SIZE 16
-#define TASK_LOCALSTACK_SIZE 16
+#define TASK_OPSTACK_SIZE 32
+#define TASK_STACK_SIZE 32
 #define CONTEXT_MAX_CYCLES 255
 
 typedef struct CPU CPU;
@@ -20,11 +19,11 @@ struct CPU
     const uint8_t *program;
     Stack *opstack;
     Stack *stack;
-    Stack *localstack;
     PortBank *port_bank;
     MessageQueue *message_queues;
+#ifdef MACOSX
     Server *server;
-
+#endif
     uint16_t program_size;
     uint16_t ip;
     uint16_t data_address;

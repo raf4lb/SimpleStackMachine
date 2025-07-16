@@ -1,3 +1,4 @@
+#ifdef MACOSX
 #ifndef SERVER_H
 #define SERVER_H
 
@@ -19,4 +20,5 @@ Server *server_create(int port);
 Message *server_receive_message(Server *server);
 void server_free(Server *server);
 
+#endif
 #endif

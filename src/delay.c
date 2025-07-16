@@ -2,9 +2,10 @@
 #include <unistd.h>
 #include <stdbool.h>
 
+#ifdef ARDUINO
+
 volatile uint16_t millis_counter = 0; // Milliseconds counter
 
-#ifdef ARDUINO
 // Initialize Timer0 to generate an interrupt every 1 millisecond
 void timer_init()
 {
@@ -92,7 +93,7 @@ void delay_us(uint32_t microseconds)
 }
 
 #elif MACOSX
-#include <time.h>
+#include <sys/time.h>
 
 // uint16_t gettimeofday2()
 // {
@@ -109,26 +110,10 @@ void timer_init()
 
 uint16_t millis()
 {
-    static struct timespec start_time;
-    static int initialized = 0;
-
-    struct timespec current_time;
-
-    // Initialize the start time on the first call
-    if (!initialized)
-    {
-        clock_gettime(CLOCK_MONOTONIC, &start_time);
-        initialized = 1;
-    }
-
-    // Get the current time
-    clock_gettime(CLOCK_MONOTONIC, &current_time);
-
-    // Calculate the elapsed time in milliseconds
-    uint64_t elapsed_time = (current_time.tv_sec - start_time.tv_sec) * 1000 +
-                            (current_time.tv_nsec - start_time.tv_nsec) / 1000000;
-
-    return (uint16_t)elapsed_time;
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    uint64_t milliseconds = (uint64_t)(tv.tv_sec) * 1000 + (uint64_t)(tv.tv_usec) / 1000;
+    return (uint16_t)(milliseconds % 65536); // Wrap the time to fit into 16 bits
 }
 
 void delay_ms(CPU *cpu, uint16_t milliseconds)

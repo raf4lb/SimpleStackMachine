@@ -11,7 +11,9 @@ void *cpu_create(uint8_t port_bank)
 {
     CPU *cpu = (CPU *)vmmalloc(sizeof(CPU));
     cpu->port_bank = port_bank_create(port_bank);
+#ifdef MACOSX
     cpu->server = server_create(SERVER_PORT);
+#endif
     cpu->ip = 0;
     cpu->data_address = 0;
     cpu->tasks_number = 0;
@@ -33,7 +35,7 @@ void cpu_create_task(CPU *cpu, uint16_t address)
     uint16_t message_handler_address;
     stack_pop_data(cpu->opstack, &message_handler_address, sizeof(uint16_t));
 
-    Task *task = task_create(id, address, TASK_OPSTACK_SIZE, TASK_STACK_SIZE, TASK_LOCALSTACK_SIZE, message_handler_address);
+    Task *task = task_create(id, address, TASK_OPSTACK_SIZE, TASK_STACK_SIZE, message_handler_address);
     task_tree_add_child(cpu->task_tree_current_node, task);
     cpu_create_task_inbox(cpu, task);
 }
@@ -60,7 +62,7 @@ void cpu_load_program(CPU *cpu, const uint8_t *program, uint16_t program_size, u
     cpu->program = program;
     cpu->program_size = program_size;
     cpu->data_address = data_address;
-    Task *main_task = task_create(0, 0, TASK_OPSTACK_SIZE, TASK_STACK_SIZE, TASK_LOCALSTACK_SIZE, 0);
+    Task *main_task = task_create(0, 0, TASK_OPSTACK_SIZE, TASK_STACK_SIZE, 0);
     cpu->task_tree_root = task_tree_create_node(main_task);
     cpu->task_tree_current_node = cpu->task_tree_root;
     MessageQueue *queue = message_queue_create(0);
@@ -188,14 +190,14 @@ void cpu_execute(CPU *cpu, uint8_t opcode)
     case OP_PUSH_U16:
         push_U16(cpu);
         break;
-    case OP_PUSH_LOCAL_U16:
-        push_local_U16(cpu);
+    case OP_ALLOC_LOCAL:
+        allocate_local(cpu);
         break;
-    case OP_POP_LOCAL_U16:
-        pop_local_U16(cpu);
+    case OP_PUSH_LOCAL:
+        push_local(cpu);
         break;
-    case OP_PARENT_POP_LOCAL_U16:
-        parent_pop_local_U16(cpu);
+    case OP_POP_LOCAL:
+        pop_local(cpu);
         break;
 
     // I16 operations and memory
@@ -282,7 +284,7 @@ void cpu_execute(CPU *cpu, uint8_t opcode)
         break;
 
     default:
-        vmprintf("unknown opcode %d", opcode);
+        vmprintf("unknown opcode %d\n", opcode);
         break;
     }
 }
@@ -293,7 +295,6 @@ void cpu_set_task_node(CPU *cpu, TaskTreeNode *node)
     cpu->ip = node->task->ip;
     cpu->opstack = node->task->opstack;
     cpu->stack = node->task->stack;
-    cpu->localstack = node->task->localstack;
     cpu->task_tree_current_node = node;
 }
 
@@ -327,6 +328,7 @@ void cpu_run_cycle(CPU *cpu, TaskTreeNode *node)
 
 void cpu_check_incoming_messages(CPU *cpu)
 {
+#ifdef MACOSX
     Message *message = server_receive_message(cpu->server);
     if (message)
     {
@@ -349,6 +351,7 @@ void cpu_check_incoming_messages(CPU *cpu)
 
         deliver_local(cpu->message_queues, message);
     }
+#endif
 }
 
 void cpu_process_context_inbox(CPU *cpu)
@@ -380,10 +383,8 @@ void cpu_run(CPU *cpu)
 void cpu_print(CPU *cpu)
 {
     vmprintf("IP: %d\n", cpu->ip);
-    vmprintf("Stack:\n");
+    vmprintf("OpStack:\n");
     stack_print(cpu->opstack);
-    vmprintf("CallStack:\n");
+    vmprintf("Stack:\n");
     stack_print(cpu->stack);
-    vmprintf("LocalStack:\n");
-    stack_print(cpu->localstack);
 }

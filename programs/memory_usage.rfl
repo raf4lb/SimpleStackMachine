@@ -1,6 +1,6 @@
 CONST message STRING "memory usage: "
 
-.print_memory_usage
+fn .print_memory_usage
     PUSHL_U16 $message
     SYSCALL 0
     SYSCALL 4
