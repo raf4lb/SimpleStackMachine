@@ -13,9 +13,9 @@ fn .main
     ASYNC_CALL .main_2
     PUSHL_U16 .nop
     ASYNC_CALL .main_3
-    PUSHL_U16 5000
+    PUSHL_U16 3000
     CALL .delay_ms
-    HALT
+    RETURN
 
 fn .main_1
     PUSHL_U16 $message_task1
