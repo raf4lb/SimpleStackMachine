@@ -1,0 +1,17 @@
+CONST string STRING "x = %u and y = %u\n"
+
+fn .main
+    ALLOC_LOCAL 2 $x
+    PUSHL_U16 20
+    POP_LOCAL 2 $x
+    
+    ALLOC_LOCAL 2 $y
+    PUSHL_U16 10
+    POP_LOCAL 2 $y
+
+    PUSH_LOCAL 2 $x
+    PUSH_LOCAL 2 $y
+    
+    PUSHL_U16 $string
+    SYSCALL 0
+    RETURN

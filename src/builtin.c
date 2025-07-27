@@ -5,26 +5,48 @@
 
 void builtin_print(CPU *cpu)
 {
-    uint16_t buffer_address;
-    stack_pop_bend_data(cpu->opstack, &buffer_address, sizeof(uint16_t)); // pop 2 bytes
-    char *buffer = (char *)&cpu->program[cpu->data_address + buffer_address - cpu->port_bank->size];
+    uint16_t format_address;
+    stack_pop_data(cpu->opstack, &format_address, sizeof(format_address));
+    char *format = (char *)&cpu->program[cpu->data_address + format_address - cpu->port_bank->size];
 
-    // stack_pop_bytes(cpu->opstack, address, 2); // pop 2 bytes
-    // int16_t integer = *(int16_t *)address;
+    uint16_t u16;
+    int16_t i16;
+    uint8_t u8;
 
-    // stack_pop_bytes(cpu->opstack, address, 2); // pop 2 bytes
-    // int16_t integer2 = *(int16_t *)address;
-
-    // uint8_t faddress[4];
-    // stack_pop_bytes(cpu->opstack, faddress, 4); // pop 2 bytes
-    // float floatValue = *(float *)faddress;
-
-    // vmprintf(buffer, integer, integer2, floatValue);
-    vmprintf(buffer);
+    while (*format)
+    {
+        if (*format == '%')
+        {
+            format++;
+            switch (*format)
+            {
+            case 'u':
+                stack_pop_data(cpu->opstack, &u16, sizeof(u16));
+                vmprintf("%hu", u16);
+                break;
+            case 'i':
+                stack_pop_data(cpu->opstack, &i16, sizeof(i16));
+                vmprintf("%hi", i16);
+                break;
+            case 's':
+                stack_pop_data(cpu->opstack, &u8, sizeof(u8));
+                vmprintf("%c", u8);
+                break;
+            default:
+                vmprintf("%%%c", *format);
+            }
+        }
+        else
+        {
+            vmprintf("%c", *format);
+        }
+        format++;
+    }
 }
 
-void builtin_print_stack(CPU *cpu)
+void builtin_print_opstack(CPU *cpu)
 {
+    vmprintf("OPSTACK\n");
     stack_print(cpu->opstack);
 }
 
@@ -66,6 +88,12 @@ void builtin_get_memory_usage(CPU *cpu)
     stack_push_data(cpu->opstack, &memory_usage, sizeof(memory_usage));
 }
 
+void builtin_print_stack(CPU *cpu)
+{
+    vmprintf("STACK\n");
+    stack_print(cpu->stack);
+}
+
 void builtin_syscall(CPU *cpu)
 {
     uint16_t func_id;
@@ -78,14 +106,17 @@ void builtin_syscall(CPU *cpu)
     case BUILTIN_TOGGLE_LED:
         builtin_toggle_led(cpu, 500);
         break;
-    case BUILTIN_PRINT_STACK:
-        builtin_print_stack(cpu);
+    case BUILTIN_PRINT_OPSTACK:
+        builtin_print_opstack(cpu);
         break;
     case BUILTIN_SEND_MESSAGE:
         builtin_send_message(cpu);
         break;
     case BUILTIN_GET_MEMORY_USAGE:
         builtin_get_memory_usage(cpu);
+        break;
+    case BUILTIN_PRINT_STACK:
+        builtin_print_stack(cpu);
         break;
     default:
         break;

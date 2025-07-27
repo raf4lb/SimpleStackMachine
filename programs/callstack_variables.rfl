@@ -5,10 +5,11 @@
 ; main() {
 ;   result <i16>
 ;   result = sum(1, -2)
-;   print(result)
+;   print(f"result: {print_result}")
 ; } <void>
 ; expected output: -1
 
+CONST print_result STRING "result: %i\n"
 
 fn .main
     ALLOC_LOCAL 2 $result
@@ -17,8 +18,9 @@ fn .main
     CALL .sum
     POP_LOCAL 2 $result
     PUSH_LOCAL 2 $result
-    TOP_I16
-    HALT
+    PUSHL_U16 $print_result
+    SYSCALL 0
+    RETURN
 
 fn .sum
     ALLOC_LOCAL 2 $y

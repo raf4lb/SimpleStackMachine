@@ -485,7 +485,7 @@ void push_local(CPU *cpu)
     uint16_t address;
     cpu_fetch_data(cpu, &address, sizeof(address));
     void *value;
-    stack_read_data_at(cpu->stack, &value, sizeof(value), cpu->stack->bp + address);
+    stack_read_data_at(cpu->stack, &value, size, cpu->stack->bp + address);
     stack_push_bend_data(cpu->opstack, &value, size);
 }
 
@@ -497,5 +497,5 @@ void pop_local(CPU *cpu)
     cpu_fetch_data(cpu, &address, sizeof(address));
     void *value;
     stack_pop_bend_data(cpu->opstack, &value, size);
-    stack_write_bend_data_at(cpu->stack, &value, sizeof(value), cpu->stack->bp + address);
+    stack_write_bend_data_at(cpu->stack, &value, size, cpu->stack->bp + address);
 }
