@@ -6,8 +6,13 @@
 #include "tasktree.h"
 #include "server.h"
 
+#ifdef ARDUINO
 #define TASK_OPSTACK_SIZE 32
-#define TASK_STACK_SIZE 64
+#define TASK_STACK_SIZE 128
+#elif MACOSX || WINDOWS
+#define TASK_OPSTACK_SIZE 1024
+#define TASK_STACK_SIZE 4096
+#endif
 #define CONTEXT_MAX_CYCLES 255
 
 typedef struct CPU CPU;

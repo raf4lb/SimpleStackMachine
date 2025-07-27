@@ -1,30 +1,36 @@
-; def incr(i):
-;     if i == 10:
+; def incr(i, n):
+;     if i == n:
 ;         return i
 ;     else:
-;         return incr(i+1)
+;         return incr(i+1, n)
 ;
-; print(incr(1))
+; print(f"result: {incr(1, 10)}")
+
+CONST ret STRING "%u\n"
 
 fn .main
+    PUSHL_U16 10
     PUSHL_U16 1
     CALL .incr
-    TOP_U16
-    HALT
+    PUSHL_U16 $ret
+    SYSCALL 0
+    RETURN
 
 fn .incr
     ALLOC_LOCAL 2 $i
     POP_LOCAL 2 $i
+    ALLOC_LOCAL 2 $n
+    POP_LOCAL 2 $n
+    PUSH_LOCAL 2 $n
     PUSH_LOCAL 2 $i
-    PUSHL_U16 10
     COMPARE_EQ
     POP_JUMP_IF_FALSE .call_incr
     PUSH_LOCAL 2 $i
     RETURN
     .call_incr
+        PUSH_LOCAL 2 $n
         PUSH_LOCAL 2 $i
         PUSHL_U16 1
         ADD_U16
         CALL .incr
         RETURN
-

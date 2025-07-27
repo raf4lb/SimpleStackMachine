@@ -2,7 +2,6 @@
 
 CONST message_task1 STRING "task 1"
 CONST message_task2 STRING "task 2"
-CONST message_task3 STRING "task 3"
 CONST message_started STRING " started\n"
 CONST message_ended STRING " ended\n"
 
@@ -11,8 +10,6 @@ fn .main
     ASYNC_CALL .main_1
     PUSHL_U16 .nop
     ASYNC_CALL .main_2
-    PUSHL_U16 .nop
-    ASYNC_CALL .main_3
     PUSHL_U16 3000
     CALL .delay_ms
     RETURN
@@ -40,20 +37,6 @@ fn .main_2
         PUSHL_U16 500
         CALL .delay_ms
         PUSHL_U16 $message_task2
-        SYSCALL 0
-        PUSHL_U16 $message_ended
-        SYSCALL 0
-        ASYNC_RETURN
-
-fn .main_3
-    PUSHL_U16 $message_task3
-    SYSCALL 0
-    PUSHL_U16 $message_started
-    SYSCALL 0
-    .loop_3
-        PUSHL_U16 1500
-        CALL .delay_ms
-        PUSHL_U16 $message_task3
         SYSCALL 0
         PUSHL_U16 $message_ended
         SYSCALL 0
