@@ -1,16 +1,26 @@
 CONST string STRING "x = %u and y = %u\n"
 
 fn .main
-    ALLOC_LOCAL 2 $x
+    PUSHL_U16 2
+    ALLOC_LOCAL $x
     PUSHL_U16 20
-    POP_LOCAL 2 $x
+    PUSHL_U16 2
+    PUSHL_U16 $x
+    POP_LOCAL
     
-    ALLOC_LOCAL 2 $y
+    PUSHL_U16 2
+    ALLOC_LOCAL $y
     PUSHL_U16 10
-    POP_LOCAL 2 $y
+    PUSHL_U16 2
+    PUSHL_U16 $y
+    POP_LOCAL
 
-    PUSH_LOCAL 2 $x
-    PUSH_LOCAL 2 $y
+    PUSHL_U16 2
+    PUSHL_U16 $x
+    PUSH_LOCAL
+    PUSHL_U16 2
+    PUSHL_U16 $y
+    PUSH_LOCAL
     
     PUSHL_U16 $string
     SYSCALL 0

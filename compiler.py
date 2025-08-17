@@ -233,17 +233,17 @@ class PushU16Instruction(U16OperandInstruction):
     opcode = 22
 
 
-class AllocateLocalStackInstruction(TwoU16OperandInstruction):
+class AllocateLocalStackInstruction(U16OperandInstruction):
     name = "ALLOC_LOCAL"
     opcode = 23
 
 
-class PushLocalStackInstruction(TwoU16OperandInstruction):
+class PushLocalStackInstruction(NoOperandInstruction):
     name = "PUSH_LOCAL"
     opcode = 24
 
 
-class PopLocalStackInstruction(TwoU16OperandInstruction):
+class PopLocalStackInstruction(NoOperandInstruction):
     name = "POP_LOCAL"
     opcode = 25
 
@@ -496,13 +496,14 @@ def build_local_variables(lines: list[str]):
     addresses = {}
     offset = 0
     new_lines = []
-    for line in lines:
-        if line.startswith("fn ."):
+    for line, content in enumerate(lines):
+        if content.startswith("fn ."):
             offset = 0
-            var_prefix = line[4:] + "_"
+            var_prefix = content[4:] + "_"
 
-        if line.startswith("ALLOC_LOCAL"):
-            var_size, var_name = line.split(" ")[1:]
+        if content.startswith("ALLOC_LOCAL"):
+            var_size = lines[line-1].split(" ")[1]
+            var_name = content.split(" ")[1]
             var_name = var_prefix + var_name[1:]
             if var_name in addresses:
                 raise Exception(
@@ -510,17 +511,25 @@ def build_local_variables(lines: list[str]):
                 )
             addresses[var_name] = offset
             offset += int(var_size)
-        new_lines.append(line)
+        new_lines.append(content)
 
     for line, content in enumerate(new_lines):
         if content.startswith("fn ."):
             offset = 0
             var_prefix = content[4:] + "_"
         if "$" in content and "_LOCAL" in content:
-            instruction, var_size, var_name = content.split(" ")
+            instruction, var_name = content.split(" ")
             var_name = var_prefix + var_name[1:]
             if var_name in addresses:
-                new_lines[line] = f"{instruction} {var_size} {addresses[var_name]}"
+                new_lines[line] = f"{instruction} {addresses[var_name]}"
+            else:
+                print(addresses)
+                raise Exception(f"{var_name} not found in addressess")
+        elif "$" in content:
+            instruction, var_name = content.split(" ")
+            var_name = var_prefix + var_name[1:]
+            if var_name in addresses:
+                new_lines[line] = f"{instruction} {addresses[var_name]}"
             else:
                 print(addresses)
                 raise Exception(f"{var_name} not found in addressess")

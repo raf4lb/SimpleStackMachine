@@ -5,26 +5,45 @@
 ;   print i
 
 fn .main
-    ALLOC_LOCAL 2 $i
+    PUSHL_U16 2
+    ALLOC_LOCAL $i
     PUSHL_I16 0
-    POP_LOCAL 2 $i
+    PUSHL_U16 2
+    PUSHL_U16 $i
+    POP_LOCAL
 
-    ALLOC_LOCAL 2 $max
+    PUSHL_U16 2
+    ALLOC_LOCAL $max
     PUSHL_I16 10
-    POP_LOCAL 2 $max
+    PUSHL_U16 2
+    PUSHL_U16 $max
+    POP_LOCAL
     
-    ALLOC_LOCAL 2 $inc
+    PUSHL_U16 2
+    ALLOC_LOCAL $inc
     PUSHL_I16 1
-    POP_LOCAL 2 $inc
+    PUSHL_U16 2
+    PUSHL_U16 $inc
+    POP_LOCAL
     
     .for
-        PUSH_LOCAL 2 $i
+        PUSHL_U16 2
+        PUSHL_U16 $i
+        PUSH_LOCAL
         TOP_U16
-        PUSH_LOCAL 2 $inc
+        PUSHL_U16 2
+        PUSHL_U16 $inc
+        PUSH_LOCAL
         ADD_I16
-        POP_LOCAL 2 $i
-        PUSH_LOCAL 2 $i
-        PUSH_LOCAL 2 $max
+        PUSHL_U16 2
+        PUSHL_U16 $i
+        POP_LOCAL
+        PUSHL_U16 2
+        PUSHL_U16 $i
+        PUSH_LOCAL
+        PUSHL_U16 2
+        PUSHL_U16 $max
+        PUSH_LOCAL
         COMPARE_EQ
         POP_JUMP_IF_FALSE .for 
         HALT

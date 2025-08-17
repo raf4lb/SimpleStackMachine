@@ -1,0 +1,88 @@
+CONST print STRING "[%u, %u, %u, %u]\n"
+
+fn .main
+    PUSHL_U16 8
+    ALLOC_LOCAL $array_4_u16
+    PUSHL_U16 2
+    ALLOC_LOCAL $index
+
+    PUSHL_U16 $array_4_u16
+    PUSHL_U16 2
+    PUSHL_U16 $index
+    POP_LOCAL
+    
+    PUSHL_U16 1  ; value
+    PUSHL_U16 2  ; size
+    PUSHL_U16 2
+    PUSHL_U16 $index  ; address
+    PUSH_LOCAL
+    POP_LOCAL
+
+    PUSHL_U16 2
+    PUSHL_U16 $index
+    PUSH_LOCAL
+    PUSHL_U16 2
+    ADD_U16
+    PUSHL_U16 2  ; size
+    PUSHL_U16 $index
+    POP_LOCAL
+
+    PUSHL_U16 3  ; value
+    PUSHL_U16 2  ; size
+    PUSHL_U16 2
+    PUSHL_U16 $index  ; address
+    PUSH_LOCAL
+    POP_LOCAL
+    
+    PUSHL_U16 2
+    PUSHL_U16 $index
+    PUSH_LOCAL
+    PUSHL_U16 2
+    ADD_U16
+    PUSHL_U16 2  ; size
+    PUSHL_U16 $index
+    POP_LOCAL
+
+    PUSHL_U16 5  ; value
+    PUSHL_U16 2  ; size
+    PUSHL_U16 2
+    PUSHL_U16 $index  ; address
+    PUSH_LOCAL
+    POP_LOCAL
+    
+    PUSHL_U16 2
+    PUSHL_U16 $index
+    PUSH_LOCAL
+    PUSHL_U16 2
+    ADD_U16
+    PUSHL_U16 2  ; size
+    PUSHL_U16 $index
+    POP_LOCAL
+
+    PUSHL_U16 7  ; value
+    PUSHL_U16 2  ; size
+    PUSHL_U16 2
+    PUSHL_U16 $index  ; address
+    PUSH_LOCAL
+    POP_LOCAL
+    
+    PUSHL_U16 2
+    PUSHL_U16 6
+    PUSH_LOCAL
+
+    PUSHL_U16 2
+    PUSHL_U16 4
+    PUSH_LOCAL
+    
+    PUSHL_U16 2
+    PUSHL_U16 2
+    PUSH_LOCAL
+
+    PUSHL_U16 2
+    PUSHL_U16 0
+    PUSH_LOCAL
+
+    PUSHL_U16 $print
+    SYSCALL 0
+
+    RETURN

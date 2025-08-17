@@ -2,38 +2,63 @@
 
 
 fn .main
-    ALLOC_LOCAL 2 $i
-    ALLOC_LOCAL 2 $MIN
-    ALLOC_LOCAL 2 $MAX
+    PUSHL_U16 2
+    ALLOC_LOCAL $i
+    PUSHL_U16 2
+    ALLOC_LOCAL $MIN
+    PUSHL_U16 2
+    ALLOC_LOCAL $MAX
 
     PUSHL_U16 0
-    POP_LOCAL 2 $MIN
+    PUSHL_U16 2
+    PUSHL_U16 $MIN
+    POP_LOCAL
     PUSHL_U16 10
-    POP_LOCAL 2 $MAX
+    PUSHL_U16 2
+    PUSHL_U16 $MAX
+    POP_LOCAL
     PUSHL_U16 0
     TOP_U16
-    POP_LOCAL 2 $i
+    PUSHL_U16 2
+    PUSHL_U16 $i
+    POP_LOCAL
     
 .incr
-    PUSH_LOCAL 2 $i
+    PUSHL_U16 2
+    PUSHL_U16 $i
+    PUSH_LOCAL
     PUSHL_U16 1
     ADD_U16
     TOP_U16
-    POP_LOCAL 2 $i
-    PUSH_LOCAL 2 $i
-    PUSH_LOCAL 2 $MAX
+    PUSHL_U16 2
+    PUSHL_U16 $i
+    POP_LOCAL
+    PUSHL_U16 2
+    PUSHL_U16 $i
+    PUSH_LOCAL
+    PUSHL_U16 2
+    PUSHL_U16 $MAX
+    PUSH_LOCAL
     COMPARE_LT
     POP_JUMP_IF_FALSE .decr
     JUMP .incr
 
 .decr
-    PUSH_LOCAL 2 $i
+    PUSHL_U16 2
+    PUSHL_U16 $i
+    PUSH_LOCAL
     PUSHL_U16 1
     SUB_U16
     TOP_U16
-    POP_LOCAL 2 $i
-    PUSH_LOCAL 2 $i
-    PUSH_LOCAL 2 $MIN
+    PUSHL_U16 2
+    PUSHL_U16 $i
+    POP_LOCAL
+    PUSHL_U16 2
+    PUSHL_U16 $i
+    PUSH_LOCAL
+    PUSHL_U16 2
+    PUSHL_U16 $MIN
+    PUSH_LOCAL
     COMPARE_GT
     POP_JUMP_IF_FALSE .end 
     JUMP .decr

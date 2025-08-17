@@ -19,21 +19,27 @@ fn .main
     CALL .toggle_main_pin
     
 fn .toggle_main_pin
-    ALLOC_LOCAL 2 $main_pin
+    PUSHL_U16 2
+    ALLOC_LOCAL $main_pin
     PUSHL_U16 5
-    POP_LOCAL 2 $main_pin
-    ALLOC_LOCAL 2 $main_delay_ms
+    PUSHL_U16 2
+    POP_LOCAL $main_pin
+    PUSHL_U16 2
+    ALLOC_LOCAL $main_delay_ms
     PUSHL_U16 2000
-    POP_LOCAL 2 $main_delay_ms
+    PUSHL_U16 2
+    POP_LOCAL $main_delay_ms
     .loop
         ; PORTB = PORTB | (1 << PINB5)
         PUSH_U16 $portb             ; push PORTB to stack
         PUSHL_U16 1                 ; push 1 to stack
-        PUSH_LOCAL 2 $main_pin    ; push pin to stack
+        PUSHL_U16 2
+        PUSH_LOCAL $main_pin    ; push pin to stack
         LSHIFT_U16                  ; bitwise LEFT SHIFT operation
         OR_U16                      ; bitwise OR operation
         POPA_U16 $portb             ; pop result to address 0x1 (PORTB)
-        PUSH_LOCAL 2 $main_delay_ms
+        PUSHL_U16 2
+        PUSH_LOCAL $main_delay_ms
         CALL .delay_ms
 
         ; PORTB = PORTB & ~(1 << PINB5)
@@ -44,36 +50,43 @@ fn .toggle_main_pin
         NOT_U16                     ; bitwise NOT operation
         AND_U16                     ; bitwise AND operation
         POPA_U16 $portb             ; pop result to address 0x1 (PORTB)
-        PUSH_LOCAL 2 $main_delay_ms
+        PUSHL_U16 2
+        PUSH_LOCAL $main_delay_ms
         CALL .delay_ms
         JUMP .loop
         RETURN
 
 .toggle_pinbx
-    ALLOC_LOCAL 2 $delay_ms
-    ALLOC_LOCAL 2 $pin
+    PUSHL_U16 2
+    ALLOC_LOCAL $delay_ms
+    PUSHL_U16 2
+    ALLOC_LOCAL $pin
     PARENT_POP_LOCAL_U16 $delay_ms
     PARENT_POP_LOCAL_U16 $pin
     .toggle_pin_loop
         ; PORTB = PORTB | (1 << PINBX)
         PUSH_U16 $portb         ; push PORTB to stack
         PUSHL_U16 1             ; push 1 to stack
-        PUSH_LOCAL 2 $pin     ; push pin to stack
+        PUSHL_U16 2
+        PUSH_LOCAL $pin     ; push pin to stack
         LSHIFT_U16              ; bitwise LEFT SHIFT operation
         OR_U16                  ; bitwise OR operation
         POPA_U16 $portb         ; pop result to address 0x1 (PORTB)
-        PUSH_LOCAL 2 $delay_ms
+        PUSHL_U16 2
+        PUSH_LOCAL $delay_ms
         CALL .delay_ms
 
         ; PORTB = PORTB & ~(1 << PINBX)
         PUSH_U16 $portb         ; push PORTB to stack
         PUSHL_U16 1             ; push 1 to stack
-        PUSH_LOCAL 2 $pin   ; push pin to stack
+        PUSHL_U16 2
+        PUSH_LOCAL $pin   ; push pin to stack
         LSHIFT_U16              ; bitwise LEFT SHIFT operation
         NOT_U16                 ; bitwise NOT operation
         AND_U16                 ; bitwise AND operation
         POPA_U16 $portb         ; pop result to address 0x1 (PORTB)
-        PUSH_LOCAL 2 $delay_ms
+        PUSHL_U16 2
+        PUSH_LOCAL $delay_ms
         CALL .delay_ms
         JUMP .toggle_pin_loop
 

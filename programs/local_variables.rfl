@@ -1,20 +1,35 @@
 
 fn .main
-    ALLOC_LOCAL 2 $result
+    PUSHL_U16 2
+    ALLOC_LOCAL $result
     PUSHL_U16 2
     PUSHL_U16 3
     CALL .sum
-    POP_LOCAL 2 $result
-    PUSH_LOCAL 2 $result
+    PUSHL_U16 2
+    PUSHL_U16 $result
+    POP_LOCAL
+    PUSHL_U16 2
+    PUSHL_U16 $result
+    PUSH_LOCAL
     TOP_U16
     RETURN
 
 fn .sum
-    ALLOC_LOCAL 2 $a
-    ALLOC_LOCAL 2 $b
-    POP_LOCAL 2 $a
-    POP_LOCAL 2 $b
-    PUSH_LOCAL 2 $a
-    PUSH_LOCAL 2 $b
+    PUSHL_U16 2
+    ALLOC_LOCAL $a
+    PUSHL_U16 2
+    ALLOC_LOCAL $b
+    PUSHL_U16 2
+    PUSHL_U16 $a
+    POP_LOCAL
+    PUSHL_U16 2
+    PUSHL_U16 $b
+    POP_LOCAL
+    PUSHL_U16 2
+    PUSHL_U16 $a
+    PUSH_LOCAL
+    PUSHL_U16 2
+    PUSHL_U16 $b
+    PUSH_LOCAL
     ADD_U16
     RETURN

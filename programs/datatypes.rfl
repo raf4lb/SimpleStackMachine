@@ -1,3 +1,6 @@
+CONST float STRING "%f\n"
+CONST uint STRING "%u\n"
+CONST int STRING "%i\n"
 
 fn .main
     .loop
@@ -13,22 +16,22 @@ fn .func_u16
     PUSHL_U16 100
     PUSHL_U16 4
     ADD_U16
-    TOP_U16
-    POP_U16
+    PUSHL_U16 $uint
+    SYSCALL 0
     RETURN
 
 fn .func_i16
     PUSHL_I16 -1320
     PUSHL_I16 340
     ADD_I16
-    TOP_I16
-    POP_I16
+    PUSHL_U16 $int
+    SYSCALL 0
     RETURN
 
 fn .func_f32
     PUSHL_F32 2.5
     PUSHL_F32 10.5
     MUL_F32
-    TOP_F32
-    POP_F32
+    PUSHL_U16 $float
+    SYSCALL 0
     RETURN

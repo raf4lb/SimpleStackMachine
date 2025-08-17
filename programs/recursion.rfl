@@ -17,19 +17,35 @@ fn .main
     RETURN
 
 fn .incr
-    ALLOC_LOCAL 2 $i
-    POP_LOCAL 2 $i
-    ALLOC_LOCAL 2 $n
-    POP_LOCAL 2 $n
-    PUSH_LOCAL 2 $n
-    PUSH_LOCAL 2 $i
+    PUSHL_U16 2
+    ALLOC_LOCAL $i
+    PUSHL_U16 2
+    PUSHL_U16 $i
+    POP_LOCAL
+    PUSHL_U16 2
+    ALLOC_LOCAL $n
+    PUSHL_U16 2
+    PUSHL_U16 $n
+    POP_LOCAL
+    PUSHL_U16 2
+    PUSHL_U16 $n
+    PUSH_LOCAL
+    PUSHL_U16 2
+    PUSHL_U16 $i
+    PUSH_LOCAL
     COMPARE_EQ
     POP_JUMP_IF_FALSE .call_incr
-    PUSH_LOCAL 2 $i
+    PUSHL_U16 2
+    PUSHL_U16 $i
+    PUSH_LOCAL
     RETURN
     .call_incr
-        PUSH_LOCAL 2 $n
-        PUSH_LOCAL 2 $i
+        PUSHL_U16 2
+        PUSHL_U16 $n
+        PUSH_LOCAL
+        PUSHL_U16 2
+        PUSHL_U16 $i
+        PUSH_LOCAL
         PUSHL_U16 1
         ADD_U16
         CALL .incr
