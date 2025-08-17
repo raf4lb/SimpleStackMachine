@@ -1,59 +1,115 @@
+CONST print_n STRING "n=%u\n"
+
 fn .main
-    ALLOC_LOCAL 2 $a    ; a
+    PUSHL_U16 2
+    ALLOC_LOCAL $a    ; a
     PUSHL_U16 0
-    POP_LOCAL 2 $a
+    PUSHL_U16 2
+    PUSHL_U16 $a
+    POP_LOCAL
     
-    ALLOC_LOCAL 2 $b    ; b
+    PUSHL_U16 2
+    ALLOC_LOCAL $b    ; b
     PUSHL_U16 1
-    POP_LOCAL 2 $b
+    PUSHL_U16 2
+    PUSHL_U16 $b
+    POP_LOCAL
     
-    ALLOC_LOCAL 2 $c    ; c
-    ALLOC_LOCAL 2 $i    ; i
+    PUSHL_U16 2
+    ALLOC_LOCAL $c    ; c
+    PUSHL_U16 2
+    ALLOC_LOCAL $i    ; i
 
-    ALLOC_LOCAL 2 $n    ; n
+    PUSHL_U16 2
+    ALLOC_LOCAL $n    ; n
     PUSHL_U16 24        ; n here
-    POP_LOCAL 2 $n
+    PUSHL_U16 2
+    PUSHL_U16 $n
+    POP_LOCAL 2
 
-    PUSH_LOCAL 2 $n
+    PUSHL_U16 2
+    PUSHL_U16 $n
+    PUSH_LOCAL
     PUSHL_U16 1
     COMPARE_GE
     POP_JUMP_IF_FALSE .false_1
-    PUSH_LOCAL 2 $a
-    TOP_U16
+    PUSHL_U16 2
+    PUSHL_U16 $n
+    PUSH_LOCAL
+    PUSHL_U16 2
+    PUSHL_U16 $n
+    PUSHL_U16 $print_n
+    SYSCALL 0
     .false_1
-    PUSH_LOCAL 2 $n
+    PUSHL_U16 2
+    PUSHL_U16 $n
+    PUSH_LOCAL
     PUSHL_U16 2
     COMPARE_GE
     POP_JUMP_IF_FALSE .false_2
-    PUSH_LOCAL 2 $b
+    PUSHL_U16 2
+    PUSHL_U16 $b
+    PUSH_LOCAL
     TOP_U16
     .false_2
     PUSHL_U16 3
-    POP_LOCAL 2 $i
-    ALLOC_LOCAL 2 $inc ; inc
+    PUSHL_U16 2
+    PUSHL_U16 $i
+    POP_LOCAL
+
+    PUSHL_U16 2
+    ALLOC_LOCAL $inc ; inc
     PUSHL_U16 1
-    POP_LOCAL 2 $inc
+    PUSHL_U16 2
+    PUSHL_U16 $inc
+    POP_LOCAL
     .for
         ; for content
-        PUSH_LOCAL 2 $a
-        PUSH_LOCAL 2 $b
+        PUSHL_U16 2
+        PUSHL_U16 $a
+        PUSH_LOCAL
+        PUSHL_U16 2
+        PUSHL_U16 $b
+        PUSH_LOCAL
         ADD_U16
         TOP_U16
-        POP_LOCAL 2 $c
-        PUSH_LOCAL 2 $b
-        POP_LOCAL 2 $a
-        PUSH_LOCAL 2 $c
-        POP_LOCAL 2 $b
+        PUSHL_U16 2
+        PUSHL_U16 $c
+        POP_LOCAL
+        PUSHL_U16 2
+        PUSHL_U16 $b
+        PUSH_LOCAL
+        PUSHL_U16 2
+        PUSHL_U16 $a
+        POP_LOCAL
+        PUSHL_U16 2
+        PUSHL_U16 $c
+        PUSH_LOCAL
+        PUSHL_U16 2
+        PUSHL_U16 $b
+        POP_LOCAL
 
         ; for increment
-        PUSH_LOCAL 2 $i
-        PUSH_LOCAL 2 $inc
+        PUSHL_U16 2
+        PUSHL_U16 $i
+        PUSHL_U16 2
+        PUSH_LOCAL $i
+        PUSHL_U16 2
+        PUSHL_U16 $inc
+        PUSH_LOCAL
         ADD_U16
-        POP_LOCAL 2 $i
+        PUSHL_U16 2
+        PUSHL_U16 $i
+        POP_LOCAL
 
         ; check for condition
-        PUSH_LOCAL 2 $i
-        PUSH_LOCAL 2 $n
+        PUSHL_U16 2
+        PUSHL_U16 $i
+        PUSH_LOCAL
+        PUSHL_U16 2
+        PUSHL_U16 $n
+        PUSHL_U16 2
+        PUSH_LOCAL $n
         COMPARE_GT
         POP_JUMP_IF_FALSE .for
         HALT

@@ -77,23 +77,6 @@ void cpu_free(CPU *cpu)
     vmfree(cpu, sizeof(CPU));
 }
 
-uint8_t cpu_fetch_8b(CPU *cpu)
-{
-    if (0 <= cpu->ip && cpu->ip < cpu->program_size)
-    {
-        return cpu->program[cpu->ip++];
-    }
-    vmprintf("cpu_fetch_8b: out of program memory\n");
-    cpu_print(cpu);
-    exit(EXIT_FAILURE);
-}
-
-uint16_t cpu_fetch_16b(CPU *cpu)
-{
-    uint16_t data = cpu_fetch_8b(cpu);
-    return data << 8 | cpu_fetch_8b(cpu);
-}
-
 void cpu_fetch_data(CPU *cpu, void *value, uint16_t size)
 {
     if (0 <= cpu->ip && cpu->ip < cpu->program_size)
@@ -316,7 +299,8 @@ void cpu_run_cycle(CPU *cpu, TaskTreeNode *node)
     uint8_t cycles = CONTEXT_MAX_CYCLES;
     while (cycles > 0)
     {
-        uint8_t opcode = cpu_fetch_8b(cpu);
+        uint8_t opcode;
+        cpu_fetch_data(cpu, &opcode, sizeof(opcode));
         cpu_execute(cpu, opcode);
         if (opcode == OP_ASYNC_RETURN)
         {

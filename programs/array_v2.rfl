@@ -1,0 +1,124 @@
+CONST u16 STRING "%u "
+CONST endline STRING "\n"
+
+fn .main
+    PUSHL_U16 14
+    ALLOC_LOCAL $array_4_u16
+    
+    PUSHL_U16 2
+    ALLOC_LOCAL $size_u16         ; allocate 2 bytes
+    PUSHL_U16 2                     ; value
+    PUSHL_U16 2                     ; size
+    PUSHL_U16 $size_u16             ; address
+    POP_LOCAL                       ; store value at address
+
+    PUSHL_U16 2
+    ALLOC_LOCAL $max  ; allocate 2 bytes
+    PUSHL_U16 7         ; value
+    PUSHL_U16 2         ; size
+    PUSHL_U16 $max      ; address
+    POP_LOCAL           ; store value at address
+
+    ; initial state
+    PUSHL_U16 2
+    ALLOC_LOCAL $i
+    PUSHL_U16 0
+    PUSHL_U16 2
+    PUSHL_U16 $i
+    POP_LOCAL
+
+    .for
+        ; compare
+        PUSHL_U16 2
+        PUSHL_U16 $i
+        PUSH_LOCAL
+        PUSHL_U16 2
+        PUSHL_U16 $max
+        PUSH_LOCAL
+        COMPARE_LT
+        POP_JUMP_IF_FALSE .endfor 
+
+        ; block
+        PUSHL_U16 2
+        PUSHL_U16 $i
+        PUSH_LOCAL              ; value
+        
+        PUSHL_U16 2             ; size
+        
+        PUSHL_U16 2
+        PUSHL_U16 $i
+        PUSH_LOCAL
+        PUSHL_U16 2
+        PUSHL_U16 $size_u16
+        PUSH_LOCAL
+        MUL_U16
+        PUSHL_U16 2
+        PUSHL_U16 $array_4_u16
+        PUSH_LOCAL
+        ADD_U16                 ; address
+        POP_LOCAL
+
+        ; increment
+        PUSHL_U16 2
+        PUSHL_U16 $i
+        PUSH_LOCAL
+        PUSHL_U16 1
+        ADD_U16
+        PUSHL_U16 2
+        PUSHL_U16 $i
+        POP_LOCAL
+        JUMP .for
+    
+    .endfor
+
+    ; initial state
+    PUSHL_U16 0
+    PUSHL_U16 2
+    PUSHL_U16 $i
+    POP_LOCAL
+
+    .for_2
+        ; compare
+        PUSHL_U16 2
+        PUSHL_U16 $i
+        PUSH_LOCAL
+        PUSHL_U16 2
+        PUSHL_U16 $max
+        PUSH_LOCAL
+        COMPARE_LT
+        POP_JUMP_IF_FALSE .endfor_2
+
+        ; block
+        PUSHL_U16 2             ; size
+
+        PUSHL_U16 2
+        PUSHL_U16 $i
+        PUSH_LOCAL
+        PUSHL_U16 2
+        PUSHL_U16 $size_u16
+        PUSH_LOCAL
+        MUL_U16
+        PUSHL_U16 2
+        PUSHL_U16 $array_4_u16
+        PUSH_LOCAL
+        ADD_U16                 ; address
+        PUSH_LOCAL
+        PUSHL_U16 $u16
+        SYSCALL 0
+
+        ; increment
+        PUSHL_U16 2
+        PUSHL_U16 $i
+        PUSH_LOCAL
+        PUSHL_U16 1
+        ADD_U16
+        PUSHL_U16 2
+        PUSHL_U16 $i
+        POP_LOCAL
+        JUMP .for_2
+    
+    .endfor_2
+        PUSHL_U16 $endline
+        SYSCALL 0
+
+        RETURN

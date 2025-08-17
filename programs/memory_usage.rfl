@@ -1,9 +1,7 @@
-CONST message STRING "memory usage: "
+CONST message STRING "memory usage: %u\n"
 
 fn .print_memory_usage
+    SYSCALL 4
     PUSHL_U16 $message
     SYSCALL 0
-    SYSCALL 4
-    TOP_U16
-    POP_U16
     RETURN

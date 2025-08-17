@@ -13,6 +13,7 @@
 #define TASK_OPSTACK_SIZE 1024
 #define TASK_STACK_SIZE 4096
 #endif
+
 #define CONTEXT_MAX_CYCLES 255
 
 typedef struct CPU CPU;
@@ -38,10 +39,6 @@ struct CPU
 void *cpu_create(uint8_t port_banks);
 
 void cpu_free(CPU *cpu);
-
-uint8_t cpu_fetch_8b(CPU *cpu);
-
-uint16_t cpu_fetch_16b(CPU *cpu);
 
 void cpu_fetch_data(CPU *cpu, void *value, uint16_t size);
 

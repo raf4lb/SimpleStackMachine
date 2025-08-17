@@ -12,6 +12,7 @@ void builtin_print(CPU *cpu)
     uint16_t u16;
     int16_t i16;
     uint8_t u8;
+    float f32;
 
     while (*format)
     {
@@ -27,6 +28,15 @@ void builtin_print(CPU *cpu)
             case 'i':
                 stack_pop_data(cpu->opstack, &i16, sizeof(i16));
                 vmprintf("%hi", i16);
+                break;
+            case 'f':
+#ifdef ARDUINO
+                // TODO: fix printing floats for arduino
+                vmprintf("FLOAT UNSUPPORTED");
+#elif MACOSX || WINDOWS
+                stack_pop_data(cpu->opstack, &f32, sizeof(f32));
+                vmprintf("%.2f", f32);
+#endif
                 break;
             case 's':
                 stack_pop_data(cpu->opstack, &u8, sizeof(u8));
@@ -82,7 +92,7 @@ void builtin_send_message(CPU *cpu)
     message_queue_send_message(cpu->message_queues, task_src_id, task_dst_id, payload, payload_size);
 }
 
-void builtin_get_memory_usage(CPU *cpu)
+void builtin_push_memory_usage(CPU *cpu)
 {
     uint16_t memory_usage = get_memory_usage();
     stack_push_data(cpu->opstack, &memory_usage, sizeof(memory_usage));
@@ -112,8 +122,8 @@ void builtin_syscall(CPU *cpu)
     case BUILTIN_SEND_MESSAGE:
         builtin_send_message(cpu);
         break;
-    case BUILTIN_GET_MEMORY_USAGE:
-        builtin_get_memory_usage(cpu);
+    case BUILTIN_PUSH_MEMORY_USAGE:
+        builtin_push_memory_usage(cpu);
         break;
     case BUILTIN_PRINT_STACK:
         builtin_print_stack(cpu);

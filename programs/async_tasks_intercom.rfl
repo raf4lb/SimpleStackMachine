@@ -6,7 +6,6 @@
 #include memory_usage.rfl
 
 CONST hi STRING "SENT!\n"
-CONST message STRING "memory usage: "
 CONST message_pin_toogled STRING "TOGGLED!\n"
 
 fn .main
