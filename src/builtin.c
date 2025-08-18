@@ -13,6 +13,7 @@ void builtin_print(CPU *cpu)
     int16_t i16;
     uint8_t u8;
     float f32;
+    uint16_t s_index;
 
     while (*format)
     {
@@ -38,9 +39,13 @@ void builtin_print(CPU *cpu)
                 vmprintf("%.2f", f32);
 #endif
                 break;
-            case 's':
+            case 'c':
                 stack_pop_data(cpu->opstack, &u8, sizeof(u8));
                 vmprintf("%c", u8);
+                break;
+            case 's':
+                stack_pop_data(cpu->opstack, &s_index, sizeof(s_index));
+                vmprintf("%s", cpu->stack->data + cpu->stack->bp + s_index);
                 break;
             default:
                 vmprintf("%%%c", *format);

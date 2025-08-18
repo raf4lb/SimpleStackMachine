@@ -18,6 +18,7 @@ Task *task_create(uint8_t id, uint16_t ip, uint16_t opstack_size, uint16_t stack
     task->ip = ip;
     task->opstack = stack_create(opstack_size);
     task->stack = stack_create(stack_size);
+    stack_push_data(task->stack, &task->id, sizeof(task->id));
     task->message_handler_address = message_handler_address;
     return task;
 }

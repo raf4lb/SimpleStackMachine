@@ -348,6 +348,7 @@ void cpu_process_context_inbox(CPU *cpu)
         if (cpu->task_tree_current_node->task->message_handler_address > 0)
         {
             call_address(cpu, cpu->task_tree_current_node->task->message_handler_address);
+            stack_push_message(cpu->stack, message);
         }
         inbox_queue->head = message->next;
         inbox_queue->count--;

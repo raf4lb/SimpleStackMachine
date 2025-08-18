@@ -64,6 +64,7 @@ void stack_push(Stack *stack, uint8_t value)
 void stack_print(Stack *stack)
 {
     vmprintf("SP: %d\n", stack->sp);
+    vmprintf("BP: %d\n", stack->bp);
     vmprintf("[");
     for (int i = 0; i < stack->size; i++)
     {
@@ -73,33 +74,15 @@ void stack_print(Stack *stack)
         }
         if (i == stack->sp)
         {
-            vmprintf("->");
+            vmprintf("SP->");
+        }
+        if (i == stack->bp)
+        {
+            vmprintf("BP->");
         }
         vmprintf("0x%02X", stack->data[i]);
     }
     vmprintf("]\n");
-}
-
-void stack_pop_bytes(Stack *stack, uint8_t *destination, uint16_t data_size)
-{
-    for (int i = 0; i < data_size; i++)
-    {
-        destination[i] = stack_pop(stack);
-    }
-}
-
-void stack_push_16b(Stack *stack, uint16_t value)
-{
-    stack_push(stack, value >> 8);
-    stack_push(stack, value & 255);
-}
-
-uint16_t stack_pop_16b(Stack *stack)
-{
-    uint8_t buffer[2];
-    stack_pop_bytes(stack, buffer, 2); // pop 2 bytes
-    uint16_t data = buffer[1] << 8 | buffer[0];
-    return data;
 }
 
 void stack_push_data(Stack *stack, void *value, uint16_t size)
@@ -200,4 +183,15 @@ float stack_read_F32(Stack *stack, uint16_t address)
     uint8_t size = sizeof(value);
     stack_read_bend_data_at(stack, &value, size, address);
     return value;
+}
+
+void stack_push_message(Stack *stack, Message *message)
+{
+    stack_push_data(stack, &message->task_dst, sizeof(message->task_dst));
+    stack_push_data(stack, &message->task_src, sizeof(message->task_src));
+    stack_push_data(stack, &message->vm_src, sizeof(message->vm_src));
+    stack_push_data(stack, &message->vm_dst, sizeof(message->vm_dst));
+    stack_push_data(stack, &message->payload_size, sizeof(message->payload_size));
+    memcpy(stack->data + stack->sp, message->payload, message->payload_size);
+    stack->sp += message->payload_size;
 }

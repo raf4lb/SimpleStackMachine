@@ -1,0 +1,40 @@
+#include memory_usage.rfl
+#include delay.rfl
+
+CONST message STRING "task %u -> task %u: %s\n"
+CONST running STRING "task %u running\n"
+CONST payload STRING "hello"
+
+
+fn .main
+    PUSHL_U16 .task_1_message_handler
+    ASYNC_CALL .task_1
+    .loop_main
+        PUSHL_U16 1                         ; task id
+        PUSHL_U16 $payload                  ; payload address
+        PUSHL_U16 5                         ; payload size
+        SYSCALL 3                           ; send message builtin function
+        PUSHL_U16 1000
+        CALL .delay_ms
+        JUMP .loop_main
+    RETURN
+
+
+fn .task_1
+    .loop_1
+        JUMP .loop_1
+
+fn .task_1_message_handler
+    PUSHL_U16 10  ; payload address
+
+    PUSHL_U16 2
+    PUSHL_U16 0  ; task dst address
+    PUSH_LOCAL
+
+    PUSHL_U16 2
+    PUSHL_U16 2  ; task src address
+    PUSH_LOCAL
+
+    PUSHL_U16 $message
+    SYSCALL 0
+    RETURN

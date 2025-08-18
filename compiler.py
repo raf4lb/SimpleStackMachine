@@ -494,11 +494,11 @@ def build_const_data(lines: list[str]):
 
 def build_local_variables(lines: list[str]):
     addresses = {}
-    offset = 0
+    default_offset = 2  # it's 2 because we're storing the task id at the beginning of the stack frame
     new_lines = []
     for line, content in enumerate(lines):
         if content.startswith("fn ."):
-            offset = 0
+            offset = default_offset
             var_prefix = content[4:] + "_"
 
         if content.startswith("ALLOC_LOCAL"):
@@ -515,7 +515,7 @@ def build_local_variables(lines: list[str]):
 
     for line, content in enumerate(new_lines):
         if content.startswith("fn ."):
-            offset = 0
+            offset = default_offset
             var_prefix = content[4:] + "_"
         if "$" in content and "_LOCAL" in content:
             instruction, var_name = content.split(" ")
