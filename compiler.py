@@ -373,6 +373,21 @@ class NotU16Instruction(NoOperandInstruction):
     opcode = 50
 
 
+class PushLocalReferenceInstruction(NoOperandInstruction):
+    name = "PUSH_LOCAL_REF"
+    opcode = 51
+
+
+class PushConstantReferenceInstruction(NoOperandInstruction):
+    name = "PUSH_CONST_REF"
+    opcode = 52
+
+
+class PushConstantInstruction(NoOperandInstruction):
+    name = "PUSH_CONST"
+    opcode = 53
+
+
 instruction_classes = [
     cls_obj
     for cls_name, cls_obj in inspect.getmembers(sys.modules[__name__])

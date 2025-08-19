@@ -508,3 +508,28 @@ void pop_local(CPU *cpu)
     stack_pop_data(cpu->opstack, &value, size);
     stack_write_bend_data_at(cpu->stack, &value, size, cpu->stack->bp + address);
 }
+
+void push_local_reference(CPU *cpu)
+{
+    uint16_t index;
+    stack_pop_data(cpu->opstack, &index, sizeof(index));
+    uint8_t *address = &cpu->stack->data[cpu->stack->bp + index];
+    stack_push_data(cpu->opstack, &address, sizeof(address));
+}
+
+void push_constant_reference(CPU *cpu)
+{
+    uint16_t index;
+    stack_pop_data(cpu->opstack, &index, sizeof(index));
+    const uint8_t *address = &cpu->program[cpu->data_address + index - cpu->port_bank->size];
+    stack_push_data(cpu->opstack, &address, sizeof(address));
+}
+
+void push_constant(CPU *cpu)
+{
+    uint16_t address;
+    stack_pop_data(cpu->opstack, &address, sizeof(address));
+    uint16_t size;
+    stack_pop_data(cpu->opstack, &size, sizeof(size));
+    stack_push_data(cpu->opstack, (void *)&cpu->program[cpu->data_address + address - cpu->port_bank->size], size);
+}

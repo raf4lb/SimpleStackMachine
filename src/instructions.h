@@ -56,6 +56,9 @@ typedef enum
     OP_XOR_U16 = 48,
     OP_AND_U16 = 49,
     OP_NOT_U16 = 50,
+    OP_PUSH_LOCAL_REF = 51,
+    OP_PUSH_CONST_REF = 52,
+    OP_PUSH_CONST = 53,
 } OpCode;
 
 void halt(CPU *cpu);
@@ -169,5 +172,11 @@ void allocate_local(CPU *cpu);
 void push_local(CPU *cpu);
 
 void pop_local(CPU *cpu);
+
+void push_local_reference(CPU *cpu);
+
+void push_constant_reference(CPU *cpu);
+
+void push_constant(CPU *cpu);
 
 #endif

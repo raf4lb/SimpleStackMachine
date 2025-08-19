@@ -5,15 +5,14 @@
 
 void builtin_print(CPU *cpu)
 {
-    uint16_t format_address;
-    stack_pop_data(cpu->opstack, &format_address, sizeof(format_address));
-    char *format = (char *)&cpu->program[cpu->data_address + format_address - cpu->port_bank->size];
+    uint8_t *format;
+    stack_pop_data(cpu->opstack, &format, sizeof(format));
 
     uint16_t u16;
     int16_t i16;
     uint8_t u8;
     float f32;
-    uint16_t s_index;
+    uint8_t *string;
 
     while (*format)
     {
@@ -44,8 +43,8 @@ void builtin_print(CPU *cpu)
                 vmprintf("%c", u8);
                 break;
             case 's':
-                stack_pop_data(cpu->opstack, &s_index, sizeof(s_index));
-                vmprintf("%s", cpu->stack->data + cpu->stack->bp + s_index);
+                stack_pop_data(cpu->opstack, &string, sizeof(string));
+                vmprintf("%s", string);
                 break;
             default:
                 vmprintf("%%%c", *format);

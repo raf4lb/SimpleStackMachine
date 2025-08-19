@@ -26,6 +26,7 @@ fn .task_1
 
 fn .task_1_message_handler
     PUSHL_U16 10  ; payload address
+    PUSH_LOCAL_REF
 
     PUSHL_U16 2
     PUSHL_U16 0  ; task dst address
@@ -36,5 +37,6 @@ fn .task_1_message_handler
     PUSH_LOCAL
 
     PUSHL_U16 $message
+    PUSH_CONST_REF
     SYSCALL 0
     RETURN

@@ -265,6 +265,15 @@ void cpu_execute(CPU *cpu, uint8_t opcode)
     case OP_NOT_U16:
         bitwise_not_U16(cpu);
         break;
+    case OP_PUSH_LOCAL_REF:
+        push_local_reference(cpu);
+        break;
+    case OP_PUSH_CONST_REF:
+        push_constant_reference(cpu);
+        break;
+    case OP_PUSH_CONST:
+        push_constant(cpu);
+        break;
 
     default:
         vmprintf("unknown opcode %d\n", opcode);
