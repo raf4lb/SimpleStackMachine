@@ -454,9 +454,7 @@ def remove_static_data_lines(lines: list[str]) -> list[str]:
 
 
 def to_utf8(string):
-    utf8_bytes = string.encode("utf-8")
-    utf8_array = [byte for byte in utf8_bytes]
-    return ",".join(str(c) for c in utf8_array) + ",0"
+    return ",".join(str(c) for c in string.encode("utf-8")) + ",0"
 
 
 def build_utf8_strings(lines: list[str]):
@@ -477,6 +475,14 @@ def build_utf8_strings(lines: list[str]):
                     string += c
             ascii_list = to_utf8(string)
             lines[i] = content.replace(f'"{string}"', ascii_list)
+
+
+def build_utf8_characters(lines: list[str]):
+    for i, content in enumerate(lines):
+        content = content.replace("\\n", "\n")
+        if "'" in content:
+            c = content.split(" ")[1]
+            lines[i] = content.replace(f'{c}', str(ord(c[1])))
 
 
 def build_const_data(lines: list[str]):
@@ -572,9 +578,10 @@ def encode_line(i: int, line: str) -> list[int]:
         print(f"Error at line {i}: unknow instruction {inst_name}")
     try:
         return instruction.encode(operand)
-    except:
+    except Exception as e:
         print("Error at:")
         print(i, instruction)
+        raise e
 
 
 def copy_code_from(source_file: str) -> list[str]:
@@ -645,6 +652,7 @@ def compile_rfl(filename: str, debug: bool = True) -> list[int]:
         strip(lines)
         lines = remove_blank_lines(lines)
         build_utf8_strings(lines)
+        build_utf8_characters(lines)
         lines, data = build_const_data(lines)
         lines = build_local_variables(lines)
         lines = build_jumps(lines)

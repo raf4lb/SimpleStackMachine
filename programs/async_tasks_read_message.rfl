@@ -3,16 +3,61 @@
 
 CONST message STRING "task %u -> task %u: %s\n"
 CONST running STRING "task %u running\n"
-CONST payload STRING "hello"
 
 
 fn .main
+    
+    ; create a "hello" string
+    PUSHL_U16 3
+    ALLOC_LOCAL $local_payload
+    
+    PUSHL_U16 'h'               ; value
+    PUSHL_U16 1                 ; size
+    PUSHL_U16 $local_payload    ; address
+    POP_LOCAL
+
+    PUSHL_U16 'e'               ; value
+    PUSHL_U16 1                 ; size
+    PUSHL_U16 1                 ; adds 1 to $local_payload
+    PUSHL_U16 $local_payload
+    ADD_U16                     ; address
+    POP_LOCAL
+
+    PUSHL_U16 'l'                 ; value
+    PUSHL_U16 1                 ; size
+    PUSHL_U16 2                 ; adds 2 to $local_payload
+    PUSHL_U16 $local_payload
+    ADD_U16                     ; address
+    POP_LOCAL
+
+    PUSHL_U16 'l'                 ; value
+    PUSHL_U16 1                 ; size
+    PUSHL_U16 3                 ; adds 3 to $local_payload
+    PUSHL_U16 $local_payload
+    ADD_U16                     ; address
+    POP_LOCAL
+
+    PUSHL_U16 'o'                 ; value
+    PUSHL_U16 1                 ; size
+    PUSHL_U16 4                 ; adds 4 to $local_payload
+    PUSHL_U16 $local_payload
+    ADD_U16                     ; address
+    POP_LOCAL
+
+    PUSHL_U16 0                 ; value
+    PUSHL_U16 1                 ; size
+    PUSHL_U16 5                 ; adds 5 to $local_payload
+    PUSHL_U16 $local_payload
+    ADD_U16                     ; address
+    POP_LOCAL
+
     PUSHL_U16 .task_1_message_handler
     ASYNC_CALL .task_1
     .loop_main
         PUSHL_U16 1                         ; task id
-        PUSHL_U16 $payload                  ; payload address
-        PUSHL_U16 5                         ; payload size
+        PUSHL_U16 $local_payload            ; payload address
+        PUSH_LOCAL_REF
+        PUSHL_U16 6                         ; payload size
         SYSCALL 3                           ; send message builtin function
         PUSHL_U16 1000
         CALL .delay_ms

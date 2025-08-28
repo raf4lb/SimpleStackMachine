@@ -84,9 +84,8 @@ void builtin_send_message(CPU *cpu)
     uint16_t payload_size;
     stack_pop_data(cpu->opstack, &payload_size, sizeof(payload_size));
 
-    uint16_t payload_address;
-    stack_pop_data(cpu->opstack, &payload_address, sizeof(payload_address));
-    uint8_t *payload = (uint8_t *)&cpu->program[cpu->data_address + payload_address - cpu->port_bank->size];
+    uint8_t *payload;
+    stack_pop_data(cpu->opstack, &payload, sizeof(payload));
 
     uint16_t task_dst_id;
     stack_pop_data(cpu->opstack, &task_dst_id, sizeof(task_dst_id));
