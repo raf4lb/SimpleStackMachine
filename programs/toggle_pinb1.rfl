@@ -1,5 +1,13 @@
-; Use a button to control a led
-; https://wokwi.com/projects/434796710305388545
+; Use a push button to toggle a LED
+; This example must be executed on Arduino Uno R3 or using an emulator.
+; To compile the arduino .hex file, in the root project folder run:
+; $ make arduino PROGRAM_FILE=programs/toggle_pinb1.rfl.rfl
+; To run it on an emulator:
+; - Go to https://wokwi.com/projects/434796710305388545
+; - Upload the compiled .hex file pressing F1 > Upload Firmware and Start Simulation...
+; - Select the .hex located at the project root folder/build/arduino.hex
+; - The simulation will start
+; - Press the button to toggle the LED
 
 #include delay.rfl
 #include toggle.rfl

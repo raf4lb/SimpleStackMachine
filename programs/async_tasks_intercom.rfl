@@ -1,5 +1,24 @@
-; Task intercommunication example
-; https://wokwi.com/projects/434796710305388545
+; Async Task Communication Example
+; This example must be executed on Arduino Uno R3 or using an emulator.
+; To compile the arduino .hex file, in the root project folder run:
+; $ make arduino PROGRAM_FILE=programs/async_tasks_intercom.rfl
+; To run it on an emulator:
+; - Go to https://wokwi.com/projects/434796710305388545
+; - Upload the compiled .hex file pressing F1 > Upload Firmware and Start Simulation...
+; - Select the .hex located at the project root folder/build/arduino.hex
+; - The simulation will start
+;
+; Program operation:
+; - The main task spawns an asynchronous task (task_1), then enters a loop
+;   where it continuously monitors the push button.
+;
+; - task_1 runs concurrently: it prints the VM's memory usage and waits
+;   for incoming messages.
+;
+; - When the push button is pressed, the main task sends a message to task_1.
+;
+; - Upon receiving a message, task_1 toggles the LED connected to pin B5.
+
 
 #include delay.rfl
 #include toggle.rfl

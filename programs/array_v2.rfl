@@ -1,8 +1,14 @@
+; Array Example v2
+; - Allocates an array of 4 unsigned integers
+; - Fills the array using a for loop
+; - Prints the array elements using another for loop
+; Expected output: 0 1 2 3
+
 CONST u16 STRING "%u "
 CONST endline STRING "\n"
 
 fn .main
-    PUSHL_U16 14
+    PUSHL_U16 10
     ALLOC_LOCAL $array_4_u16
     
     PUSHL_U16 2
@@ -14,7 +20,7 @@ fn .main
 
     PUSHL_U16 2
     ALLOC_LOCAL $max  ; allocate 2 bytes
-    PUSHL_U16 7         ; value
+    PUSHL_U16 4         ; value
     PUSHL_U16 2         ; size
     PUSHL_U16 $max      ; address
     POP_LOCAL           ; store value at address

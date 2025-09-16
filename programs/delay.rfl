@@ -1,3 +1,5 @@
+; Delay module. Cannot be compiled, only imported
+
 ; delay milliseconds
 ; - param: ms (U16)
 

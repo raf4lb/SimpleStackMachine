@@ -1,3 +1,7 @@
+; Hello world example
+; Prints the HELLO WORLD! message and then prints the current
+; memory usage in bytes every second
+
 #include memory_usage.rfl
 
 CONST hello STRING "HELLO WORLD!\n"

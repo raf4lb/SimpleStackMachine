@@ -1,3 +1,5 @@
+; Print syscall example
+
 CONST message_on STRING "HELLO WORLD!\n"
 CONST message_off STRING "OLÁ MUNDO!\n"
 

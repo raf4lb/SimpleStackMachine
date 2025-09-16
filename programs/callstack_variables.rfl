@@ -1,3 +1,5 @@
+; Call a function to add two signed integers, and print the result
+; 
 ; sum(x <i16>, y <i16>) {
 ;   return x + y
 ; } <i16>
@@ -12,7 +14,8 @@
 CONST print_result STRING "result: %i\n"
 
 fn .main
-    ALLOC_LOCAL 2 $result
+    PUSHL_U16 2
+    ALLOC_LOCAL $result
     PUSHL_I16 1
     PUSHL_I16 -2
     CALL .sum
@@ -21,12 +24,14 @@ fn .main
     RETURN
 
 fn .sum
-    ALLOC_LOCAL 2 $y
+    PUSHL_U16 2
+    ALLOC_LOCAL $y
     PUSHL_U16 2
     PUSHL_U16 $y
     POP_LOCAL
 
-    ALLOC_LOCAL 2 $x
+    PUSHL_U16 2
+    ALLOC_LOCAL $x
     PUSHL_U16 2
     PUSHL_U16 $x
     POP_LOCAL
@@ -37,7 +42,7 @@ fn .sum
     
     PUSHL_U16 2
     PUSHL_U16 $y
-    PUSH_LOCAL 2 $y
+    PUSH_LOCAL
     
     ADD_I16
     

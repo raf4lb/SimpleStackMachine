@@ -1,4 +1,6 @@
-CONST message STRING "memory usage: %u\n"
+; Memory usage module. Cannot be compiled, only imported
+
+CONST message STRING "memory usage: %u bytes\n"
 
 fn .print_memory_usage
     SYSCALL 4
