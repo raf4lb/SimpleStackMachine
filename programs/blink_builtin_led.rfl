@@ -1,5 +1,6 @@
-; Blink builtin LED pin 13 (portb5)
-; https://wokwi.com/projects/392567753366512641
+; Blink built-in LED pin 13 (portb5)
+; This example must be executed on Arduino Uno R3 or using an emulator.
+; https://wokwi.com/projects/434796710305388545
 
 #include delay.rfl
 

@@ -1,15 +1,17 @@
+; Example of calling a function recursively
 ; def incr(i, n):
 ;     if i == n:
 ;         return i
 ;     else:
 ;         return incr(i+1, n)
 ;
-; print(f"result: {incr(1, 10)}")
+; res = incr(1, 5)
+; print(f"result: {res}")
 
-CONST ret STRING "%u\n"
+CONST ret STRING "result: %u\n"
 
 fn .main
-    PUSHL_U16 10
+    PUSHL_U16 5  ; <- Update n here, but be cautious of stack overflow.
     PUSHL_U16 1
     CALL .incr
     PUSHL_U16 $ret

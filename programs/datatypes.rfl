@@ -1,3 +1,8 @@
+; Prints the currently supported datatypes in a loop:
+; - unsigned integer 16 bits;
+; - signed integer 16 bits;
+; - float 32 bits;
+
 CONST float STRING "%f\n"
 CONST uint STRING "%u\n"
 CONST int STRING "%i\n"

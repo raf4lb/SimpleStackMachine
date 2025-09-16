@@ -1,3 +1,5 @@
+; Import the delay_ms function from the delay module
+
 #include delay.rfl
 
 fn .main

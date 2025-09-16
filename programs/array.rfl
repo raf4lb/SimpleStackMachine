@@ -1,7 +1,13 @@
+; Array Example
+; - Allocates an array of 4 unsigned integer;
+; - Fills the array using direct access;
+; - Prints the array elements using direct access.
+; Expected output: [1, 3, 5, 7]
+
 CONST print STRING "[%u, %u, %u, %u]\n"
 
 fn .main
-    PUSHL_U16 8
+    PUSHL_U16 10
     ALLOC_LOCAL $array_4_u16
     PUSHL_U16 2
     ALLOC_LOCAL $index

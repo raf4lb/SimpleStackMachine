@@ -1,3 +1,5 @@
+; Prints local variables using the built-in print function with formatting.
+
 CONST string STRING "x = %u and y = %u\n"
 
 fn .main
@@ -15,11 +17,13 @@ fn .main
     PUSHL_U16 $y
     POP_LOCAL
 
-    PUSHL_U16 2
-    PUSHL_U16 $x
-    PUSH_LOCAL
+
     PUSHL_U16 2
     PUSHL_U16 $y
+    PUSH_LOCAL
+    
+    PUSHL_U16 2
+    PUSHL_U16 $x
     PUSH_LOCAL
     
     PUSHL_U16 $string

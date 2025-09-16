@@ -1,3 +1,5 @@
+; Toggle module. Cannot be compiled, only imported
+
 ; toggle a portb pin
 ; - param: pin_number (U16)
 

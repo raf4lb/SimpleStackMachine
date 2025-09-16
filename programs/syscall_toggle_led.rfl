@@ -1,3 +1,6 @@
+; Toggles Arduino's built-in LED
+; This example must be executed on Arduino Uno R3 or using an emulator.
+
 CONST hello STRING "LED TOGGLED!\n"
 
 fn .main

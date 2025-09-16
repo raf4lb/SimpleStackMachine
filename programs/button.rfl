@@ -1,5 +1,6 @@
 ; Use a button to control a led
-; https://wokwi.com/projects/392584555920917505
+; This example must be executed on Arduino Uno R3 or using an emulator.
+; https://wokwi.com/projects/434796710305388545
 
 ; DDRB address is 0b0
 ; PORTB address is 0b1

@@ -1,3 +1,9 @@
+; Generates the first n fibonacci numbers
+; Since max supported unsigned integer size is 16 bits, max n is 24 = 46368
+; output example:
+; n=24
+; 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597, 2584, 4181, 6765, 10946, 17711, 28657, 46368
+
 CONST print_n STRING "n=%u\n"
 
 fn .main
@@ -22,10 +28,25 @@ fn .main
 
     PUSHL_U16 2
     ALLOC_LOCAL $n    ; n
-    PUSHL_U16 24        ; n here
+    PUSHL_U16 24      ; <- update n here
     PUSHL_U16 2
     PUSHL_U16 $n
-    POP_LOCAL 2
+    POP_LOCAL
+
+    PUSHL_U16 2
+    PUSHL_U16 $n
+    PUSH_LOCAL
+    PUSHL_U16 $print_n
+    SYSCALL 0
+
+    PUSHL_U16 2
+    PUSHL_U16 $n
+    PUSH_LOCAL
+    PUSHL_U16 1
+    ADD_U16
+    PUSHL_U16 2
+    PUSHL_U16 $n
+    POP_LOCAL
 
     PUSHL_U16 2
     PUSHL_U16 $n
@@ -36,10 +57,6 @@ fn .main
     PUSHL_U16 2
     PUSHL_U16 $n
     PUSH_LOCAL
-    PUSHL_U16 2
-    PUSHL_U16 $n
-    PUSHL_U16 $print_n
-    SYSCALL 0
     .false_1
     PUSHL_U16 2
     PUSHL_U16 $n

@@ -1,3 +1,5 @@
+; In a infinite loop: adds 3 contants, and prints the result
+
 CONST x U16 10
 CONST y U16 5
 CONST z U16 15
