@@ -1,0 +1,31 @@
+; Prints local variables using the built-in print function with formatting.
+
+CONST string STRING "x = %u and y = %u\n"
+
+fn .main
+    PUSHL_U16 2
+    ALLOC_LOCAL $x
+    PUSHL_U16 20
+    PUSHL_U16 2
+    PUSHL_U16 $x
+    POP_LOCAL
+    
+    PUSHL_U16 2
+    ALLOC_LOCAL $y
+    PUSHL_U16 10
+    PUSHL_U16 2
+    PUSHL_U16 $y
+    POP_LOCAL
+
+
+    PUSHL_U16 2
+    PUSHL_U16 $y
+    PUSH_LOCAL
+    
+    PUSHL_U16 2
+    PUSHL_U16 $x
+    PUSH_LOCAL
+    
+    PUSHL_U16 $string
+    SYSCALL 0
+    RETURN

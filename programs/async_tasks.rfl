@@ -1,0 +1,58 @@
+; Async Task Spawn Example
+;
+; main function spawns two async tasks:
+; - task_1 delays for 1 second
+; - task_2 delays for 0.5 seconds
+; - meanwhile, the main function itself delays for 3 seconds
+; All tasks start at the same time.
+; As a result:
+; - task_2 completes first (after 0.5s),
+; - followed by task_1 (after 1s),
+; - and finally the main function (after 3s). 
+
+#include delay.rfl
+
+CONST message_task1 STRING "task 1"
+CONST message_task2 STRING "task 2"
+CONST message_started STRING " started\n"
+CONST message_ended STRING " ended\n"
+
+fn .main
+    PUSHL_U16 .nop       ; nop message handler (do nothing)
+    ASYNC_CALL .task_1
+    PUSHL_U16 .nop       ; nop message handler (do nothing)
+    ASYNC_CALL .task_2
+    PUSHL_U16 3000
+    CALL .delay_ms
+    RETURN
+
+fn .task_1
+    PUSHL_U16 $message_task1
+    SYSCALL 0
+    PUSHL_U16 $message_started
+    SYSCALL 0
+    .loop_1
+        PUSHL_U16 1000
+        CALL .delay_ms
+        PUSHL_U16 $message_task1
+        SYSCALL 0
+        PUSHL_U16 $message_ended
+        SYSCALL 0
+        ASYNC_RETURN
+
+fn .task_2
+    PUSHL_U16 $message_task2
+    SYSCALL 0
+    PUSHL_U16 $message_started
+    SYSCALL 0
+    .loop_2
+        PUSHL_U16 500
+        CALL .delay_ms
+        PUSHL_U16 $message_task2
+        SYSCALL 0
+        PUSHL_U16 $message_ended
+        SYSCALL 0
+        ASYNC_RETURN
+
+fn .nop
+    RETURN

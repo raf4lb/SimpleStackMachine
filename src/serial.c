@@ -1,52 +1,39 @@
+#ifdef ARDUINO
 #include <string.h>
 #include <stdio.h>
 #include <avr/io.h>
 #include <stdarg.h>
-#include <stdlib.h>
+#include "sys.h"
 #include "serial.h"
 
-void serial_setup()
+void serial_setup(uint16_t baud)
 {
-    // Register settings
-    // High and low bits
-    UBRR0H = (BUAD_RATE_CALC >> 8);
-    UBRR0L = BUAD_RATE_CALC;
-    // transimit and recieve enable
-    UCSR0B = (1 << TXEN0) | (1 << TXCIE0) | (1 << RXEN0) | (1 << RXCIE0);
-    UCSR0C = (1 << UCSZ01) | (1 << UCSZ00); // 8 bit data format
+    uint16_t ubrr_value = F_CPU / 16 / baud - 1;
+    // Set baud rate
+    UBRR0H = (ubrr_value >> 8);
+    UBRR0L = ubrr_value;
+    // Enable transmitter
+    UCSR0B = (1 << TXEN0);
+    // Set frame format: 8 data bits, 1 stop bit
+    UCSR0C = (1 << UCSZ01) | (1 << UCSZ00);
 }
 
-uint8_t USART_receive()
+void serial_write(const char *str)
 {
-    // Wait for data to be received
-    while (!(UCSR0A & (1 << RXC0)))
-        ;
-
-    // Get and return received data from buffer
-    return UDR0;
-}
-
-void USART_transmit(uint8_t data)
-{
-    // Wait for empty transmit buffer
-    while (!(UCSR0A & (1 << UDRE0)))
-        ;
-
-    // Put data into buffer, sends the data
-    UDR0 = data;
-}
-
-void serial_send(char *sendString)
-{
-    int i = 0;
-    for (i = 0; i < strlen(sendString); i++)
+    while (*str)
     {
-        USART_transmit(sendString[i]);
+        // Wait until the transmit buffer is empty
+        while (!(UCSR0A & (1 << UDRE0)))
+            ;
+        // Load the next character into the buffer
+        UDR0 = *str;
+        str++;
     }
 }
 
-void serial_printf(const char *format, ...)
+int serial_printf(const char *format, ...)
 {
+#ifdef SERIAL_ENABLED
     va_list args;
     va_start(args, format);
 
@@ -54,7 +41,7 @@ void serial_printf(const char *format, ...)
     int size = vsnprintf(NULL, 0, format, args);
 
     // Allocate memory for the buffer
-    char *buffer = (char *)malloc(sizeof(char) + 1); // +1 for null terminator
+    char *buffer = (char *)vmmalloc(sizeof(char) + 1); // +1 for null terminator
 
     // Reset va_list for actual usage
     va_end(args);
@@ -66,6 +53,9 @@ void serial_printf(const char *format, ...)
     va_end(args);
 
     // Now you can use the buffer as needed, for example, printing it
-    serial_send(buffer);
-    free(buffer);
+    serial_write(buffer);
+    vmfree(buffer, sizeof(char) + 1);
+#endif
+    return 0;
 }
+#endif

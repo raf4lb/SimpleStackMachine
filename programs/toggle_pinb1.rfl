@@ -1,0 +1,35 @@
+; Use a push button to toggle a LED
+; This example must be executed on Arduino Uno R3 or using an emulator.
+; To compile the arduino .hex file, in the root project folder run:
+; $ make arduino PROGRAM_FILE=programs/toggle_pinb1.rfl.rfl
+; To run it on an emulator:
+; - Go to https://wokwi.com/projects/434796710305388545
+; - Upload the compiled .hex file pressing F1 > Upload Firmware and Start Simulation...
+; - Select the .hex located at the project root folder/build/arduino.hex
+; - The simulation will start
+; - Press the button to toggle the LED
+
+#include delay.rfl
+#include toggle.rfl
+
+; DDRB address is 0b0
+; PORTB address is 0b1
+
+fn .main 
+    PUSHL_U16 2           ; push 0b10 to stack
+    POPA_U16 $ddrb       ; set DDRB 0 input 1 output
+
+    .loop
+        ; check if PINB0 is ON (PINB & 1)
+        PUSH_U16 $pinb           ; push PINB to stack
+        PUSHL_U16 1      
+        AND_U16          
+        PUSHL_U16 1
+        COMPARE_EQ
+        POP_JUMP_IF_FALSE .loop
+        PUSHL_U16 1
+        CALL .toggle_portb_pin   ; toogle pinb1
+        PUSHL_U16 250            ; delay 250ms
+        CALL .delay_ms
+        JUMP .loop
+        

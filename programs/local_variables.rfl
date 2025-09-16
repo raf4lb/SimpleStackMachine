@@ -1,0 +1,60 @@
+; Call a function that adds two integers and then print the result
+; ex:
+; def sum(x, y):
+;     return x + y
+;
+; def main():
+;     result = sum(3, 2)
+;     print(f"result: {result}")
+; main()
+; # expected output: "result: 5"
+
+CONST print_result STRING "result: %u\n"
+
+fn .main
+    PUSHL_U16 2
+    ALLOC_LOCAL $result      ; allocate memory to store the result
+    
+    PUSHL_U16 2          ; push 2 to the top of the stack (second argument)
+    PUSHL_U16 3          ; push 3 to the top of the stack (first argument)
+    
+    CALL .sum            ; call sum function 
+    
+    PUSHL_U16 2
+    PUSHL_U16 $result
+    POP_LOCAL            ; store the function return in the $result variable
+    
+    PUSHL_U16 2
+    PUSHL_U16 $result         
+    PUSH_LOCAL                ; push the $result local variable value to the stack
+    PUSHL_U16 $print_result   ; push the $print_result string address to the stack
+    SYSCALL 0                 ; call builtin print syscall
+    
+    RETURN
+
+fn .sum
+    PUSHL_U16 2
+    ALLOC_LOCAL $a     ; allocate space for local $a variable
+    
+    PUSHL_U16 2
+    ALLOC_LOCAL $b     ; allocate space for local $b variable
+    
+    PUSHL_U16 2
+    PUSHL_U16 $a
+    POP_LOCAL          ; store the value of the first parameter in $a
+    
+    PUSHL_U16 2
+    PUSHL_U16 $b
+    POP_LOCAL          ; store the value of the second parameter in $b
+    
+    PUSHL_U16 2
+    PUSHL_U16 $a
+    PUSH_LOCAL         ; push $a to the top of the stack
+    
+    PUSHL_U16 2
+    PUSHL_U16 $b         
+    PUSH_LOCAL         ; push $b to the top of the stack
+    
+    ADD_U16            ; add the top two values and store the result on the top of the stack
+    
+    RETURN             ; return to the caller scope

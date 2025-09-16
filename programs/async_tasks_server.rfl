@@ -1,0 +1,34 @@
+#include delay.rfl
+#include memory_usage.rfl
+
+CONST t1 STRING "task 1 received message\n"
+CONST t2 STRING "task 2 received message\n"
+
+fn .main
+    PUSHL_U16 .message_handler_1     ; task message handler
+    ASYNC_CALL .task_1
+    PUSHL_U16 .message_handler_2     ; task message handler
+    ASYNC_CALL .task_2
+    .loop
+    CALL .print_memory_usage
+    PUSHL_U16 1000
+    CALL .delay_ms
+    JUMP .loop
+
+fn .task_1
+    .t1_loop
+    JUMP .t1_loop
+
+fn .message_handler_1
+    PUSHL_U16 $t1
+    SYSCALL 0
+    RETURN
+
+fn .task_2
+    .t2_loop
+    JUMP .t2_loop
+
+fn .message_handler_2
+    PUSHL_U16 $t2
+    SYSCALL 0
+    RETURN

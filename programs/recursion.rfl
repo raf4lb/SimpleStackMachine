@@ -1,0 +1,54 @@
+; Example of calling a function recursively
+; def incr(i, n):
+;     if i == n:
+;         return i
+;     else:
+;         return incr(i+1, n)
+;
+; res = incr(1, 5)
+; print(f"result: {res}")
+
+CONST ret STRING "result: %u\n"
+
+fn .main
+    PUSHL_U16 5  ; <- Update n here, but be cautious of stack overflow.
+    PUSHL_U16 1
+    CALL .incr
+    PUSHL_U16 $ret
+    SYSCALL 0
+    RETURN
+
+fn .incr
+    PUSHL_U16 2
+    ALLOC_LOCAL $i
+    PUSHL_U16 2
+    PUSHL_U16 $i
+    POP_LOCAL
+    PUSHL_U16 2
+    ALLOC_LOCAL $n
+    PUSHL_U16 2
+    PUSHL_U16 $n
+    POP_LOCAL
+    PUSHL_U16 2
+    PUSHL_U16 $n
+    PUSH_LOCAL
+    PUSHL_U16 2
+    PUSHL_U16 $i
+    PUSH_LOCAL
+    COMPARE_EQ
+    POP_JUMP_IF_FALSE .call_incr
+    PUSHL_U16 2
+    PUSHL_U16 $i
+    PUSH_LOCAL
+    RETURN
+    .call_incr
+        PUSHL_U16 2
+        PUSHL_U16 $n
+        PUSH_LOCAL
+        PUSHL_U16 2
+        PUSHL_U16 $i
+        PUSH_LOCAL
+        PUSHL_U16 1
+        ADD_U16
+        CALL .incr
+        RETURN

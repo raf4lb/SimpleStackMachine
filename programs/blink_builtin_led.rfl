@@ -1,0 +1,23 @@
+; Blink built-in LED pin 13 (portb5)
+; This example must be executed on Arduino Uno R3 or using an emulator.
+; https://wokwi.com/projects/434796710305388545
+
+#include delay.rfl
+
+fn .main
+    ; set pin 13 output
+    PUSHL_U16 32         ; push 0b00100000 to stack
+    POPA_U16 $ddrb       ; set DDRB
+
+    .loop
+        PUSHL_U16 32     ; push 0b00100000 to stack
+        POPA_U16 $portb  ; pop result to address 0x1 (PORTB)
+        PUSHL_U16 1000
+        CALL .delay_ms
+
+        PUSHL_U16 0      ; push 0b00000000 to stack
+        POPA_U16 $portb  ; pop result to address 0x1 (PORTB)
+        PUSHL_U16 1000
+        CALL .delay_ms
+        
+        JUMP .loop   ; jump to .loop

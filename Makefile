@@ -1,32 +1,74 @@
 all: main
 
-CC = clang
-override CFLAGS += -g -Wno-everything -pthread -lm
-
 BUILD_DIR = build
 SOURCE_DIR = src
+TEST_DIR = tests
+TEST_BUILD_DIR = $(TEST_DIR)/build
 
-generic:
-	mkdir -p build
-	$(CC) $(SOURCE_DIR)/memory.c \
+PARAMS = \
+		$(SOURCE_DIR)/sys.c \
+		$(SOURCE_DIR)/io.c \
+		$(SOURCE_DIR)/memory.c \
+		$(SOURCE_DIR)/delay.c \
 		$(SOURCE_DIR)/stack.c \
 		$(SOURCE_DIR)/cpu.c \
 		$(SOURCE_DIR)/instructions.c \
+		$(SOURCE_DIR)/serial.c \
+		$(SOURCE_DIR)/builtin.c \
+		$(SOURCE_DIR)/messaging.c \
+		$(SOURCE_DIR)/task.c \
+		$(SOURCE_DIR)/tasktree.c \
+		$(SOURCE_DIR)/server.c \
 		$(SOURCE_DIR)/main.c \
-		-o $(BUILD_DIR)/$@
+		-DPROGRAM_SIZE=$(PROGRAM_SIZE) \
+		-DPROGRAM="$(PROGRAM)" \
+		-DDATA_ADDRESS=$(DATA_ADDRESS) \
 
-arduino:
+compile:
 	$(eval PYTHON_SCRIPT := compiler.py)
 	@echo "Compiling rfl file..."
-	$(eval OUTPUT := $(shell python3 $(PYTHON_SCRIPT) $(PROGRAM_FILE) $(PORTS_SIZE)))
+	$(eval OUTPUT := $(shell python3 $(PYTHON_SCRIPT) $(PROGRAM_FILE)))
 	@echo "OK"
 	$(eval PROGRAM := $(word 1, $(OUTPUT)))
 	$(eval PROGRAM_SIZE := $(word 2, $(OUTPUT)))
+	$(eval DATA_ADDRESS := $(word 3, $(OUTPUT)))
 	@echo "Program: $(PROGRAM)"
 	@echo "Size: $(PROGRAM_SIZE)"
-	mkdir -p $(BUILD_DIR)
-	@echo "Sending code to RFLVM"
-	avr-gcc -Os -mmcu=atmega328p \
+	@echo "Data: $(DATA_ADDRESS)"
+		
+macosx: compile
+	@echo "Compiling code to MACOSX version"
+	clang $(PARAMS) -DMACOSX -o build/$@
+	@echo "MACOSX version created"
+
+macosx-debug: compile
+	@echo "Compiling code to MACOSX version"
+	clang $(PARAMS) -DMACOSX -o build/$@.out -g
+	@echo "MACOSX version created"
+
+windows: compile
+	@echo "Compiling code to WINDOWS version"
+	gcc $(PARAMS) -DWINDOWS -o build/$@.exe
+	@echo "WINDOWS version created"
+
+windows-debug: compile
+	@echo "Compiling code to WINDOWS version"
+	gcc $(PARAMS) -DWINDOWS -o build/$@.out -g
+	@echo "WINDOWS version created"
+
+arduino: compile
+	@echo "Compiling code to ARDUINO version"
+	avr-gcc $(PARAMS) -Os -mmcu=atmega328p -DARDUINO -DSERIAL_ENABLED -o build/$@.elf
+	avr-objcopy -O ihex -R .eeprom build/$@.elf build/$@.hex
+	avr-size -C --mcu=atmega328p build/$@.elf 
+	@echo "ARDUINO version created"
+
+clean:
+	rm -r $(BUILD_DIR)
+
+test:
+	mkdir -p $(TEST_BUILD_DIR)
+	$(CC) \
 		$(SOURCE_DIR)/memory.c \
 		$(SOURCE_DIR)/io.c \
 		$(SOURCE_DIR)/delay.c \
@@ -34,12 +76,18 @@ arduino:
 		$(SOURCE_DIR)/cpu.c \
 		$(SOURCE_DIR)/instructions.c \
 		$(SOURCE_DIR)/serial.c \
-		$(SOURCE_DIR)/main.c \
-		-DPROGRAM_SIZE=$(PROGRAM_SIZE) \
-		-DPROGRAM=\""$(PROGRAM)"\" \
-		-o build/$@.bin
-	avr-objcopy -O ihex -R .eeprom build/$@.bin build/$@.hex
+		$(SOURCE_DIR)/builtin.c \
+		$(TEST_DIR)/test_*.c \
+		-DMACOSX \
+		-o $(TEST_BUILD_DIR)/$@
 
-clean:
-	rm -r $(BUILD_DIR)
-	
+clean-test:
+	rm -r $(TEST_BUILD_DIR)	
+
+macosx-build-send-message:
+	gcc -o $(BUILD_DIR)/send_message \
+		tools/send_message.c \
+		$(SOURCE_DIR)/messaging.c \
+		$(SOURCE_DIR)/io.c \
+		$(SOURCE_DIR)/sys.c \
+		-DMACOSX

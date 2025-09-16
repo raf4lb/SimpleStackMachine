@@ -1,7 +1,16 @@
-.start
-    PSHL 2
-    PSHL 4
-    MUL
-    TOP
-    HLT
+; Hello world example
+; Prints the HELLO WORLD! message and then prints the current
+; memory usage in bytes every second
+
+#include memory_usage.rfl
+
+CONST hello STRING "HELLO WORLD!\n"
+
+fn .main
+    PUSHL_U16 $hello
+    SYSCALL 0
+    .loop
+        CALL .print_memory_usage
+        DELAY 1000
+        JUMP .loop
     

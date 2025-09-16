@@ -1,29 +1,49 @@
-; For example
+; For loop example
 ; int i
 ; int max = 10
 ; for i = 0; i < max; i++
 ;   print i
 
-VAR i
-VAR max
-VAR inc
+fn .main
+    PUSHL_U16 2
+    ALLOC_LOCAL $i
+    PUSHL_I16 0
+    PUSHL_U16 2
+    PUSHL_U16 $i
+    POP_LOCAL
 
-.main
-    PSHL 0
-    POPA $i
-    PSHL 10
-    POPA $max
-    PSHL 1
-    POPA $inc
+    PUSHL_U16 2
+    ALLOC_LOCAL $max
+    PUSHL_I16 10
+    PUSHL_U16 2
+    PUSHL_U16 $max
+    POP_LOCAL
     
-.for
-    PSH $i
-    TOP
-    PSH $inc
-    ADD
-    POPA $i
-    PSH $i
-    PSH $max
-    CPGE
-    PJIF .for 
-    HLT
+    PUSHL_U16 2
+    ALLOC_LOCAL $inc
+    PUSHL_I16 1
+    PUSHL_U16 2
+    PUSHL_U16 $inc
+    POP_LOCAL
+    
+    .for
+        PUSHL_U16 2
+        PUSHL_U16 $i
+        PUSH_LOCAL
+        TOP_U16
+        PUSHL_U16 2
+        PUSHL_U16 $inc
+        PUSH_LOCAL
+        ADD_I16
+        PUSHL_U16 2
+        PUSHL_U16 $i
+        POP_LOCAL
+        PUSHL_U16 2
+        PUSHL_U16 $i
+        PUSH_LOCAL
+        PUSHL_U16 2
+        PUSHL_U16 $max
+        PUSH_LOCAL
+        COMPARE_EQ
+        POP_JUMP_IF_FALSE .for 
+        HALT

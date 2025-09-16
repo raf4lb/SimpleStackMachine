@@ -1,0 +1,8 @@
+; Import the delay_ms function from the delay module
+
+#include delay.rfl
+
+fn .main
+    PUSHL_U16 500
+    CALL .delay_ms
+    RETURN

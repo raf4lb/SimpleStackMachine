@@ -1,0 +1,49 @@
+; Call a function to add two signed integers, and print the result
+; 
+; sum(x <i16>, y <i16>) {
+;   return x + y
+; } <i16>
+; 
+; main() {
+;   result <i16>
+;   result = sum(1, -2)
+;   print(f"result: {print_result}")
+; } <void>
+; expected output: -1
+
+CONST print_result STRING "result: %i\n"
+
+fn .main
+    PUSHL_U16 2
+    ALLOC_LOCAL $result
+    PUSHL_I16 1
+    PUSHL_I16 -2
+    CALL .sum
+    PUSHL_U16 $print_result
+    SYSCALL 0
+    RETURN
+
+fn .sum
+    PUSHL_U16 2
+    ALLOC_LOCAL $y
+    PUSHL_U16 2
+    PUSHL_U16 $y
+    POP_LOCAL
+
+    PUSHL_U16 2
+    ALLOC_LOCAL $x
+    PUSHL_U16 2
+    PUSHL_U16 $x
+    POP_LOCAL
+    
+    PUSHL_U16 2
+    PUSHL_U16 $x
+    PUSH_LOCAL
+    
+    PUSHL_U16 2
+    PUSHL_U16 $y
+    PUSH_LOCAL
+    
+    ADD_I16
+    
+    RETURN

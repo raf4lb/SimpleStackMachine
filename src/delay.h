@@ -1,6 +1,24 @@
+
+#ifndef DELAY_H
+#define DELAY_H
+#include <stdint.h>
+#include "cpu.h"
+#ifdef ARDUINO
 #ifndef F_CPU
 #define F_CPU 16000000UL
 #endif
-#include <stdint.h>
 
-void delay_ms(uint16_t milliseconds);
+#include <avr/io.h>
+#include <avr/interrupt.h>
+
+void timer1_setup();
+uint32_t micros();
+
+#endif
+
+void timer_init();
+uint16_t millis();
+void delay_ms(CPU *cpu, uint16_t milliseconds);
+void delay_us(uint32_t microseconds);
+
+#endif

@@ -1,3 +1,4 @@
+#ifdef ARDUINO
 #ifndef SERIAL_H
 #define SERIAL_H
 
@@ -7,17 +8,11 @@
 #define F_CPU 16000000UL
 #endif
 
-#define BUAD 9600
-#define BUAD_RATE_CALC ((F_CPU / 16 / BUAD) - 1)
+int serial_printf(const char *format, ...);
 
-void serial_setup(void);
+void serial_setup(uint16_t baud);
 
-void serial_send(char *sendString);
+void serial_write(const char *str);
 
-uint8_t USART_receive();
-
-void USART_transmit(uint8_t data);
-
-void serial_printf(const char *format, ...);
-
+#endif
 #endif

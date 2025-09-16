@@ -1,31 +1,25 @@
-#include "memory.h"
 #include <stdlib.h>
-#include <stdint.h>
-#include "serial.h"
-
-void memory_error_print(char *message)
-{
-    serial_printf("MemoryError: %s", message);
-}
+#include "memory.h"
+#include "sys.h"
+#include "io.h"
 
 Memory *memory_create(uint16_t size)
 {
-    Memory *memory = (Memory *)malloc(sizeof(Memory));
+    Memory *memory = (Memory *)vmmalloc(sizeof(Memory));
     if (memory == NULL)
     {
-        memory_error_print("Memory allocation failed for Memory\n");
+        vmprintf("mem_alloc_failed: Memory\n");
         exit(EXIT_FAILURE);
     }
     memory->size = size;
-    uint8_t *data = (uint8_t *)malloc(size * sizeof(uint8_t));
+    uint8_t *data = (uint8_t *)vmmalloc(size * sizeof(uint8_t));
     if (data == NULL)
     {
-        memory_error_print("Memory allocation failed for Memory->data\n");
+        vmprintf("mem_alloc_failed: Memory->data\n");
         exit(EXIT_FAILURE);
     }
     // Initialize memory
-    int i;
-    for (i = 0; i < size; i++)
+    for (int i = 0; i < size; i++)
     {
         data[i] = 0;
     }
@@ -35,23 +29,22 @@ Memory *memory_create(uint16_t size)
 
 void memory_free(Memory *memory)
 {
-    free(memory->data);
-    free(memory);
+    vmfree(memory->data, sizeof(uint8_t) * memory->size);
+    vmfree(memory, sizeof(Memory));
 }
 
 void memory_print(Memory *memory)
 {
-    serial_printf("[");
-    int i;
-    for (i = 0; i < memory->size; i++)
+    vmprintf("[");
+    for (int i = 0; i < memory->size; i++)
     {
         if (i > 0)
         {
-            serial_printf(", ");
+            vmprintf(", ");
         }
-        serial_printf("%u", memory->data[i]);
+        vmprintf("%u", memory->data[i]);
     }
-    serial_printf("]\n");
+    vmprintf("]\n");
 }
 
 uint8_t memory_get_address(Memory *memory, uint16_t address)
@@ -60,7 +53,7 @@ uint8_t memory_get_address(Memory *memory, uint16_t address)
     {
         return memory->data[address];
     }
-    memory_error_print("memory_get_address: Memory address out of the range\n");
+    vmprintf("Get: memory address %d out of the range\n", address);
     exit(EXIT_FAILURE);
 }
 
@@ -72,7 +65,7 @@ void memory_set_address(Memory *memory, uint16_t address, uint8_t value)
     }
     else
     {
-        memory_error_print("memory_get_address: Memory address out of the range\n");
+        vmprintf("Set: memory address %d out of the range\n", address);
         exit(EXIT_FAILURE);
     }
 }

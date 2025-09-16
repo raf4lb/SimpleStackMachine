@@ -1,0 +1,42 @@
+; Prints the currently supported datatypes in a loop:
+; - unsigned integer 16 bits;
+; - signed integer 16 bits;
+; - float 32 bits;
+
+CONST float STRING "%f\n"
+CONST uint STRING "%u\n"
+CONST int STRING "%i\n"
+
+fn .main
+    .loop
+    CALL .func_u16
+    DELAY 500
+    CALL .func_i16
+    DELAY 500
+    CALL .func_f32
+    DELAY 500
+    JUMP .loop
+
+fn .func_u16
+    PUSHL_U16 100
+    PUSHL_U16 4
+    ADD_U16
+    PUSHL_U16 $uint
+    SYSCALL 0
+    RETURN
+
+fn .func_i16
+    PUSHL_I16 -1320
+    PUSHL_I16 340
+    ADD_I16
+    PUSHL_U16 $int
+    SYSCALL 0
+    RETURN
+
+fn .func_f32
+    PUSHL_F32 2.5
+    PUSHL_F32 10.5
+    MUL_F32
+    PUSHL_U16 $float
+    SYSCALL 0
+    RETURN

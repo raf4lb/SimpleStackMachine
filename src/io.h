@@ -1,9 +1,17 @@
 #ifndef IO_H
 #define IO_H
-
-#define _DDRB 0
-#define _PORTB 1
 #include <stdint.h>
+
+#ifdef ARDUINO
+
+#include "avr/io.h"
+#include "serial.h"
+
+#elif defined(MACOSX) || defined(WINDOWS)
+
+#include <stdio.h>
+
+#endif
 
 typedef struct
 {
@@ -22,5 +30,7 @@ void port_bank_free(PortBank *port_bank);
 void port_bank_set_address(PortBank *port_bank, uint8_t address, uint8_t value);
 
 uint8_t port_bank_get_address(PortBank *port_bank, uint8_t address);
+
+extern int (*vmprintf)(const char *, ...);
 
 #endif

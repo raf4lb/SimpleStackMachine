@@ -1,19 +1,34 @@
 #include <stdlib.h>
+#include "sys.h"
 #include "instructions.h"
-#include "serial.h"
 #include "delay.h"
+#include "builtin.h"
 
 void halt(CPU *cpu)
 {
-    serial_printf("Exit\n");
-    cpu_print_user_memory(cpu);
+    vmprintf("Exit\n");
     cpu_free(cpu);
     exit(0);
 }
 
-void push(CPU *cpu)
+void push_literal_U16(CPU *cpu)
 {
-    uint16_t address = cpu_fetch_16b(cpu);
+    uint16_t value;
+    cpu_fetch_data(cpu, &value, sizeof(value));
+    stack_push_data(cpu->opstack, &value, sizeof(value));
+}
+
+void pop_U16(CPU *cpu)
+{
+    uint16_t value;
+    stack_pop_data(cpu->opstack, &value, sizeof(value));
+}
+
+void push_U16(CPU *cpu)
+{
+    // TODO: optimize reading. We do not need to copy date to value variable, we can push it directly from the address.
+    uint16_t address;
+    cpu_fetch_data(cpu, &address, sizeof(address));
     uint16_t value;
     if (address < cpu->port_bank->size)
     {
@@ -21,214 +36,475 @@ void push(CPU *cpu)
     }
     else
     {
-        address = address + cpu->user_memory - cpu->port_bank->size;
-        value = memory_get_address_16b(cpu->memory, address);
+        value = (uint16_t)cpu->program[cpu->data_address + address - cpu->port_bank->size];
     }
-    stack_push(cpu->stack, value);
+    stack_push_data(cpu->opstack, &value, sizeof(value));
 }
 
-void push_literal(CPU *cpu)
+void pop_address_U16(CPU *cpu)
 {
-    uint16_t value = cpu_fetch_16b(cpu);
-    stack_push(cpu->stack, value);
-}
-
-void pop(CPU *cpu)
-{
-    stack_pop(cpu->stack);
-}
-
-void pop_address(CPU *cpu)
-{
-    uint16_t address = cpu_fetch_16b(cpu);
-    uint16_t value = stack_pop(cpu->stack);
+    uint16_t address;
+    cpu_fetch_data(cpu, &address, sizeof(address));
+    uint16_t value;
+    stack_pop_data(cpu->opstack, &value, sizeof(value));
     if (address < cpu->port_bank->size)
     {
-        port_bank_set_address(cpu->port_bank, (uint8_t)address, (uint8_t)value);
+        port_bank_set_address(cpu->port_bank, address, (uint8_t)value);
     }
     else
     {
-        address = cpu->user_memory + address - cpu->port_bank->size;
-        memory_set_address_16b(cpu->memory, address, value);
+        vmprintf("ERROR: invalid cpu address\n");
+        exit(EXIT_FAILURE);
     }
 }
 
-void top(CPU *cpu)
+void load_U16(CPU *cpu)
 {
-    serial_printf("%d\n", cpu->stack->data[cpu->stack->sp - 1]);
+    uint16_t address;
+    cpu_fetch_data(cpu, &address, sizeof(address));
+    uint16_t value;
+    stack_read_bend_data_at(cpu->stack, &value, sizeof(value), address);
+    stack_push_data(cpu->opstack, &value, sizeof(value));
+}
+
+void store_U16(CPU *cpu)
+{
+    uint16_t address;
+    cpu_fetch_data(cpu, &address, sizeof(address));
+    uint16_t value;
+    stack_pop_data(cpu->opstack, &value, sizeof(value));
+    stack_write_bend_data_at(cpu->stack, &value, sizeof(value), address);
+}
+
+void var_U16(CPU *cpu)
+{
+    uint16_t address;
+    cpu_fetch_data(cpu, &address, sizeof(address));
+    cpu->stack->sp += sizeof(uint16_t);
+}
+
+void del_U16(CPU *cpu)
+{
+    uint16_t address;
+    cpu_fetch_data(cpu, &address, sizeof(address));
+    cpu->stack->sp -= sizeof(uint16_t);
+}
+
+void top_U16(CPU *cpu)
+{
+    uint16_t top = stack_read_U16(cpu->opstack, cpu->opstack->sp - sizeof(uint16_t));
+    vmprintf("%hu\n", top);
+}
+
+void add_U16(CPU *cpu)
+{
+    uint16_t b;
+    stack_pop_data(cpu->opstack, &b, sizeof(b));
+    uint16_t a;
+    stack_pop_data(cpu->opstack, &a, sizeof(a));
+    uint16_t result = a + b;
+    stack_push_data(cpu->opstack, &result, sizeof(result));
+}
+
+void subtract_U16(CPU *cpu)
+{
+    uint16_t b;
+    stack_pop_data(cpu->opstack, &b, sizeof(b));
+    uint16_t a;
+    stack_pop_data(cpu->opstack, &a, sizeof(a));
+    uint16_t result = a - b;
+    stack_push_data(cpu->opstack, &result, sizeof(result));
+}
+
+void multiply_U16(CPU *cpu)
+{
+    uint16_t b;
+    stack_pop_data(cpu->opstack, &b, sizeof(b));
+    uint16_t a;
+    stack_pop_data(cpu->opstack, &a, sizeof(a));
+    uint16_t result = a * b;
+    stack_push_data(cpu->opstack, &result, sizeof(result));
+}
+
+void divide_U16(CPU *cpu)
+{
+    uint16_t b;
+    stack_pop_data(cpu->opstack, &b, sizeof(b));
+    uint16_t a;
+    stack_pop_data(cpu->opstack, &a, sizeof(a));
+    uint16_t result = a / b;
+    stack_push_data(cpu->opstack, &result, sizeof(result));
+}
+
+void push_literal_I16(CPU *cpu)
+{
+    int16_t value;
+    cpu_fetch_data(cpu, &value, sizeof(value));
+    stack_push_data(cpu->opstack, &value, sizeof(value));
+}
+
+void pop_I16(CPU *cpu)
+{
+    cpu->opstack->sp -= sizeof(int16_t);
+}
+
+void load_I16(CPU *cpu)
+{
+    uint16_t address;
+    cpu_fetch_data(cpu, &address, sizeof(address));
+    int16_t value;
+    stack_read_bend_data_at(cpu->stack, &value, sizeof(value), address);
+    stack_push_data(cpu->opstack, &value, sizeof(value));
+}
+
+void store_I16(CPU *cpu)
+{
+    uint16_t address;
+    cpu_fetch_data(cpu, &address, sizeof(address));
+    int16_t value;
+    stack_pop_data(cpu->opstack, &value, sizeof(value));
+    stack_write_bend_data_at(cpu->stack, &value, sizeof(value), address);
+}
+
+void var_I16(CPU *cpu)
+{
+    uint16_t address;
+    cpu_fetch_data(cpu, &address, sizeof(address));
+    cpu->stack->sp += sizeof(int16_t);
+}
+
+void del_I16(CPU *cpu)
+{
+    uint16_t address;
+    cpu_fetch_data(cpu, &address, sizeof(address));
+    cpu->stack->sp -= sizeof(int16_t);
+}
+
+void top_I16(CPU *cpu)
+{
+    int16_t top = stack_read_I16(cpu->opstack, cpu->opstack->sp - sizeof(int16_t));
+    vmprintf("%hi\n", top);
+}
+
+void add_I16(CPU *cpu)
+{
+    int16_t b;
+    stack_pop_data(cpu->opstack, &b, sizeof(b));
+    int16_t a;
+    stack_pop_data(cpu->opstack, &a, sizeof(a));
+    int16_t result = a + b;
+    stack_push_data(cpu->opstack, &result, sizeof(result));
+}
+
+void subtract_I16(CPU *cpu)
+{
+    int16_t b;
+    stack_pop_data(cpu->opstack, &b, sizeof(b));
+    int16_t a;
+    stack_pop_data(cpu->opstack, &a, sizeof(a));
+    int16_t result = a - b;
+    stack_push_data(cpu->opstack, &result, sizeof(result));
+}
+
+void multiply_I16(CPU *cpu)
+{
+    int16_t b;
+    stack_pop_data(cpu->opstack, &b, sizeof(b));
+    int16_t a;
+    stack_pop_data(cpu->opstack, &a, sizeof(a));
+    int16_t result = a * b;
+    stack_push_data(cpu->opstack, &result, sizeof(result));
+}
+
+void divide_I16(CPU *cpu)
+{
+    int16_t b;
+    stack_pop_data(cpu->opstack, &b, sizeof(b));
+    int16_t a;
+    stack_pop_data(cpu->opstack, &a, sizeof(a));
+    int16_t result = a / b;
+    stack_push_data(cpu->opstack, &result, sizeof(result));
+}
+
+void push_literal_F32(CPU *cpu)
+{
+    float value;
+    cpu_fetch_data(cpu, &value, sizeof(value));
+    stack_push_data(cpu->opstack, &value, sizeof(value));
+}
+
+void pop_F32(CPU *cpu)
+{
+    float value;
+    stack_pop_data(cpu->opstack, &value, sizeof(value));
+}
+
+void top_F32(CPU *cpu)
+{
+    float top = stack_read_F32(cpu->opstack, cpu->opstack->sp - sizeof(float));
+#ifdef ARDUINO
+    char floatString[30];
+    dtostrf(top, 10, 2, floatString);
+    vmprintf("%s\n", floatString);
+#elif MACOSX
+    vmprintf("%.2f\n", top);
+#endif
+}
+
+void add_F32(CPU *cpu)
+{
+    float b;
+    stack_pop_data(cpu->opstack, &b, sizeof(b));
+    float a;
+    stack_pop_data(cpu->opstack, &a, sizeof(a));
+    float result = a + b;
+    stack_push_data(cpu->opstack, &result, sizeof(result));
+}
+
+void subtract_F32(CPU *cpu)
+{
+    float b;
+    stack_pop_data(cpu->opstack, &b, sizeof(b));
+    float a;
+    stack_pop_data(cpu->opstack, &a, sizeof(a));
+    float result = a - b;
+    stack_push_data(cpu->opstack, &result, sizeof(result));
+}
+
+void multiply_F32(CPU *cpu)
+{
+    float b;
+    stack_pop_data(cpu->opstack, &b, sizeof(b));
+    float a;
+    stack_pop_data(cpu->opstack, &a, sizeof(a));
+    float result = a * b;
+    stack_push_data(cpu->opstack, &result, sizeof(result));
+}
+
+void divide_F32(CPU *cpu)
+{
+    float b;
+    stack_pop_data(cpu->opstack, &b, sizeof(b));
+    float a;
+    stack_pop_data(cpu->opstack, &a, sizeof(a));
+    float result = a / b;
+    stack_push_data(cpu->opstack, &result, sizeof(result));
 }
 
 void delay(CPU *cpu)
 {
-    uint16_t milliseconds = cpu_fetch_16b(cpu);
-    delay_ms(milliseconds);
+    uint16_t milliseconds;
+    cpu_fetch_data(cpu, &milliseconds, sizeof(milliseconds));
+    delay_ms(cpu, milliseconds);
 }
 
 void jump(CPU *cpu)
 {
-    uint16_t address = cpu_fetch_16b(cpu);
+    uint16_t address;
+    cpu_fetch_data(cpu, &address, sizeof(address));
     cpu->ip = address;
 }
 
 void pop_jump_if_false(CPU *cpu)
 {
-    uint16_t address = cpu_fetch_16b(cpu);
-    uint16_t result = stack_pop(cpu->stack);
+    uint16_t address;
+    cpu_fetch_data(cpu, &address, sizeof(address));
+    // TODO: Pop value according the size of type stored
+    // Here result is a bool so it should be okay
+    bool result;
+    stack_pop_data(cpu->opstack, &result, sizeof(result));
     if (!result)
         cpu->ip = address;
 }
 
 void compare_equal(CPU *cpu)
 {
-    uint16_t b = stack_pop(cpu->stack);
-    uint16_t a = stack_pop(cpu->stack);
-    stack_push(cpu->stack, a == b);
+    // TODO: Pop value according the size of type stored (int, float, etc)
+    int16_t b;
+    stack_pop_data(cpu->opstack, &b, sizeof(b));
+    int16_t a;
+    stack_pop_data(cpu->opstack, &a, sizeof(a));
+    bool result = a == b;
+    stack_push_data(cpu->opstack, &result, sizeof(bool));
 }
 
 void compare_less(CPU *cpu)
 {
-    uint16_t b = stack_pop(cpu->stack);
-    uint16_t a = stack_pop(cpu->stack);
-    stack_push(cpu->stack, a < b);
+    // TODO: Pop value according the size of type stored (int, float, etc)
+    int16_t b;
+    stack_pop_data(cpu->opstack, &b, sizeof(b));
+    int16_t a;
+    stack_pop_data(cpu->opstack, &a, sizeof(a));
+    bool result = a < b;
+    stack_push_data(cpu->opstack, &result, sizeof(bool));
 }
 
 void compare_greater(CPU *cpu)
 {
-    uint16_t b = stack_pop(cpu->stack);
-    uint16_t a = stack_pop(cpu->stack);
-    stack_push(cpu->stack, a > b);
+    // TODO: Pop value according the size of type stored (int, float, etc)
+    int16_t b;
+    stack_pop_data(cpu->opstack, &b, sizeof(b));
+    int16_t a;
+    stack_pop_data(cpu->opstack, &a, sizeof(a));
+    bool result = a > b;
+    stack_push_data(cpu->opstack, &result, sizeof(bool));
 }
 
 void compare_less_equal(CPU *cpu)
 {
-    uint16_t b = stack_pop(cpu->stack);
-    uint16_t a = stack_pop(cpu->stack);
-    stack_push(cpu->stack, a <= b);
+    // TODO: Pop value according the size of type stored (int, float, etc)
+    int16_t b;
+    stack_pop_data(cpu->opstack, &b, sizeof(b));
+    int16_t a;
+    stack_pop_data(cpu->opstack, &a, sizeof(a));
+    bool result = a <= b;
+    stack_push_data(cpu->opstack, &result, sizeof(bool));
 }
 
 void compare_greater_equal(CPU *cpu)
 {
-    uint16_t b = stack_pop(cpu->stack);
-    uint16_t a = stack_pop(cpu->stack);
-    stack_push(cpu->stack, a >= b);
+    // TODO: Pop value according the size of type stored (int, float, etc)
+    int16_t b;
+    stack_pop_data(cpu->opstack, &b, sizeof(b));
+    int16_t a;
+    stack_pop_data(cpu->opstack, &a, sizeof(a));
+    bool result = a >= b;
+    stack_push_data(cpu->opstack, &result, sizeof(bool));
 }
 
-void add(CPU *cpu)
+void bitwise_and_U16(CPU *cpu)
 {
-    uint16_t b = stack_pop(cpu->stack);
-    uint16_t a = stack_pop(cpu->stack);
-    stack_push(cpu->stack, a + b);
+    uint16_t b;
+    stack_pop_data(cpu->opstack, &b, sizeof(b));
+    uint16_t a;
+    stack_pop_data(cpu->opstack, &a, sizeof(a));
+    uint16_t result = a & b;
+    stack_push_data(cpu->opstack, &result, sizeof(result));
 }
 
-void subtract(CPU *cpu)
+void bitwise_or_U16(CPU *cpu)
 {
-    uint16_t b = stack_pop(cpu->stack);
-    uint16_t a = stack_pop(cpu->stack);
-    stack_push(cpu->stack, a - b);
+    uint16_t b;
+    stack_pop_data(cpu->opstack, &b, sizeof(b));
+    uint16_t a;
+    stack_pop_data(cpu->opstack, &a, sizeof(a));
+    uint16_t result = a | b;
+    stack_push_data(cpu->opstack, &result, sizeof(result));
 }
 
-void multiply(CPU *cpu)
+void bitwise_xor_U16(CPU *cpu)
 {
-    uint16_t b = stack_pop(cpu->stack);
-    uint16_t a = stack_pop(cpu->stack);
-    stack_push(cpu->stack, a * b);
+    uint16_t b;
+    stack_pop_data(cpu->opstack, &b, sizeof(b));
+    uint16_t a;
+    stack_pop_data(cpu->opstack, &a, sizeof(a));
+    uint16_t result = a ^ b;
+    stack_push_data(cpu->opstack, &result, sizeof(result));
 }
 
-void divide(CPU *cpu)
+void bitwise_not_U16(CPU *cpu)
 {
-    uint16_t b = stack_pop(cpu->stack);
-    uint16_t a = stack_pop(cpu->stack);
-    stack_push(cpu->stack, a / b);
+    uint16_t a;
+    stack_pop_data(cpu->opstack, &a, sizeof(a));
+    a = ~a;
+    stack_push_data(cpu->opstack, &a, sizeof(a));
 }
 
-void bitwise_and(CPU *cpu)
+void bitwise_left_shift_U16(CPU *cpu)
 {
-    uint16_t b = stack_pop(cpu->stack);
-    uint16_t a = stack_pop(cpu->stack);
-    stack_push(cpu->stack, a & b);
+    uint16_t b;
+    stack_pop_data(cpu->opstack, &b, sizeof(b));
+    uint16_t a;
+    stack_pop_data(cpu->opstack, &a, sizeof(a));
+    uint16_t result = a << b;
+    stack_push_data(cpu->opstack, &result, sizeof(result));
 }
 
-void bitwise_or(CPU *cpu)
+void bitwise_right_shift_U16(CPU *cpu)
 {
-    uint16_t b = stack_pop(cpu->stack);
-    uint16_t a = stack_pop(cpu->stack);
-    stack_push(cpu->stack, a | b);
-}
-
-void bitwise_xor(CPU *cpu)
-{
-    uint16_t b = stack_pop(cpu->stack);
-    uint16_t a = stack_pop(cpu->stack);
-    stack_push(cpu->stack, a ^ b);
-}
-
-void bitwise_not(CPU *cpu)
-{
-    uint16_t a = stack_pop(cpu->stack);
-    stack_push(cpu->stack, ~a);
-}
-
-void bitwise_left_shift(CPU *cpu)
-{
-    uint16_t b = stack_pop(cpu->stack);
-    uint16_t a = stack_pop(cpu->stack);
-    stack_push(cpu->stack, a << b);
-}
-
-void bitwise_right_shift(CPU *cpu)
-{
-    uint16_t b = stack_pop(cpu->stack);
-    uint16_t a = stack_pop(cpu->stack);
-    stack_push(cpu->stack, a >> b);
+    uint16_t b;
+    stack_pop_data(cpu->opstack, &b, sizeof(b));
+    uint16_t a;
+    stack_pop_data(cpu->opstack, &a, sizeof(a));
+    uint16_t result = a >> b;
+    stack_push_data(cpu->opstack, &result, sizeof(result));
 }
 
 void call(CPU *cpu)
 {
-    uint16_t address = cpu_fetch_16b(cpu);
-    stack_push(cpu->callstack, cpu->ip);
+    uint16_t address;
+    cpu_fetch_data(cpu, &address, sizeof(address));
+    call_address(cpu, address);
+}
+
+void call_address(CPU *cpu, uint16_t address)
+{
+    stack_push_data(cpu->stack, &cpu->ip, sizeof(cpu->ip));
     cpu->ip = address;
+    stack_push_data(cpu->stack, &cpu->stack->bp, sizeof(cpu->stack->bp));
+    cpu->stack->bp = cpu->stack->sp;
 }
 
 void ret(CPU *cpu)
 {
-    uint16_t address = stack_pop(cpu->callstack);
+    cpu->stack->sp = cpu->stack->bp;
+    stack_pop_data(cpu->stack, &cpu->stack->bp, sizeof(cpu->stack->bp));
+    uint16_t address;
+    stack_pop_data(cpu->stack, &address, sizeof(address));
     cpu->ip = address;
 }
 
-void (**instructions_create())()
+void async_call(CPU *cpu)
 {
-    void (**instructions)() = malloc(INSTRUCTIONS * sizeof(void (*)()));
-    if (instructions == NULL)
-    {
-        printf("Memory allocation failed for instructions");
-        return NULL;
-    }
-    instructions[0] = halt;
-    instructions[1] = push_literal;
-    instructions[2] = push;
-    instructions[3] = pop;
-    instructions[4] = pop_address;
-    instructions[5] = top;
-    instructions[6] = delay;
-    instructions[7] = jump;
-    instructions[8] = pop_jump_if_false;
-    instructions[9] = compare_equal;
-    instructions[10] = compare_less;
-    instructions[11] = compare_greater;
-    instructions[12] = compare_less_equal;
-    instructions[13] = compare_greater_equal;
-    instructions[14] = add;
-    instructions[15] = subtract;
-    instructions[16] = multiply;
-    instructions[17] = divide;
-    instructions[18] = bitwise_and;
-    instructions[19] = bitwise_or;
-    instructions[20] = bitwise_xor;
-    instructions[21] = bitwise_not;
-    instructions[22] = bitwise_left_shift;
-    instructions[23] = bitwise_right_shift;
-    instructions[24] = call;
-    instructions[25] = ret;
+    uint16_t address;
+    cpu_fetch_data(cpu, &address, sizeof(uint16_t));
+    cpu_create_task(cpu, address);
+}
 
-    return instructions;
+void async_ret(CPU *cpu)
+{
+    cpu_delete_task(cpu, cpu->task_tree_current_node);
+}
+
+void syscall(CPU *cpu)
+{
+    builtin_syscall(cpu);
+}
+
+void push_millis(CPU *cpu)
+{
+    uint16_t time = millis();
+    stack_push_data(cpu->opstack, &time, sizeof(time));
+}
+
+void allocate_local(CPU *cpu)
+{
+    uint16_t size;
+    stack_pop_data(cpu->opstack, &size, sizeof(size));
+    uint16_t address;
+    cpu_fetch_data(cpu, &address, sizeof(address));
+    // do nothing with the address?
+    cpu->stack->sp += size;
+}
+
+void push_local(CPU *cpu)
+{
+    uint16_t address;
+    stack_pop_data(cpu->opstack, &address, sizeof(address));
+    uint16_t size;
+    stack_pop_data(cpu->opstack, &size, sizeof(size));
+    void *value;
+    stack_read_data_at(cpu->stack, &value, size, cpu->stack->bp + address);
+    stack_push_data(cpu->opstack, &value, size);
+}
+
+void pop_local(CPU *cpu)
+{
+    uint16_t address;
+    stack_pop_data(cpu->opstack, &address, sizeof(address));
+    uint16_t size;
+    stack_pop_data(cpu->opstack, &size, sizeof(size));
+    void *value;
+    stack_pop_data(cpu->opstack, &value, size);
+    stack_write_bend_data_at(cpu->stack, &value, size, cpu->stack->bp + address);
 }

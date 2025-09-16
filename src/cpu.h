@@ -1,37 +1,64 @@
 #ifndef CPU_H
 #define CPU_H
-
 #include "stack.h"
 #include "io.h"
-#include <stdint.h>
+#include "task.h"
+#include "tasktree.h"
+#include "server.h"
+
+#ifdef ARDUINO
+#define TASK_OPSTACK_SIZE 32
+#define TASK_STACK_SIZE 64
+#elif MACOSX || WINDOWS
+#define TASK_OPSTACK_SIZE 1024
+#define TASK_STACK_SIZE 4096
+#endif
+
+#define CONTEXT_MAX_CYCLES 255
 
 typedef struct CPU CPU;
 
 struct CPU
 {
-    Memory *memory;
+    TaskTreeNode *task_tree_root;
+    TaskTreeNode *task_tree_current_node;
+    const uint8_t *program;
+    Stack *opstack;
     Stack *stack;
-    Stack *callstack;
-    uint16_t ip;
-    void (**instructions)(CPU *cpu);
     PortBank *port_bank;
-    uint16_t user_memory;
+    MessageQueue *message_queues;
+#ifdef MACOSX
+    Server *server;
+#endif
+    uint16_t program_size;
+    uint16_t ip;
+    uint16_t data_address;
+    uint16_t tasks_number;
 };
 
-CPU *cpu_create(uint16_t memory_size, uint16_t stack_size, uint16_t callstack_size, void (**instructions)(CPU *cpu), uint8_t port_banks);
+void *cpu_create(uint8_t port_banks);
 
 void cpu_free(CPU *cpu);
 
-uint8_t cpu_fetch_8b(CPU *cpu);
-
-uint16_t cpu_fetch_16b(CPU *cpu);
+void cpu_fetch_data(CPU *cpu, void *value, uint16_t size);
 
 void cpu_execute(CPU *cpu, uint8_t opcode);
 
-void cpu_load_program(CPU *cpu, uint8_t *program, uint16_t program_size);
+void cpu_load_program(CPU *cpu, const uint8_t *program, uint16_t program_size, uint16_t data_address);
 
 void cpu_run(CPU *cpu);
 
-void cpu_print_user_memory(CPU *cpu);
+void cpu_print(CPU *cpu);
 
+typedef struct TaskTreeNode TaskTreeNode;
+
+void cpu_context_switch(CPU *cpu, TaskTreeNode *node);
+void cpu_set_task_node(CPU *cpu, TaskTreeNode *node);
+
+void cpu_create_task(CPU *cpu, uint16_t address);
+void cpu_delete_task(CPU *cpu, TaskTreeNode *node);
+
+void cpu_create_task_inbox(CPU *cpu, Task *task);
+void cpu_process_context_inbox(CPU *cpu);
+void cpu_check_incoming_messages(CPU *cpu);
 #endif

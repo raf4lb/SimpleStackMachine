@@ -1,38 +1,39 @@
 ; Use a button to control a led
-; https://wokwi.com/projects/392584555920917505
+; This example must be executed on Arduino Uno R3 or using an emulator.
+; https://wokwi.com/projects/434796710305388545
 
 ; DDRB address is 0b0
 ; PORTB address is 0b1
 
-PSHL 2          ; push 0b10 to stack
-POPA ddrb       ; set DDRB 0 input 1 output
+fn .main
+    PUSHL_U16 2          ; push 0b10 to stack
+    POPA_U16 $ddrb       ; set DDRB 0 input 1 output
+    .loop
+        ; check if PINB0 is ON (PINB & 1)
+        PUSH_U16 $pinb    ; push PINB to stack
+        PUSHL_U16 1      ; push 1 to stack
+        AND_U16         ; bitwise AND operation
+        TOP_U16
+        PUSHL_U16 1
+        COMPARE_EQ
+        POP_JUMP_IF_FALSE .off
+        ; PORTB = PORTB | (1 << PINB1)
+        PUSH_U16 $portb   ; push PORTB to stack
+        PUSHL_U16 1      ; push 1 to stack
+        PUSHL_U16 1      ; push 1 to stack
+        LSHIFT_U16         ; bitwise LEFT SHIFT operation
+        OR_U16          ; bitwise OR operation
+        POPA_U16 portb  ; pop result to PORTB
+        JUMP .loop
 
-.loop
-    ; check if PINB0 is ON (PINB & 1)
-    PSH pinb    ; push PINB to stack
-    PSHL 1      ; push 1 to stack
-    AND         ; bitwise AND operation
-    PSHL 1
-    CPE
-    PJIF .off
-    ; PORTB = PORTB | (1 << PINB1)
-    PSH portb   ; push PORTB to stack
-    PSHL 1      ; push 1 to stack
-    PSHL 1      ; push 1 to stack
-    LSH         ; bitwise LEFT SHIFT operation
-    OR          ; bitwise OR operation
-    POPA portb  ; pop result to PORTB
-    JMP .loop
-    
-
-.off
-    ; PORTB = PORTB & ~(1 << PINB1) 
-    PSH portb   ; push PORTB to stack
-    PSHL 1      ; push 1 to stack
-    PSHL 1      ; push 1 to stack
-    LSH         ; bitwise LEFT SHIFT operation
-    NOT         ; bitwise NOT operation
-    AND         ; bitwise AND operation
-    POPA portb  ; pop result to address 0x1 (PORTB)
-    JMP .loop
+    .off
+        ; PORTB = PORTB & ~(1 << PINB1) 
+        PUSH_U16 $portb   ; push PORTB to stack
+        PUSHL_U16 1      ; push 1 to stack
+        PUSHL_U16 1      ; push 1 to stack
+        LSHIFT_U16         ; bitwise LEFT SHIFT operation
+        NOT_U16         ; bitwise NOT operation
+        AND_U16         ; bitwise AND operation
+        POPA_U16 portb  ; pop result to address 0x1 (PORTB)
+        JUMP .loop
     
